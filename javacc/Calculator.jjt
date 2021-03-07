@@ -44,7 +44,6 @@ void Expr1() #void: {}
    	("+" Expr2(1) #Add(2)
    	| "-" Expr2(1) #Sub(2)
    	)
-   	
    ]
 }
 

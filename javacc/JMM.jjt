@@ -1,0 +1,89 @@
+options {
+    LOOKAHEAD=1;
+}
+
+PARSER_BEGIN(JMM)
+
+public class JMM {
+
+}
+
+PARSER_END(JMM)
+
+SKIP : {
+    " " | "\r" | "\t"
+}
+
+TOKEN: {
+    < IDENTIFIER: ["A"-"Z", "a"-"z"](["0"-"9", "A"-"Z", "a"-"z", "_"])* > |
+    < INTEGER: (["0"-"9"])+ > |
+    < LF: "\n" >
+}
+
+void Program(): {} {
+    ImportDeclaration() |
+    ClassDeclaration() |
+    <EOF>
+}
+
+void ImportDeclaration(): {} {
+    "import" <IDENTIFIER> ("." <IDENTIFIER>)* ";"
+}
+
+void ClassDeclaration(): {} {
+    "class" <IDENTIFIER> ("extends" <IDENTIFIER>)?
+    "{" ( VarDeclaration() )? ( MethodDeclaration() )? "}"
+}
+
+void VarDeclaration(): {} {
+    Type() <IDENTIFIER> ";"
+}
+
+void MethodDeclaration(): {} {
+    (
+        "public" Type() <IDENTIFIER> "("
+        ( Type() <IDENTIFIER> ("," Type() <IDENTIFIER>)* )?
+        ")" "{"
+        ( VarDeclaration() )*
+        ( Statement() )*
+        "return" Expression() ";" "}"
+    ) |
+    (
+        "public" "static" "void" "main" "(" "String" "[" "]" <IDENTIFIER> ")" "{"
+        ( VarDeclaration() )*
+        ( Statement() )*
+        "}"
+    )
+}
+
+void Type(): {} {
+    ( "int" "[" "]" ) |
+    "boolean" |
+    "int" |
+    <IDENTIFIER>
+}
+
+void Statement(): {} {
+    ( "{" ( Statement() )* "}" ) |
+    ( "if" "(" Expression() ")" Statement() "else" Statement() ) |
+    ( "while" "(" Expression() ")" Statement() ) |
+    ( Expression() ";" ) |
+    ( <IDENTIFIER> "=" Expression() ";" ) |
+    ( <IDENTIFIER> "[" Expression() "]" "=" Expression() ";" )
+}
+
+SimpleNode Expression(): {} {
+    ( Expression() ( "&&" | "<" | "+" | "-" | "*" | "/" ) Expression() ) |
+    ( Expression() "[" Expression() "]" ) |
+    ( Expression() "." "length" ) |
+    ( Expression() "." <IDENTIFIER> "(" ( Expression() ( "," Expression() )* )? ")" ) |
+    <INTEGER> |
+    "true" |
+    "false" |
+    <IDENTIFIER> |
+    "this" |
+    ( "new" "int" "[" Expression() "]" ) |
+    ( "new" <IDENTIFIER> "(" ")") |
+    ( "!" Expression() ) |
+    ( "(" Expression() ")" )
+}
