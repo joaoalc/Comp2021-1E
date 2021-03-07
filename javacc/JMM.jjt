@@ -11,13 +11,66 @@ public class JMM {
 PARSER_END(JMM)
 
 SKIP : {
-    " " | "\r" | "\t"
+    " " | "\r" | "\t" | "\n"
 }
 
+// Keywords
+
+TOKEN : {
+    <IMPORT: "import"> |
+    <CLASS: "class"> |
+    <EXTENDS: "extends"> |
+    <PUBLIC: "public"> |
+    <RETURN: "return"> |
+    <STATIC: "static"> |
+    <VOID: "void"> |
+    <MAIN: "main"> |
+    <STRING: "String"> |
+    <TRUE: "true"> |
+    <FALSE: "false"> |
+    <INT: "int"> |
+    <BOOLEAN: "boolean"> |
+    <IF: "if"> |
+    <ELSE: "else"> |
+    <WHILE: "while"> |
+    <THIS: "this"> |
+    <NEW: "new"> |
+    <LENGTH: "length">
+}
+
+// Delimiters
+
+TOKEN : {
+    <LEFT_PARENTHESES: "("> |
+    <RIGHT_PARENTHESES: ")"> |
+    <LEFT_BRACE: "{"> |
+    <RIGHT_BRACE: "}"> |
+    <LEFT_BRACKET: "["> |
+    <RIGHT_BRACKET: "]"> |
+    <SEMICOLON: ";"> |
+    <COMMA: ",">
+}
+
+// Operators
+
+TOKEN : {
+    <ADD: "+"> |
+    <SUB: "-"> |
+    <MUL: "*"> |
+    <DIV: "/"> |
+    <ASSIGN: "="> |
+    <DOT: "."> |
+    <NOT: "!"> |
+    <AND: "&&"> |
+    <LT: "<">
+}
+
+// Symbols
+
 TOKEN: {
-    < IDENTIFIER: ["A"-"Z", "a"-"z"](["0"-"9", "A"-"Z", "a"-"z", "_"])* > |
-    < INTEGER: (["0"-"9"])+ > |
-    < LF: "\n" >
+    <IDENTIFIER: ["A"-"Z", "a"-"z"](["0"-"9", "A"-"Z", "a"-"z", "_"])*> |
+    <INTEGER: (["0"-"9"])+> |
+    <LF: "\n">
 }
 
 void Program(): {} {
@@ -27,63 +80,64 @@ void Program(): {} {
 }
 
 void ImportDeclaration(): {} {
-    "import" <IDENTIFIER> ("." <IDENTIFIER>)* ";"
+    <IMPORT> <IDENTIFIER> (<DOT> <IDENTIFIER>)* <SEMICOLON>
 }
 
 void ClassDeclaration(): {} {
-    "class" <IDENTIFIER> ("extends" <IDENTIFIER>)?
-    "{" ( VarDeclaration() )? ( MethodDeclaration() )? "}"
+    <CLASS> <IDENTIFIER> ("extends" <IDENTIFIER>)?
+    <LEFT_BRACE> ( VarDeclaration() )? ( MethodDeclaration() )? <RIGHT_BRACE>
 }
 
 void VarDeclaration(): {} {
-    Type() <IDENTIFIER> ";"
+    Type() <IDENTIFIER> <SEMICOLON>
 }
 
 void MethodDeclaration(): {} {
     (
-        "public" Type() <IDENTIFIER> "("
+        <PUBLIC> Type() <IDENTIFIER> <LEFT_PARENTHESES>
         ( Type() <IDENTIFIER> ("," Type() <IDENTIFIER>)* )?
-        ")" "{"
+        <RIGHT_PARENTHESES> <LEFT_BRACE>
         ( VarDeclaration() )*
         ( Statement() )*
-        "return" Expression() ";" "}"
+        <RETURN> Expression() <SEMICOLON> <RIGHT_BRACE>
     ) |
     (
-        "public" "static" "void" "main" "(" "String" "[" "]" <IDENTIFIER> ")" "{"
+        <PUBLIC> <STATIC> <VOID> <MAIN>
+        <LEFT_PARENTHESES> <STRING> <LEFT_BRACKET> <RIGHT_BRACKET> <IDENTIFIER> <RIGHT_PARENTHESES> <LEFT_BRACE>
         ( VarDeclaration() )*
         ( Statement() )*
-        "}"
+        <RIGHT_BRACE>
     )
 }
 
 void Type(): {} {
-    ( "int" "[" "]" ) |
-    "boolean" |
-    "int" |
+    ( <INT> <LEFT_BRACKET> <RIGHT_BRACKET> ) |
+    <BOOLEAN> |
+    <INT> |
     <IDENTIFIER>
 }
 
 void Statement(): {} {
-    ( "{" ( Statement() )* "}" ) |
-    ( "if" "(" Expression() ")" Statement() "else" Statement() ) |
-    ( "while" "(" Expression() ")" Statement() ) |
-    ( Expression() ";" ) |
-    ( <IDENTIFIER> "=" Expression() ";" ) |
-    ( <IDENTIFIER> "[" Expression() "]" "=" Expression() ";" )
+    ( <LEFT_BRACE> ( Statement() )* <RIGHT_BRACE> ) |
+    ( <IF> <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> Statement() <ELSE> Statement() ) |
+    ( <WHILE> <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> Statement() ) |
+    ( Expression() <SEMICOLON> ) |
+    ( <IDENTIFIER> <ASSIGN> Expression() <SEMICOLON> ) |
+    ( <IDENTIFIER> <LEFT_BRACKET> Expression() <RIGHT_BRACKET> <ASSIGN> Expression() <SEMICOLON> )
 }
 
 SimpleNode Expression(): {} {
-    ( Expression() ( "&&" | "<" | "+" | "-" | "*" | "/" ) Expression() ) |
-    ( Expression() "[" Expression() "]" ) |
-    ( Expression() "." "length" ) |
-    ( Expression() "." <IDENTIFIER> "(" ( Expression() ( "," Expression() )* )? ")" ) |
+    ( Expression() ( <AND> | <LT> | <ADD> | <SUB> | <MUL> | <DIV> ) Expression() ) |
+    ( Expression() <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ) |
+    ( Expression() <DOT> <LENGTH> ) |
+    ( Expression() <DOT> <IDENTIFIER> <LEFT_PARENTHESES> ( Expression() ( <COMMA> Expression() )* )? <RIGHT_PARENTHESES> ) |
     <INTEGER> |
-    "true" |
-    "false" |
+    <TRUE> |
+    <FALSE> |
     <IDENTIFIER> |
-    "this" |
-    ( "new" "int" "[" Expression() "]" ) |
-    ( "new" <IDENTIFIER> "(" ")") |
-    ( "!" Expression() ) |
-    ( "(" Expression() ")" )
+    <THIS> |
+    ( <NEW> <INT> <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ) |
+    ( <NEW> <IDENTIFIER> <LEFT_PARENTHESES> <RIGHT_PARENTHESES>) |
+    ( <NOT> Expression() ) |
+    ( <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> )
 }
