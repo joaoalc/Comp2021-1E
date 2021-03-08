@@ -1,11 +1,19 @@
 options {
-    LOOKAHEAD=1;
+    LOOKAHEAD=5;
 }
 
 PARSER_BEGIN(JMM)
 
 public class JMM {
+    public static void main(String[] args) {
+        System.out.println("Write a Java-- program:");
+        JMM jmm = new JMM(System.in);
 
+        SimpleNode root = jmm.Program(); // Returns reference to root node
+        root.dump(""); // Prints the tree on the screen
+
+        System.out.println("Finished parsing");
+    }
 }
 
 PARSER_END(JMM)
@@ -68,15 +76,17 @@ TOKEN : {
 // Symbols
 
 TOKEN: {
-    <IDENTIFIER: ["A"-"Z", "a"-"z"](["0"-"9", "A"-"Z", "a"-"z", "_"])*> |
-    <INTEGER: (["0"-"9"])+> |
-    <LF: "\n">
+    <IDENTIFIER:
+        (["A"-"Z", "a"-"z", "$"](["0"-"9", "A"-"Z", "a"-"z", "$", "_"])*) |
+        (["_"](["0"-"9", "A"-"Z", "a"-"z", "$", "_"])+)
+    > |
+    <INTEGER: (["0"-"9"])+>
 }
 
-void Program(): {} {
+SimpleNode Program(): {} {
     ImportDeclaration() |
     ClassDeclaration() |
-    <EOF>
+    <EOF> {return jjtThis;}
 }
 
 void ImportDeclaration(): {} {
@@ -93,21 +103,22 @@ void VarDeclaration(): {} {
 }
 
 void MethodDeclaration(): {} {
+    <PUBLIC>
     (
-        <PUBLIC> Type() <IDENTIFIER> <LEFT_PARENTHESES>
-        ( Type() <IDENTIFIER> ("," Type() <IDENTIFIER>)* )?
-        <RIGHT_PARENTHESES> <LEFT_BRACE>
-        ( VarDeclaration() )*
-        ( Statement() )*
-        <RETURN> Expression() <SEMICOLON> <RIGHT_BRACE>
-    ) |
-    (
-        <PUBLIC> <STATIC> <VOID> <MAIN>
-        <LEFT_PARENTHESES> <STRING> <LEFT_BRACKET> <RIGHT_BRACKET> <IDENTIFIER> <RIGHT_PARENTHESES> <LEFT_BRACE>
-        ( VarDeclaration() )*
-        ( Statement() )*
-        <RIGHT_BRACE>
+        (
+            Type() <IDENTIFIER> <LEFT_PARENTHESES>
+            ( Type() <IDENTIFIER> ("," Type() <IDENTIFIER>)* )?
+            <RIGHT_PARENTHESES> <LEFT_BRACE>
+        ) |
+        (
+            <STATIC> <VOID> <MAIN>
+            <LEFT_PARENTHESES> <STRING> <LEFT_BRACKET> <RIGHT_BRACKET> <IDENTIFIER> <RIGHT_PARENTHESES> <LEFT_BRACE>
+        )
     )
+    ( VarDeclaration() )*
+    ( Statement() )*
+    ( <RETURN> Expression() <SEMICOLON> )?
+    <RIGHT_BRACE>
 }
 
 void Type(): {} {
@@ -126,18 +137,30 @@ void Statement(): {} {
     ( <IDENTIFIER> <LEFT_BRACKET> Expression() <RIGHT_BRACKET> <ASSIGN> Expression() <SEMICOLON> )
 }
 
-SimpleNode Expression(): {} {
-    ( Expression() ( <AND> | <LT> | <ADD> | <SUB> | <MUL> | <DIV> ) Expression() ) |
-    ( Expression() <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ) |
-    ( Expression() <DOT> <LENGTH> ) |
-    ( Expression() <DOT> <IDENTIFIER> <LEFT_PARENTHESES> ( Expression() ( <COMMA> Expression() )* )? <RIGHT_PARENTHESES> ) |
-    <INTEGER> |
-    <TRUE> |
-    <FALSE> |
-    <IDENTIFIER> |
-    <THIS> |
-    ( <NEW> <INT> <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ) |
-    ( <NEW> <IDENTIFIER> <LEFT_PARENTHESES> <RIGHT_PARENTHESES>) |
-    ( <NOT> Expression() ) |
-    ( <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> )
+void Expression(): {} {
+    (
+        <INTEGER> |
+        <TRUE> |
+        <FALSE> |
+        <IDENTIFIER> |
+        <THIS> |
+        ( <NEW> <INT> <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ) |
+        ( <NEW> <IDENTIFIER> <LEFT_PARENTHESES> <RIGHT_PARENTHESES>) |
+        ( <NOT> Expression() ) |
+        ( <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> )
+    )
+    _Expression()
 }
+
+void _Expression(): {} {
+    (
+        ( ( <AND> | <LT> | <ADD> | <SUB> | <MUL> | <DIV> ) Expression() ) |
+        ( <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ) |
+        ( <DOT> <LENGTH> ) |
+        ( <DOT> <IDENTIFIER> <LEFT_PARENTHESES> ( Expression() ( <COMMA> Expression() )* )? <RIGHT_PARENTHESES> )
+    )
+    Expression()
+}
+
+
+
