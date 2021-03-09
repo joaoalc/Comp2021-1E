@@ -19,7 +19,7 @@ public class JMM {
 PARSER_END(JMM)
 
 SKIP : {
-    "" | " " | "\r" | "\t" | "\n"
+    " " | "\r" | "\t" | "\n"
 }
 
 // Multi-line comment
@@ -114,8 +114,8 @@ void ImportDeclaration(): {} {
 }
 
 void ClassDeclaration(): {} {
-    <CLASS> <IDENTIFIER> ("extends" <IDENTIFIER>)?
-    <LEFT_BRACE> ( VarDeclaration() )? ( MethodDeclaration() )? <RIGHT_BRACE>
+    <CLASS> <IDENTIFIER> [ "extends" <IDENTIFIER> ]
+    <LEFT_BRACE> ( VarDeclaration() )* ( MethodDeclaration() )* <RIGHT_BRACE>
 }
 
 void VarDeclaration(): {} {
@@ -127,7 +127,7 @@ void MethodDeclaration(): {} {
     (
         (
             Type() <IDENTIFIER> <LEFT_PARENTHESES>
-            ( Type() <IDENTIFIER> ("," Type() <IDENTIFIER>)* )?
+            [ Type() <IDENTIFIER> ("," Type() <IDENTIFIER>)* ]
             <RIGHT_PARENTHESES> <LEFT_BRACE>
         ) |
         (
@@ -137,7 +137,7 @@ void MethodDeclaration(): {} {
     )
     ( VarDeclaration() )*
     ( Statement() )*
-    ( <RETURN> Expression() <SEMICOLON> )?
+    [ <RETURN> Expression() <SEMICOLON> ]
     <RIGHT_BRACE>
 }
 
@@ -168,19 +168,12 @@ void Expression(): {} {
         ( <NEW> <IDENTIFIER> <LEFT_PARENTHESES> <RIGHT_PARENTHESES>) |
         ( <NOT> Expression() ) |
         ( <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> )
-    )
-    _Expression()
+    )  _Expression()
 }
 
 void _Expression(): {} {
-    (
-        ( ( <AND> | <LT> | <ADD> | <SUB> | <MUL> | <DIV> ) Expression() ) |
-        ( <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ) |
-        ( <DOT> <LENGTH> ) |
-        ( <DOT> <IDENTIFIER> <LEFT_PARENTHESES> ( Expression() ( <COMMA> Expression() )* )? <RIGHT_PARENTHESES> )
-    )
-    Expression()
+    [ ( <AND> | <LT> | <ADD> | <SUB> | <MUL> | <DIV> ) Expression() _Expression() |
+        <LEFT_BRACKET> Expression() <RIGHT_BRACKET> _Expression() |
+        <DOT> <LENGTH> _Expression() |
+        <DOT> <IDENTIFIER> <LEFT_PARENTHESES> [ Expression() ( <COMMA> Expression() )* ] <RIGHT_PARENTHESES> _Expression() ]
 }
-
-
-

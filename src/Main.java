@@ -25,6 +25,18 @@ public class Main implements JmmParser {
         String program =
             "import io;\n" +
             "class Fac {\n" +
+            "   public int ComputeFac(int num){\n" +
+            "       int num_aux ;\n" +
+            "       if (num < 1)\n" +
+            "           num_aux = 1;\n" +
+            "       else\n" +
+            "           num_aux = num * (this.ComputeFac(num-1));\n" +
+            "       return num_aux;\n" +
+            "   }\n" +
+            "   public static void main(String[] args){\n" +
+            "       io.println(new Fac().ComputeFac(10)); //assuming the existence\n" +
+            "       // of the classfile io.class\n" +
+            "   }\n" +
             "}";
 
         Main main = new Main();
