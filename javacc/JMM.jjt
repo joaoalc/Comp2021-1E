@@ -5,7 +5,7 @@ options {
 PARSER_BEGIN(JMM)
 
 public class JMM {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ParseException {
         System.out.println("Write a Java-- program:");
         JMM jmm = new JMM(System.in);
 
@@ -19,7 +19,27 @@ public class JMM {
 PARSER_END(JMM)
 
 SKIP : {
-    " " | "\r" | "\t" | "\n"
+    "" | " " | "\r" | "\t" | "\n"
+}
+
+// Multi-line comment
+
+SKIP : {
+    "/*" : WithinComment
+}
+
+<WithinComment> SKIP : {
+    "*/" : DEFAULT
+}
+
+<WithinComment> MORE : {
+    <~[]>
+}
+
+// Single-line comment
+
+SPECIAL_TOKEN : {
+    <SINGLE_LINE_COMMENT: "//" (~["\n", "\r"])* ("\n"|"\r"|"\r\n")>
 }
 
 // Keywords
@@ -84,9 +104,9 @@ TOKEN: {
 }
 
 SimpleNode Program(): {} {
-    ImportDeclaration() |
-    ClassDeclaration() |
-    <EOF> {return jjtThis;}
+    ImportDeclaration()
+    ClassDeclaration()
+    {return jjtThis;}
 }
 
 void ImportDeclaration(): {} {

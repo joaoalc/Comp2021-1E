@@ -5,7 +5,6 @@ import pt.up.fe.comp.jmm.report.Report;
 import java.util.List;
 
 public class JmmParserResult {
-
     private final JmmNode rootNode;
     private final List<Report> reports;
 
