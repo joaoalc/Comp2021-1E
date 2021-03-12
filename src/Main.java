@@ -25,6 +25,7 @@ public class Main implements JmmParser {
         String program =
             "import io;\n" +
             "class Fac {\n" +
+            "   int spaghetti;\n" +
             "   public int ComputeFac(int num){\n" +
             "       int num_aux ;\n" +
             "       if (num < 1)\n" +

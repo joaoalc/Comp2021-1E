@@ -1,5 +1,5 @@
 options {
-    LOOKAHEAD=5;
+    LOOKAHEAD=2;
 }
 
 PARSER_BEGIN(JMM)
@@ -122,7 +122,7 @@ void VarDeclaration(): {} {
     Type() <IDENTIFIER> <SEMICOLON>
 }
 
-void MethodDeclaration(): {} {
+void MethodDeclaration(): {} { //VarDeclaration and Statement can both start with identifier
     <PUBLIC>
     (
         (
@@ -135,7 +135,7 @@ void MethodDeclaration(): {} {
             <LEFT_PARENTHESES> <STRING> <LEFT_BRACKET> <RIGHT_BRACKET> <IDENTIFIER> <RIGHT_PARENTHESES> <LEFT_BRACE>
         )
     )
-    ( VarDeclaration() )*
+    ( VarDeclaration() )* //#
     ( Statement() )*
     [ <RETURN> Expression() <SEMICOLON> ]
     <RIGHT_BRACE>
@@ -148,13 +148,29 @@ void Type(): {} {
     <IDENTIFIER>
 }
 
-void Statement(): {} {
+void Statement(): {} { //Expression can start with identifier, and that forces the lookahead to be at least 2 (fixed?)
     ( <LEFT_BRACE> ( Statement() )* <RIGHT_BRACE> ) |
     ( <IF> <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> Statement() <ELSE> Statement() ) |
     ( <WHILE> <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> Statement() ) |
-    ( Expression() <SEMICOLON> ) |
-    ( <IDENTIFIER> <ASSIGN> Expression() <SEMICOLON> ) |
-    ( <IDENTIFIER> <LEFT_BRACKET> Expression() <RIGHT_BRACKET> <ASSIGN> Expression() <SEMICOLON> )
+    ( ExpressionNoIdentifier() <SEMICOLON> ) |
+    <IDENTIFIER>
+    ( _Expression() <SEMICOLON> |
+    ( <ASSIGN> Expression() <SEMICOLON> ) |
+    (  <LEFT_BRACKET> Expression() <RIGHT_BRACKET> <ASSIGN> Expression() <SEMICOLON> ))
+}
+
+void ExpressionNoIdentifier() #void: {} {
+    (
+        <INTEGER> |
+        <TRUE> |
+        <FALSE> |
+        <IDENTIFIER> |
+        <THIS> |
+        ( <NEW> <INT> <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ) |
+        ( <NEW> <IDENTIFIER> <LEFT_PARENTHESES> <RIGHT_PARENTHESES>) |
+        ( <NOT> Expression() ) |
+        ( <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> )
+    )  #Expression _Expression()
 }
 
 void Expression(): {} {
