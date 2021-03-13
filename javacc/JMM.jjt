@@ -109,8 +109,8 @@ SimpleNode Program(): {} {
     {return jjtThis;}
 }
 
-void ImportDeclaration(): {} {
-    <IMPORT> <IDENTIFIER> (<DOT> <IDENTIFIER>)* <SEMICOLON>
+void ImportDeclaration() #void: {} {
+    (<IMPORT> <IDENTIFIER> (<DOT> <IDENTIFIER>)* <SEMICOLON> #ImportDeclaration)*
 }
 
 void ClassDeclaration(): {} {
@@ -158,15 +158,15 @@ void Statement(): {} {
     ( <LEFT_BRACKET> Expression() <RIGHT_BRACKET> <ASSIGN> Expression() <SEMICOLON> ))
 }
 
-void Expression(): {} {
-    LT() (<AND> LT())*
+void Expression() #void: {} {
+    LT() (<AND> LT() #And(2))*
 }
 
-void LT(): {} {
-    Length() (<LT> Length())*
+void LT() #void: {} {
+    Length() (<LT> Length() #Less_Than(2))*
 }
 
-void Length(): {} {
+void Length() #void: {} {
     AddSub() (<DOT> functionCall())*
 }
 
@@ -175,26 +175,26 @@ void functionCall(): {} {
     (<IDENTIFIER> <LEFT_PARENTHESES> [Expression() ( <COMMA> Expression())*] <RIGHT_PARENTHESES> )
 }
 
-void AddSub(): {} {
-    MultDiv() (<ADD> MultDiv() | <SUB> MultDiv())*
+void AddSub() #void: {} {
+    MultDiv() (<ADD> MultDiv() #Add(2) | <SUB> MultDiv() #Sub(2) )*
 }
 
-void MultDiv(): {} {
-    Parentheses() (<MUL> Parentheses() | <DIV> Parentheses())*
+void MultDiv() #void: {} {
+    Parentheses() (<MUL> Parentheses() #Mul(2) | <DIV> Parentheses() #Div(2) )*
 }
 
-void Parentheses(): {} {
+void Parentheses() #void: {} {
     (<LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES>) |
     (<LEFT_BRACKET> Expression() <RIGHT_BRACKET>) |
     _Expression()
 }
 
-void _Expression(): {} {
-    <INTEGER> |
-    <TRUE> |
-    <FALSE> |
-    <IDENTIFIER> |
-    <THIS> |
-    <NEW> <INTEGER> <LEFT_BRACKET> Expression() <RIGHT_BRACKET> |
-    <NEW> <IDENTIFIER> <LEFT_PARENTHESES> <RIGHT_PARENTHESES>
+void _Expression() #void: {} {
+    <INTEGER> #Int|
+    <TRUE> #True|
+    <FALSE> #False|
+    <IDENTIFIER> #Identifier|
+    <THIS> #This|
+    <NEW> "int" <LEFT_BRACKET> Expression() #IntArray <RIGHT_BRACKET> |
+    <NEW> <IDENTIFIER> #VarCreation<LEFT_PARENTHESES> <RIGHT_PARENTHESES>
 }
