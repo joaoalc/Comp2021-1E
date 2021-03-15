@@ -196,6 +196,7 @@ void Call(): {} {
 }
 
 void _Expression() #void: {} {
+    (
     <INTEGER> #Int           |
     <TRUE> #True             |
     <FALSE> #False           |
@@ -203,4 +204,10 @@ void _Expression() #void: {} {
     <THIS> #This             |
     <NEW> "int" <LEFT_BRACKET> Expression() #IntArray <RIGHT_BRACKET> |
     <NEW> <IDENTIFIER> #VarCreation <LEFT_PARENTHESES> <RIGHT_PARENTHESES>
+    )
+    __Expression()
+}
+
+void __Expression() #void: {} {
+     [ <LEFT_BRACKET> Expression() <RIGHT_BRACKET> __Expression() ]
 }
