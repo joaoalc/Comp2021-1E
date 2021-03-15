@@ -162,22 +162,26 @@ void Expression() #void: {} {
     LT() (<AND> LT() #And(2))*
 }
 
-void Expression()
-
 void LT() #void: {} {
-    Length() (<LT> Length() #Less_Than(2))*
+    AddSub() (<LT> AddSub() #Less_Than(2))*
 }
 
-void Length() #void: {} {
-    AddSub() (<DOT> Call())*
-}
+
 
 void AddSub() #void: {} {
     MultDiv() (<ADD> MultDiv() #Add(2) | <SUB> MultDiv() #Sub(2) )*
 }
 
 void MultDiv() #void: {} {
-    Parentheses() (<MUL> Parentheses() #Mul(2) | <DIV> Parentheses() #Div(2) )*
+    Negate() (<MUL> Negate() #Mul(2) | <DIV> Negate() #Div(2) )*
+}
+
+void Negate() #void: {}  {
+    (<NOT>)* Length()
+}
+
+void Length() #void: {} {
+    Parentheses() (<DOT> Call() )*
 }
 
 void Parentheses() #void: {} {
