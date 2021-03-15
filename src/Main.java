@@ -23,13 +23,13 @@ public class Main implements JmmParser {
 
     public static void main(String[] args) {
         String program =
-            "import io;\n" +
+            "import io; \n" +
             "class Fac {\n" +
             "   int spaghetti;\n" +
             "   public int ComputeFac(int num){\n" +
             "       int num_aux ;\n" +
-            "       if (num < 1)\n" +
-            "           num_aux = 1;\n" +
+            "       if (num < 1 && num < 2)\n" +
+            "           num_aux = (1 + 1) * 2;\n" +
             "       else\n" +
             "           num_aux = num * (this.ComputeFac(num-1));\n" +
             "       return num_aux;\n" +

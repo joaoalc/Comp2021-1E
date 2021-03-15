@@ -1,5 +1,5 @@
 options {
-    LOOKAHEAD=2;
+    LOOKAHEAD=5;
 }
 
 PARSER_BEGIN(JMM)
@@ -109,8 +109,8 @@ SimpleNode Program(): {} {
     {return jjtThis;}
 }
 
-void ImportDeclaration(): {} {
-    <IMPORT> <IDENTIFIER> (<DOT> <IDENTIFIER>)* <SEMICOLON>
+void ImportDeclaration() #void: {} {
+    (<IMPORT> <IDENTIFIER> (<DOT> <IDENTIFIER>)* <SEMICOLON> #ImportDeclaration)*
 }
 
 void ClassDeclaration(): {} {
@@ -122,7 +122,7 @@ void VarDeclaration(): {} {
     Type() <IDENTIFIER> <SEMICOLON>
 }
 
-void MethodDeclaration(): {} { //VarDeclaration and Statement can both start with identifier
+void MethodDeclaration(): {} {
     <PUBLIC>
     (
         (
@@ -135,7 +135,7 @@ void MethodDeclaration(): {} { //VarDeclaration and Statement can both start wit
             <LEFT_PARENTHESES> <STRING> <LEFT_BRACKET> <RIGHT_BRACKET> <IDENTIFIER> <RIGHT_PARENTHESES> <LEFT_BRACE>
         )
     )
-    ( VarDeclaration() )* //#
+    ( VarDeclaration() )*
     ( Statement() )*
     [ <RETURN> Expression() <SEMICOLON> ]
     <RIGHT_BRACE>
@@ -148,48 +148,53 @@ void Type(): {} {
     <IDENTIFIER>
 }
 
-void Statement(): {} { //Expression can start with identifier, and that forces the lookahead to be at least 2 (fixed?)
+void Statement(): {} {
     ( <LEFT_BRACE> ( Statement() )* <RIGHT_BRACE> ) |
     ( <IF> <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> Statement() <ELSE> Statement() ) |
     ( <WHILE> <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> Statement() ) |
-    ( ExpressionNoIdentifier() <SEMICOLON> ) |
+    ( Expression() <SEMICOLON> ) |
     <IDENTIFIER>
-    ( _Expression() <SEMICOLON> |
-    ( <ASSIGN> Expression() <SEMICOLON> ) |
-    (  <LEFT_BRACKET> Expression() <RIGHT_BRACKET> <ASSIGN> Expression() <SEMICOLON> ))
+    (( <ASSIGN> Expression() <SEMICOLON> ) |
+    ( <LEFT_BRACKET> Expression() <RIGHT_BRACKET> <ASSIGN> Expression() <SEMICOLON> ))
 }
 
-void ExpressionNoIdentifier() #void: {} {
-    (
-        <INTEGER> |
-        <TRUE> |
-        <FALSE> |
-        <IDENTIFIER> |
-        <THIS> |
-        ( <NEW> <INT> <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ) |
-        ( <NEW> <IDENTIFIER> <LEFT_PARENTHESES> <RIGHT_PARENTHESES>) |
-        ( <NOT> Expression() ) |
-        ( <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> )
-    )  #Expression _Expression()
+void Expression() #void: {} {
+    LT() (<AND> LT() #And(2))*
 }
 
-void Expression(): {} {
-    (
-        <INTEGER> |
-        <TRUE> |
-        <FALSE> |
-        <IDENTIFIER> |
-        <THIS> |
-        ( <NEW> <INT> <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ) |
-        ( <NEW> <IDENTIFIER> <LEFT_PARENTHESES> <RIGHT_PARENTHESES>) |
-        ( <NOT> Expression() ) |
-        ( <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> )
-    )  _Expression()
+void LT() #void: {} {
+    Length() (<LT> Length() #Less_Than(2))*
 }
 
-void _Expression(): {} {
-    [ ( <AND> | <LT> | <ADD> | <SUB> | <MUL> | <DIV> ) Expression() _Expression() |
-        <LEFT_BRACKET> Expression() <RIGHT_BRACKET> _Expression() |
-        <DOT> <LENGTH> _Expression() |
-        <DOT> <IDENTIFIER> <LEFT_PARENTHESES> [ Expression() ( <COMMA> Expression() )* ] <RIGHT_PARENTHESES> _Expression() ]
+void Length() #void: {} {
+    AddSub() (<DOT> functionCall())*
+}
+
+void functionCall(): {} {
+    "length" |
+    (<IDENTIFIER> <LEFT_PARENTHESES> [Expression() ( <COMMA> Expression())*] <RIGHT_PARENTHESES> )
+}
+
+void AddSub() #void: {} {
+    MultDiv() (<ADD> MultDiv() #Add(2) | <SUB> MultDiv() #Sub(2) )*
+}
+
+void MultDiv() #void: {} {
+    Parentheses() (<MUL> Parentheses() #Mul(2) | <DIV> Parentheses() #Div(2) )*
+}
+
+void Parentheses() #void: {} {
+    (<LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES>) |
+    (<LEFT_BRACKET> Expression() <RIGHT_BRACKET>) |
+    _Expression()
+}
+
+void _Expression() #void: {} {
+    <INTEGER> #Int|
+    <TRUE> #True|
+    <FALSE> #False|
+    <IDENTIFIER> #Identifier|
+    <THIS> #This|
+    <NEW> "int" <LEFT_BRACKET> Expression() #IntArray <RIGHT_BRACKET> |
+    <NEW> <IDENTIFIER> #VarCreation<LEFT_PARENTHESES> <RIGHT_PARENTHESES>
 }
