@@ -106,7 +106,8 @@ TOKEN: {
 SimpleNode Program(): {} {
     ImportDeclaration()
     ClassDeclaration()
-    {return jjtThis;}
+    <EOF>
+    { return jjtThis; }
 }
 
 void ImportDeclaration() #void: {} {
@@ -129,22 +130,23 @@ void MethodDeclaration(): {} {
             Type() <IDENTIFIER> <LEFT_PARENTHESES>
             [ Type() <IDENTIFIER> ("," Type() <IDENTIFIER>)* ]
             <RIGHT_PARENTHESES> <LEFT_BRACE>
+            ( VarDeclaration() )*
+            ( Statement() )*
+            <RETURN> Expression() <SEMICOLON>
         ) |
         (
             <STATIC> <VOID> <MAIN>
             <LEFT_PARENTHESES> <STRING> <LEFT_BRACKET> <RIGHT_BRACKET> <IDENTIFIER> <RIGHT_PARENTHESES> <LEFT_BRACE>
+            ( VarDeclaration() )*
+            ( Statement() )*
         )
     )
-    ( VarDeclaration() )*
-    ( Statement() )*
-    [ <RETURN> Expression() <SEMICOLON> ]
     <RIGHT_BRACE>
 }
 
 void Type(): {} {
-    ( <INT> <LEFT_BRACKET> <RIGHT_BRACKET> ) |
+    ( <INT> [<LEFT_BRACKET> <RIGHT_BRACKET>] ) |
     <BOOLEAN> |
-    <INT> |
     <IDENTIFIER>
 }
 
@@ -153,26 +155,21 @@ void Statement(): {} {
     ( <IF> <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> Statement() <ELSE> Statement() ) |
     ( <WHILE> <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> Statement() ) |
     ( Expression() <SEMICOLON> ) |
-    <IDENTIFIER>
-    (( <ASSIGN> Expression() <SEMICOLON> ) |
-    ( <LEFT_BRACKET> Expression() <RIGHT_BRACKET> <ASSIGN> Expression() <SEMICOLON> ))
+    <IDENTIFIER> [ <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ] <ASSIGN> Expression() <SEMICOLON>
 }
 
 void Expression() #void: {} {
     LT() (<AND> LT() #And(2))*
 }
 
+void Expression()
+
 void LT() #void: {} {
     Length() (<LT> Length() #Less_Than(2))*
 }
 
 void Length() #void: {} {
-    AddSub() (<DOT> functionCall())*
-}
-
-void functionCall(): {} {
-    "length" |
-    (<IDENTIFIER> <LEFT_PARENTHESES> [Expression() ( <COMMA> Expression())*] <RIGHT_PARENTHESES> )
+    AddSub() (<DOT> Call())*
 }
 
 void AddSub() #void: {} {
@@ -184,17 +181,22 @@ void MultDiv() #void: {} {
 }
 
 void Parentheses() #void: {} {
-    (<LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES>) |
-    (<LEFT_BRACKET> Expression() <RIGHT_BRACKET>) |
+    ( <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> ) |
+    ( <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ) |
     _Expression()
 }
 
+void Call(): {} {
+    "length" |
+    (<IDENTIFIER> <LEFT_PARENTHESES> [ Expression() ( <COMMA> Expression() )* ] <RIGHT_PARENTHESES> )
+}
+
 void _Expression() #void: {} {
-    <INTEGER> #Int|
-    <TRUE> #True|
-    <FALSE> #False|
-    <IDENTIFIER> #Identifier|
-    <THIS> #This|
+    <INTEGER> #Int           |
+    <TRUE> #True             |
+    <FALSE> #False           |
+    <IDENTIFIER> #Identifier |
+    <THIS> #This             |
     <NEW> "int" <LEFT_BRACKET> Expression() #IntArray <RIGHT_BRACKET> |
-    <NEW> <IDENTIFIER> #VarCreation<LEFT_PARENTHESES> <RIGHT_PARENTHESES>
+    <NEW> <IDENTIFIER> #VarCreation <LEFT_PARENTHESES> <RIGHT_PARENTHESES>
 }
