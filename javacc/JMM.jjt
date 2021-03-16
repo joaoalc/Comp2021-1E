@@ -127,21 +127,24 @@ void MethodDeclaration(): {} {
     <PUBLIC>
     (
         (
+            <STATIC> <VOID> <MAIN>
+            <LEFT_PARENTHESES> <STRING> <LEFT_BRACKET> <RIGHT_BRACKET> <IDENTIFIER> <RIGHT_PARENTHESES> <LEFT_BRACE>
+            MethodBody()
+        ) |
+        (
             Type() <IDENTIFIER> <LEFT_PARENTHESES>
             [ Type() <IDENTIFIER> ("," Type() <IDENTIFIER>)* ]
             <RIGHT_PARENTHESES> <LEFT_BRACE>
-            ( LOOKAHEAD(2) VarDeclaration() )*
-            ( Statement() )*
+            MethodBody()
             <RETURN> Expression() <SEMICOLON>
-        ) |
-        (
-            <STATIC> <VOID> <MAIN>
-            <LEFT_PARENTHESES> <STRING> <LEFT_BRACKET> <RIGHT_BRACKET> <IDENTIFIER> <RIGHT_PARENTHESES> <LEFT_BRACE>
-            ( LOOKAHEAD(2) VarDeclaration() )*
-            ( Statement() )*
         )
     )
     <RIGHT_BRACE>
+}
+
+void MethodBody(): {} {
+    ( LOOKAHEAD(2) VarDeclaration() )*
+    ( Statement() )*
 }
 
 void Type(): {} {
@@ -156,7 +159,7 @@ void Statement(): {} {
     ( <WHILE> <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> Statement() ) |
     LOOKAHEAD(2)
     <IDENTIFIER> [ <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ] <ASSIGN> Expression() <SEMICOLON> |
-    ( Expression() <SEMICOLON> )
+    Expression() <SEMICOLON>
 }
 
 void Expression() #void: {} {
@@ -210,6 +213,6 @@ void _Expression() #void: {} {
     __Expression()
 }
 
-void __Expression() #void: {} {
+void __Expression() #Index: {} {
      [ <LEFT_BRACKET> Expression() <RIGHT_BRACKET> __Expression() ]
 }
