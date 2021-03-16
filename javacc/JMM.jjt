@@ -1,5 +1,5 @@
 options {
-    LOOKAHEAD=5;
+    LOOKAHEAD=1;
 }
 
 PARSER_BEGIN(JMM)
@@ -154,8 +154,8 @@ void Statement(): {} {
     ( <LEFT_BRACE> ( Statement() )* <RIGHT_BRACE> ) |
     ( <IF> <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> Statement() <ELSE> Statement() ) |
     ( <WHILE> <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> Statement() ) |
-    ( Expression() <SEMICOLON> ) |
-    <IDENTIFIER> [ <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ] <ASSIGN> Expression() <SEMICOLON>
+    <IDENTIFIER> [ <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ] <ASSIGN> Expression() <SEMICOLON> |
+    ( Expression() <SEMICOLON> )
 }
 
 void Expression() #void: {} {
@@ -175,7 +175,7 @@ void MultDiv() #void: {} {
 }
 
 void Negate() #void: {}  {
-    (<NOT>)* Length()
+    (<NOT>)* Length() #Negate
 }
 
 void Length() #void: {} {

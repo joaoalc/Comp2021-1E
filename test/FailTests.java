@@ -1,11 +1,20 @@
 import org.junit.Test;
+
 import pt.up.fe.comp.TestUtils;
+import pt.up.fe.comp.jmm.JmmParserResult;
+import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.specs.util.SpecsIo;
+
+import java.util.List;
+
+import static pt.up.fe.comp.TestUtils.mustFail;
 
 public class FailTests {
     public void TestTemplate(String filename) {
         String fileContents = SpecsIo.getResource(String.format("fixtures/public/%s", filename));
-        System.out.println(TestUtils.parse(fileContents).getRootNode().getKind());
+        JmmParserResult result = TestUtils.parse(fileContents);
+        List<Report> reports = result.getReports();
+        mustFail(reports);
     }
 
     @Test(expected = RuntimeException.class)

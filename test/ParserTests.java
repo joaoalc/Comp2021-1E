@@ -53,36 +53,4 @@ public class ParserTests {
     public void WhileAndIFTest() {
         TestTemplate("WhileAndIF.jmm");
     }
-
-    // Fail tests
-
-    @Test(expected = RuntimeException.class)
-    public void BlowUpTest() {
-        TestTemplate("fail/syntactical/BlowUp.jmm");
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void CompleteWhileTest() {
-        TestTemplate("fail/syntactical/CompleteWhiteTest.jmm");
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void LengthErrorTest() {
-        TestTemplate("fail/syntactical/LengthError.jmm");
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void MissingRightParTest() {
-        TestTemplate("fail/syntactical/MissingRightPar.jmm");
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void MultipleSequentialTest() {
-        TestTemplate("fail/syntactical/MultipleSequential.jmm");
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void NestedLoopTest() {
-        TestTemplate("fail/syntactical/NestedLoop.jmm");
-    }
 }
