@@ -201,9 +201,11 @@ void _Expression() #void: {} {
         <FALSE> #False           |
         <IDENTIFIER> #Identifier |
         <THIS> #This             |
-        LOOKAHEAD(2)
-        <NEW> "int" <LEFT_BRACKET> Expression() #IntArray <RIGHT_BRACKET> |
-        <NEW> <IDENTIFIER> #VarCreation <LEFT_PARENTHESES> <RIGHT_PARENTHESES>
+        <NEW>
+        (
+            "int" <LEFT_BRACKET> Expression() #IntArray <RIGHT_BRACKET> |
+            <IDENTIFIER> #VarCreation <LEFT_PARENTHESES> <RIGHT_PARENTHESES>
+        )
     )
     __Expression()
 }
