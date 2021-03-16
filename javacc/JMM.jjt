@@ -130,14 +130,14 @@ void MethodDeclaration(): {} {
             Type() <IDENTIFIER> <LEFT_PARENTHESES>
             [ Type() <IDENTIFIER> ("," Type() <IDENTIFIER>)* ]
             <RIGHT_PARENTHESES> <LEFT_BRACE>
-            ( VarDeclaration() )*
+            ( LOOKAHEAD(2) VarDeclaration() )*
             ( Statement() )*
             <RETURN> Expression() <SEMICOLON>
         ) |
         (
             <STATIC> <VOID> <MAIN>
             <LEFT_PARENTHESES> <STRING> <LEFT_BRACKET> <RIGHT_BRACKET> <IDENTIFIER> <RIGHT_PARENTHESES> <LEFT_BRACE>
-            ( VarDeclaration() )*
+            ( LOOKAHEAD(2) VarDeclaration() )*
             ( Statement() )*
         )
     )
@@ -154,6 +154,7 @@ void Statement(): {} {
     ( <LEFT_BRACE> ( Statement() )* <RIGHT_BRACE> ) |
     ( <IF> <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> Statement() <ELSE> Statement() ) |
     ( <WHILE> <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> Statement() ) |
+    LOOKAHEAD(2)
     <IDENTIFIER> [ <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ] <ASSIGN> Expression() <SEMICOLON> |
     ( Expression() <SEMICOLON> )
 }
@@ -195,13 +196,14 @@ void Call(): {} {
 
 void _Expression() #void: {} {
     (
-    <INTEGER> #Int           |
-    <TRUE> #True             |
-    <FALSE> #False           |
-    <IDENTIFIER> #Identifier |
-    <THIS> #This             |
-    <NEW> "int" <LEFT_BRACKET> Expression() #IntArray <RIGHT_BRACKET> |
-    <NEW> <IDENTIFIER> #VarCreation <LEFT_PARENTHESES> <RIGHT_PARENTHESES>
+        <INTEGER> #Int           |
+        <TRUE> #True             |
+        <FALSE> #False           |
+        <IDENTIFIER> #Identifier |
+        <THIS> #This             |
+        LOOKAHEAD(2)
+        <NEW> "int" <LEFT_BRACKET> Expression() #IntArray <RIGHT_BRACKET> |
+        <NEW> <IDENTIFIER> #VarCreation <LEFT_PARENTHESES> <RIGHT_PARENTHESES>
     )
     __Expression()
 }

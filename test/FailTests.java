@@ -24,7 +24,7 @@ public class FailTests {
 
     @Test(expected = RuntimeException.class)
     public void CompleteWhileTest() {
-        TestTemplate("fail/syntactical/CompleteWhiteTest.jmm");
+        TestTemplate("fail/syntactical/CompleteWhileTest.jmm");
     }
 
     @Test(expected = RuntimeException.class)
