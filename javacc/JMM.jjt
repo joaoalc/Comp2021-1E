@@ -45,52 +45,52 @@ SPECIAL_TOKEN : {
 // Keywords
 
 TOKEN : {
-    <IMPORT: "import"> |
-    <CLASS: "class"> |
-    <EXTENDS: "extends"> |
-    <PUBLIC: "public"> |
-    <RETURN: "return"> |
-    <STATIC: "static"> |
-    <VOID: "void"> |
-    <MAIN: "main"> |
-    <STRING: "String"> |
-    <TRUE: "true"> |
-    <FALSE: "false"> |
-    <INT: "int"> |
-    <BOOLEAN: "boolean"> |
-    <IF: "if"> |
-    <ELSE: "else"> |
-    <WHILE: "while"> |
-    <THIS: "this"> |
-    <NEW: "new"> |
-    <LENGTH: "length">
+    <IMPORT: "import">
+    | <CLASS: "class">
+    | <EXTENDS: "extends">
+    | <PUBLIC: "public">
+    | <RETURN: "return">
+    | <STATIC: "static">
+    | <VOID: "void">
+    | <MAIN: "main">
+    | <STRING: "String">
+    | <TRUE: "true">
+    | <FALSE: "false">
+    | <INT: "int">
+    | <BOOLEAN: "boolean">
+    | <IF: "if">
+    | <ELSE: "else">
+    | <WHILE: "while">
+    | <THIS: "this">
+    | <NEW: "new">
+    | <LENGTH: "length">
 }
 
 // Delimiters
 
 TOKEN : {
-    <LEFT_PARENTHESES: "("> |
-    <RIGHT_PARENTHESES: ")"> |
-    <LEFT_BRACE: "{"> |
-    <RIGHT_BRACE: "}"> |
-    <LEFT_BRACKET: "["> |
-    <RIGHT_BRACKET: "]"> |
-    <SEMICOLON: ";"> |
-    <COMMA: ",">
+    <LEFT_PARENTHESES: "(">
+    | <RIGHT_PARENTHESES: ")">
+    | <LEFT_BRACE: "{">
+    | <RIGHT_BRACE: "}">
+    | <LEFT_BRACKET: "[">
+    | <RIGHT_BRACKET: "]">
+    | <SEMICOLON: ";">
+    | <COMMA: ",">
 }
 
 // Operators
 
 TOKEN : {
-    <ADD: "+"> |
-    <SUB: "-"> |
-    <MUL: "*"> |
-    <DIV: "/"> |
-    <ASSIGN: "="> |
-    <DOT: "."> |
-    <NOT: "!"> |
-    <AND: "&&"> |
-    <LT: "<">
+    <ADD: "+">
+    | <SUB: "-">
+    | <MUL: "*">
+    | <DIV: "/">
+    | <ASSIGN: "=">
+    | <DOT: ".">
+    | <NOT: "!">
+    | <AND: "&&">
+    | <LT: "<">
 }
 
 // Symbols
@@ -110,13 +110,19 @@ SimpleNode Program(): {} {
     { return jjtThis; }
 }
 
-void ImportDeclaration() #void: {} {
-    (<IMPORT> <IDENTIFIER> (<DOT> <IDENTIFIER>)* <SEMICOLON> #ImportDeclaration)*
+void ImportDeclaration() #ImportDeclaration: {} {
+    (<IMPORT> <IDENTIFIER> (<DOT> <IDENTIFIER>)* <SEMICOLON> )*
 }
 
-void ClassDeclaration(): {} {
+void ClassDeclaration() #ClassDeclaration: {} {
     <CLASS> <IDENTIFIER> [ "extends" <IDENTIFIER> ]
-    <LEFT_BRACE> ( VarDeclaration() )* ( MethodDeclaration() )* <RIGHT_BRACE>
+    <LEFT_BRACE>
+        ClassBody()
+    <RIGHT_BRACE>
+}
+
+void ClassBody(): {} {
+    ( VarDeclaration() )* ( MethodDeclaration() )*
 }
 
 void VarDeclaration(): {} {
@@ -148,18 +154,42 @@ void MethodBody(): {} {
 }
 
 void Type(): {} {
-    ( <INT> [<LEFT_BRACKET> <RIGHT_BRACKET>] ) |
-    <BOOLEAN> |
-    <IDENTIFIER>
+    ( <INT> [<LEFT_BRACKET> <RIGHT_BRACKET>] )
+    | <BOOLEAN>
+    | <IDENTIFIER>
 }
 
 void Statement(): {} {
-    ( <LEFT_BRACE> ( Statement() )* <RIGHT_BRACE> ) |
-    ( <IF> <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> Statement() <ELSE> Statement() ) |
-    ( <WHILE> <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> Statement() ) |
-    LOOKAHEAD(2)
-    <IDENTIFIER> [ <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ] <ASSIGN> Expression() <SEMICOLON> |
-    Expression() <SEMICOLON>
+    ( <LEFT_BRACE> ( Statement() )* <RIGHT_BRACE> )
+    | IfStatement()
+    | WhileStatement()
+    | LOOKAHEAD(2) Assignment()
+    | Expression() <SEMICOLON>
+}
+
+void IfStatement(): {} {
+    <IF> <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES>
+        Statement()
+    <ELSE>
+        Statement()
+}
+
+void WhileStatement(): {} {
+    <WHILE> <LEFT_PARENTHESES>
+
+    try {
+        (Expression() <RIGHT_PARENTHESES>)
+    }
+
+    catch (ParseException exception) {
+        // Catch error
+    }
+
+    Statement()
+}
+
+void Assignment() : {} {
+    <IDENTIFIER> [ <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ] <ASSIGN> Expression() <SEMICOLON>
 }
 
 void Expression() #void: {} {
@@ -199,18 +229,22 @@ void Call(): {} {
 
 void _Expression() #void: {} {
     (
-        <INTEGER> #Int           |
-        <TRUE> #True             |
-        <FALSE> #False           |
-        <IDENTIFIER> #Identifier |
-        <THIS> #This             |
-        <NEW>
-        (
-            "int" <LEFT_BRACKET> Expression() #IntArray <RIGHT_BRACKET> |
-            <IDENTIFIER> #VarCreation <LEFT_PARENTHESES> <RIGHT_PARENTHESES>
-        )
+        <INTEGER> #Int
+        | <TRUE> #True
+        | <FALSE> #False
+        | <IDENTIFIER> #Identifier
+        | <THIS> #This
+        | NewExpression() #NewExpression
     )
     __Expression()
+}
+
+void NewExpression(): {} {
+    <NEW>
+    (
+        <INT> <LEFT_BRACKET> Expression() #IntArray <RIGHT_BRACKET> |
+        <IDENTIFIER> #VarCreation <LEFT_PARENTHESES> <RIGHT_PARENTHESES>
+    )
 }
 
 void __Expression() #Index: {} {
