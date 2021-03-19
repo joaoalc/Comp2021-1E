@@ -156,10 +156,58 @@ void Type(): {} {
 void Statement(): {} {
     ( <LEFT_BRACE> ( Statement() )* <RIGHT_BRACE> ) |
     ( <IF> <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> Statement() <ELSE> Statement() ) |
-    ( <WHILE> <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> Statement() ) |
+    ( WhileStatement() ) |
     LOOKAHEAD(2)
     <IDENTIFIER> [ <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ] <ASSIGN> Expression() <SEMICOLON> |
     Expression() <SEMICOLON>
+}
+
+
+void WhileStatement() #void : {} {
+    <WHILE> (<LEFT_PARENTHESES> | recover_error(new int[]{LEFT_BRACE, INTEGER, TRUE, FALSE, IDENTIFIER, THIS, NEW, NOT, LEFT_PARENTHESES},
+                        "Got '" + getToken(1).toString() + "' expected '(' token") )
+    try {
+        Expression()
+    } catch (ParseException e) {
+        recover_error(new int[]{LEFT_BRACE, INTEGER, TRUE, FALSE, IDENTIFIER, THIS, NEW, NOT, LEFT_PARENTHESES},
+                    "Found invalid expression '" + e.currentToken + "'");
+    }
+    (<RIGHT_PARENTHESES> | recover_error(new int[]{LEFT_BRACE, IF, WHILE, INTEGER, TRUE, FALSE, IDENTIFIER, THIS, NEW, NOT, LEFT_PARENTHESES}, "Got '" + getToken(1).toString() + "' expected ')' token") )
+
+    try {
+        Statement()
+    } catch (ParseException e) {
+        recover_error(new int[]{RIGHT_BRACE}, "Found invalid statement '" + e.currentToken + "'");
+    }
+}
+
+JAVACODE
+void recover_error(int[] skipTo, String msg) {
+     ParseException e = generateParseException();
+
+     System.err.println("Found error on line " + e.currentToken.beginLine + ", column " + e.currentToken.beginColumn);
+     System.err.println("\t" + msg);
+
+     Token t = getToken(1);
+
+     String skipped_tokens = "";
+     boolean match = false;
+     while (!match) {
+
+         for (int matcher : skipTo) {
+             if (t.kind == matcher) {
+                match = true;
+                break;
+             }
+         }
+         if (!match) { // skip current token
+             skipped_tokens += token.toString() + " ";
+             getNextToken();
+             t = getToken(1);
+         }
+     }
+
+     System.err.print("Tokens skipped " + skipped_tokens + "\n");
 }
 
 void Expression() #void: {} {
