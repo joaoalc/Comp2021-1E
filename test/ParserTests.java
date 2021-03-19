@@ -6,7 +6,7 @@ import pt.up.fe.specs.util.SpecsIo;
 public class ParserTests {
     public void TestTemplate(String filename) {
         String fileContents = SpecsIo.getResource(String.format("fixtures/public/%s", filename));
-        System.out.println(TestUtils.parse(fileContents).getRootNode().getKind());
+        System.out.println(TestUtils.parse(fileContents).getRootNode().toJson());
     }
 
     @Test

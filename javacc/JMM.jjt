@@ -224,7 +224,7 @@ void recover_error(int[] skipTo, String msg) {
          }
      }
 
-     System.err.print("Tokens skipped " + skipped_tokens + "\n");
+     System.err.println("Tokens skipped " + skipped_tokens);
 }
 
 void Expression() #void: {} {
