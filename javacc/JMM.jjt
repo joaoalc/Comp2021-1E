@@ -17,7 +17,6 @@ public class JMM {
         JMM jmm = new JMM(System.in);
 
         SimpleNode root = jmm.Program(); // Returns reference to root node
-        root.dump(""); // Prints the tree on the screen
 
         System.out.println("Finished parsing");
     }
@@ -136,8 +135,9 @@ void ClassBody(): {} {
     ( VarDeclaration() )* ( MethodDeclaration() )*
 }
 
-void VarDeclaration(): {} {
-    Type() <IDENTIFIER> <SEMICOLON>
+void VarDeclaration(): {Token t;} {
+    Type() t=<IDENTIFIER> <SEMICOLON>
+    { jjtThis.put("name", t.image); }
 }
 
 void MethodDeclaration(): {} {
@@ -230,7 +230,7 @@ JAVACODE
 void recover_error(int[] skipTo, String msg) {
      ParseException e = generateParseException();
 
-     /*System.err.println("Found error on line " + e.currentToken.beginLine + ", column " + e.currentToken.beginColumn);
+     /* System.err.println("Found error on line " + e.currentToken.beginLine + ", column " + e.currentToken.beginColumn);
      System.err.println("\t" + msg);*/
 
      Report report_error = Report.newError(Stage.SYNTATIC, e.currentToken.beginLine, e.currentToken.beginColumn, msg, e);

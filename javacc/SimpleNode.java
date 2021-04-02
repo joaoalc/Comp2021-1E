@@ -14,7 +14,7 @@ public class SimpleNode implements Node, JmmNode {
     protected int id;
     protected Object value;
     protected JMM parser;
-    protected HashMap<String, String> attributes = new HashMap();
+    protected HashMap<String, String> attributes = new HashMap<>();
 
     // added
     public int val;
@@ -34,7 +34,7 @@ public class SimpleNode implements Node, JmmNode {
     }
 
     public List<String> getAttributes() {
-        return new ArrayList<>(attributes.values());
+        return new ArrayList<>(attributes.keySet());
     }
 
     public void put(String attribute, String value) {
@@ -42,7 +42,7 @@ public class SimpleNode implements Node, JmmNode {
     }
 
     public String get(String attribute) {
-        return attributes.getOrDefault(attribute, "Not defined");
+        return attributes.get(attribute);
     }
 
     public List<JmmNode> getChildren() {
@@ -78,9 +78,9 @@ public class SimpleNode implements Node, JmmNode {
     }
 
     public void jjtAddChild(Node n, int i) {
-        if (children == null) {
+        if (children == null)
             children = new Node[i + 1];
-        }
+
         else if (i >= children.length) {
             Node c[] = new Node[i + 1];
             System.arraycopy(children, 0, c, 0, children.length);
@@ -123,9 +123,11 @@ public class SimpleNode implements Node, JmmNode {
 
     public void dump(String prefix) {
         System.out.println(toString(prefix));
+
         if (children != null) {
             for (int i = 0; i < children.length; ++i) {
                 SimpleNode n = (SimpleNode) children[i];
+
                 if (n != null) {
                     n.dump(prefix + " ");
                 }

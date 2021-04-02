@@ -14,7 +14,6 @@ import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.specs.util.SpecsIo;
 
 public class TestUtils {
-
     private static final Properties PARSER_CONFIG = TestUtils.loadProperties("parser.properties");
     private static final Properties ANALYSIS_CONFIG = TestUtils.loadProperties("analysis.properties");
 
@@ -23,7 +22,9 @@ public class TestUtils {
             Properties props = new Properties();
             props.load(new StringReader(SpecsIo.read(filename)));
             return props;
-        } catch (IOException e) {
+        }
+
+        catch (IOException e) {
             throw new RuntimeException("Error while loading properties file '" + filename + "'", e);
         }
     }
@@ -42,7 +43,8 @@ public class TestUtils {
 
             return parser.parse(code);
 
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new RuntimeException("Could not parse code", e);
         }
 
@@ -62,7 +64,8 @@ public class TestUtils {
 
             return analysis.semanticAnalysis(parserResult);
 
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new RuntimeException("Could not parse code", e);
         }
 
