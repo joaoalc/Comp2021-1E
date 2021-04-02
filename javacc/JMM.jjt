@@ -114,8 +114,8 @@ void ImportDeclaration() #ImportDeclaration: {} {
     (<IMPORT> <IDENTIFIER> (<DOT> <IDENTIFIER>)* <SEMICOLON> )*
 }
 
-void ClassDeclaration() #ClassDeclaration: {} {
-    <CLASS> <IDENTIFIER> [ "extends" <IDENTIFIER> ]
+void ClassDeclaration() #ClassDeclaration : {Token t;} {
+    <CLASS> t=<IDENTIFIER> { jjtThis.put("name", t.image); } [ "extends" <IDENTIFIER> ]
     <LEFT_BRACE>
         ClassBody()
     <RIGHT_BRACE>
@@ -153,13 +153,13 @@ void MethodBody(): {} {
     ( Statement() )*
 }
 
-void Type(): {} {
+void Type() #void : {} {
     ( <INT> [<LEFT_BRACKET> <RIGHT_BRACKET>] )
     | <BOOLEAN>
     | <IDENTIFIER>
 }
 
-void Statement(): {} {
+void Statement() #void : {} {
     ( <LEFT_BRACE> ( Statement() )* <RIGHT_BRACE> )
     | IfStatement()
     | WhileStatement()
@@ -167,33 +167,50 @@ void Statement(): {} {
     | Expression() <SEMICOLON>
 }
 
-void IfStatement(): {} {
+void IfStatement() #IfStatement : {} {
     <IF> <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES>
         Statement()
     <ELSE>
         Statement()
 }
 
-void Assignment() : {} {
+void Assignment() #Assignment : {} {
     <IDENTIFIER> [ <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ] <ASSIGN> Expression() <SEMICOLON>
 }
 
+void WhileStatement() #WhileStatement : {} {
+    <WHILE> (
+        <LEFT_PARENTHESES>
+        | recover_error(
+              new int[]{LEFT_BRACE, INTEGER, TRUE, FALSE, IDENTIFIER, THIS, NEW, NOT, LEFT_PARENTHESES},
+              "Got '" + getToken(1).toString() + "' expected '(' token"
+          )
+    )
 
-void WhileStatement() #void : {} {
-    <WHILE> (<LEFT_PARENTHESES> | recover_error(new int[]{LEFT_BRACE, INTEGER, TRUE, FALSE, IDENTIFIER, THIS, NEW, NOT, LEFT_PARENTHESES},
-                        "Got '" + getToken(1).toString() + "' expected '(' token") )
     try {
         Expression()
-    } catch (ParseException e) {
-        recover_error(new int[]{LEFT_BRACE, INTEGER, TRUE, FALSE, IDENTIFIER, THIS, NEW, NOT, LEFT_PARENTHESES},
-                    "Found invalid expression '" + e.currentToken + "'");
     }
-    (<RIGHT_PARENTHESES> | recover_error(new int[]{LEFT_BRACE, IF, WHILE, INTEGER, TRUE, FALSE, IDENTIFIER, THIS, NEW, NOT, LEFT_PARENTHESES},
-                                    "Got '" + getToken(1).toString() + "' expected ')' token") )
+
+    catch (ParseException e) {
+        recover_error(
+            new int[] {LEFT_BRACE, INTEGER, TRUE, FALSE, IDENTIFIER, THIS, NEW, NOT, LEFT_PARENTHESES},
+            "Found invalid expression '" + e.currentToken + "'"
+        );
+    }
+
+    (
+        <RIGHT_PARENTHESES>
+        | recover_error(
+              new int[] {LEFT_BRACE, IF, WHILE, INTEGER, TRUE, FALSE, IDENTIFIER, THIS, NEW, NOT, LEFT_PARENTHESES},
+              "Got '" + getToken(1).toString() + "' expected ')' token"
+          )
+    )
 
     try {
         Statement()
-    } catch (ParseException e) {
+    }
+
+    catch (ParseException e) {
         recover_error(new int[]{RIGHT_BRACE}, "Found invalid statement '" + e.currentToken + "'");
     }
 }
@@ -209,14 +226,15 @@ void recover_error(int[] skipTo, String msg) {
 
      String skipped_tokens = "";
      boolean match = false;
-     while (!match) {
 
+     while (!match) {
          for (int matcher : skipTo) {
              if (t.kind == matcher) {
                 match = true;
                 break;
              }
          }
+
          if (!match) { // skip current token
              skipped_tokens += token.toString() + " ";
              getNextToken();
