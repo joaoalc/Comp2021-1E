@@ -4,7 +4,14 @@ options {
 
 PARSER_BEGIN(JMM)
 
+import java.util.List;
+import java.util.ArrayList;
+import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp.jmm.report.ReportType;
+import pt.up.fe.comp.jmm.report.Stage;
 public class JMM {
+    private List<Report> reports = new ArrayList<Report>();
+
     public static void main(String[] args) throws ParseException {
         System.out.println("Write a Java-- program:");
         JMM jmm = new JMM(System.in);
@@ -13,6 +20,10 @@ public class JMM {
         root.dump(""); // Prints the tree on the screen
 
         System.out.println("Finished parsing");
+    }
+
+    public List<Report> getReports() {
+        return this.reports;
     }
 }
 
@@ -202,8 +213,12 @@ JAVACODE
 void recover_error(int[] skipTo, String msg) {
      ParseException e = generateParseException();
 
-     System.err.println("Found error on line " + e.currentToken.beginLine + ", column " + e.currentToken.beginColumn);
-     System.err.println("\t" + msg);
+     /*System.err.println("Found error on line " + e.currentToken.beginLine + ", column " + e.currentToken.beginColumn);
+     System.err.println("\t" + msg);*/
+
+     Report report_error = Report.newError(Stage.SYNTATIC, e.currentToken.beginLine, e.currentToken.beginColumn, msg, e);
+
+     this.reports.add(report_error);
 
      Token t = getToken(1);
 
@@ -224,7 +239,7 @@ void recover_error(int[] skipTo, String msg) {
          }
      }
 
-     System.err.println("Tokens skipped " + skipped_tokens);
+     // System.err.println("Tokens skipped " + skipped_tokens);
 }
 
 void Expression() #void: {} {

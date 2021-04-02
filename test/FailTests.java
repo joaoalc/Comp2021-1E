@@ -17,32 +17,32 @@ public class FailTests {
         mustFail(reports);
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void BlowUpTest() {
         TestTemplate("fail/syntactical/BlowUp.jmm");
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void CompleteWhileTest() {
         TestTemplate("fail/syntactical/CompleteWhileTest.jmm");
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void LengthErrorTest() {
         TestTemplate("fail/syntactical/LengthError.jmm");
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void MissingRightParTest() {
         TestTemplate("fail/syntactical/MissingRightPar.jmm");
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void MultipleSequentialTest() {
         TestTemplate("fail/syntactical/MultipleSequential.jmm");
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void NestedLoopTest() {
         TestTemplate("fail/syntactical/NestedLoop.jmm");
     }
