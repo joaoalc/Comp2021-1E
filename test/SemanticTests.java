@@ -1,16 +1,15 @@
 import org.junit.Test;
-
 import pt.up.fe.comp.TestUtils;
 import pt.up.fe.specs.util.SpecsIo;
 
-public class ParserTests {
-    public void TestTemplate(String filename) {
-        String fileContents = SpecsIo.getResource(String.format("fixtures/public/%s", filename));
-        System.out.println(TestUtils.parse(fileContents).getRootNode().toJson());
+public class SemanticTests {
+    private void TestTemplate(String filename) {
+        String code = SpecsIo.getResource(String.format("fixtures/public/%s", filename));
+        TestUtils.analyse(code);
     }
 
     @Test
-	public void FindMaximumTest() {
+    public void FindMaximumTest() {
         TestTemplate("FindMaximum.jmm");
     }
 
