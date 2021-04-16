@@ -120,8 +120,12 @@ SimpleNode Program(): {} {
     { return jjtThis; }
 }
 
-void ImportDeclaration() #ImportDeclaration: {} {
-    (<IMPORT> <IDENTIFIER> (<DOT> <IDENTIFIER>)* <SEMICOLON> )*
+void ImportDeclaration() #ImportDeclaration: {Token t;} {
+    (<IMPORT> t=<IDENTIFIER> { jjtThis.put("name", t.image); } (ImportMethod())* <SEMICOLON> )*
+}
+
+void ImportMethod() : {Token t;}{
+    <DOT> t=<IDENTIFIER> {jjtThis.put("name", t.image);}
 }
 
 void ClassDeclaration() #ClassDeclaration : {Token t;} {
@@ -159,7 +163,7 @@ void MethodDeclaration(): {} {
     <RIGHT_BRACE>
 }
 
-void MethodBody(): {} {
+void MethodBody() #void : {} {
     ( LOOKAHEAD(2) VarDeclaration() )*
     ( Statement() )*
 }
@@ -186,7 +190,7 @@ void IfStatement() #IfStatement : {} {
 }
 
 void Assignment() #Assignment : {} {
-    <IDENTIFIER> [ <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ] <ASSIGN> Expression() <SEMICOLON>
+    <IDENTIFIER> #Identifier [ <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ] <ASSIGN> Expression() <SEMICOLON>
 }
 
 void WhileStatement() #WhileStatement : {} {
@@ -277,7 +281,7 @@ void MultDiv() #void: {} {
 }
 
 void Negate() #void: {}  {
-    (<NOT>)* Length() #Negate
+    (<NOT> #Negate)* Length()
 }
 
 void Length() #void: {} {
@@ -290,9 +294,9 @@ void Parentheses() #void: {} {
     _Expression()
 }
 
-void Call(): {} {
+void Call(): {Token t;} {
     "length" |
-    (<IDENTIFIER> <LEFT_PARENTHESES> [ Expression() ( <COMMA> Expression() )* ] <RIGHT_PARENTHESES> )
+    (t=<IDENTIFIER> {jjtThis.put("name", t.image);} <LEFT_PARENTHESES> [ Expression() ( <COMMA> Expression() )* ] <RIGHT_PARENTHESES> )
 }
 
 void _Expression() #void: {} {
@@ -315,6 +319,6 @@ void NewExpression(): {} {
     )
 }
 
-void __Expression() #Index: {} {
-     [ <LEFT_BRACKET> Expression() <RIGHT_BRACKET> __Expression() ]
+void __Expression() #void: {} {
+     [ <LEFT_BRACKET> Expression() #Index <RIGHT_BRACKET> __Expression() ]
 }
