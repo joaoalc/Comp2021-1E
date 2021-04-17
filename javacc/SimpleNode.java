@@ -22,6 +22,7 @@ public class SimpleNode implements Node, JmmNode {
 
     public SimpleNode(int i) {
         id = i;
+        this.put("id", String.valueOf(i));
     }
 
     public SimpleNode(JMM p, int i) {

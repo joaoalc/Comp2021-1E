@@ -1,6 +1,7 @@
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class Method {
         return parameters;
     }
 
-    public HashMap<Symbol, ?> getLocal_variables() {
-        return local_variables;
+    public List<Symbol> getLocalVariables() {
+        return new ArrayList(local_variables.entrySet());
     }
 }
