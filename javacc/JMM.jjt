@@ -10,7 +10,7 @@ import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
 public class JMM {
-    private List<Report> reports = new ArrayList<Report>();
+    private List<Report> reports = new ArrayList();
 
     public static void main(String[] args) throws ParseException {
         System.out.println("Write a Java-- program:");
@@ -121,46 +121,49 @@ SimpleNode Program(): {} {
 }
 
 void ImportDeclaration() #ImportDeclaration: {Token t;} {
-    (<IMPORT> t=<IDENTIFIER> { jjtThis.put("name", t.image); } (ImportMethod())* <SEMICOLON> )*
+    (<IMPORT> Identifier() (ImportMethod())* <SEMICOLON> )*
 }
 
 void ImportMethod() : {Token t;}{
-    <DOT> t=<IDENTIFIER> {jjtThis.put("name", t.image);}
+    <DOT> Identifier()
 }
 
 void ClassDeclaration() #ClassDeclaration : {Token t;} {
-    <CLASS> t=<IDENTIFIER> { jjtThis.put("name", t.image); } [ "extends" <IDENTIFIER> ]
+    <CLASS> t=<IDENTIFIER> { jjtThis.put("name", t.image); } [ "extends" Identifier() #Extends ]
     <LEFT_BRACE>
         ClassBody()
     <RIGHT_BRACE>
 }
 
-void ClassBody(): {} {
+void Identifier() #Identifier : {Token t;} {
+    t=<IDENTIFIER> { jjtThis.put("name", t.image); }
+}
+
+void ClassBody() : {} {
     ( VarDeclaration() )* ( MethodDeclaration() )*
 }
 
-void VarDeclaration(): {Token t;} {
-    Type() t=<IDENTIFIER> <SEMICOLON>
-    { jjtThis.put("name", t.image); }
+void VarDeclaration() #VarDeclaration : {Token t;} {
+    Type() Identifier() <SEMICOLON>
 }
 
-void MethodDeclaration(): {} {
+void MethodDeclaration() #MethodDeclaration: {} {
     <PUBLIC>
     (
         (
-            <STATIC> <VOID> <MAIN>
-            <LEFT_PARENTHESES> <STRING> <LEFT_BRACKET> <RIGHT_BRACKET> <IDENTIFIER> <RIGHT_PARENTHESES> <LEFT_BRACE>
-            MethodBody()
+            (<STATIC> <VOID> <MAIN>
+            <LEFT_PARENTHESES> <STRING> <LEFT_BRACKET> <RIGHT_BRACKET> Identifier() #MainArg <RIGHT_PARENTHESES>) #Main <LEFT_BRACE>
+            MethodBody() #MethodBody
         ) |
         (
-            Type() <IDENTIFIER> <LEFT_PARENTHESES>
-            [ Type() <IDENTIFIER> ("," Type() <IDENTIFIER>)* ]
+            Type() Identifier() #FunctionName <LEFT_PARENTHESES>
+            [ (Type() Identifier() #ArgName) ("," Type() Identifier() #ArgName  )* ]
             <RIGHT_PARENTHESES> <LEFT_BRACE>
-            MethodBody()
-            <RETURN> Expression() <SEMICOLON>
+            MethodBody() #MethodBody
+            <RETURN> Expression() <SEMICOLON> #MethodReturn
         )
     )
-    <RIGHT_BRACE>
+    <RIGHT_BRACE> #Method
 }
 
 void MethodBody() #void : {} {
@@ -169,10 +172,11 @@ void MethodBody() #void : {} {
 }
 
 void Type() #void : {} {
-    ( <INT> [<LEFT_BRACKET> <RIGHT_BRACKET>] )
-    | <BOOLEAN>
-    | <IDENTIFIER>
+    ( <INT> ((<LEFT_BRACKET><RIGHT_BRACKET> #IntArray) | {} #Int))
+    | <BOOLEAN> #Boolean
+    | Identifier()
 }
+
 
 void Statement() #void : {} {
     ( <LEFT_BRACE> ( Statement() )* <RIGHT_BRACE> )
@@ -190,7 +194,7 @@ void IfStatement() #IfStatement : {} {
 }
 
 void Assignment() #Assignment : {} {
-    <IDENTIFIER> #Identifier [ <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ] <ASSIGN> Expression() <SEMICOLON>
+    Identifier() #Identifier [ <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ] <ASSIGN> Expression() <SEMICOLON>
 }
 
 void WhileStatement() #WhileStatement : {} {
@@ -234,9 +238,6 @@ JAVACODE
 void recover_error(int[] skipTo, String msg) {
      ParseException e = generateParseException();
 
-     /* System.err.println("Found error on line " + e.currentToken.beginLine + ", column " + e.currentToken.beginColumn);
-     System.err.println("\t" + msg);*/
-
      Report report_error = Report.newError(Stage.SYNTATIC, e.currentToken.beginLine, e.currentToken.beginColumn, msg, e);
 
      this.reports.add(report_error);
@@ -265,27 +266,27 @@ void recover_error(int[] skipTo, String msg) {
 }
 
 void Expression() #void: {} {
-    LT() (<AND> LT() #And(2))*
+    LT() (<AND> LT() )*
 }
 
-void LT() #void: {} {
-    AddSub() (<LT> AddSub() #Less_Than(2))*
+void LT() #Less_Than : {} {
+    AddSub() (<LT> AddSub() )*
 }
 
-void AddSub() #void: {} {
-    MultDiv() (<ADD> MultDiv() #Add(2) | <SUB> MultDiv() #Sub(2) )*
+void AddSub() #AddSub(2) : {} {
+    MultDiv() (<ADD> MultDiv() | <SUB> MultDiv()  )*
 }
 
-void MultDiv() #void: {} {
-    Negate() (<MUL> Negate() #Mul(2) | <DIV> Negate() #Div(2) )*
+void MultDiv() #MultDiv(2) : {} {
+    Negate() (<MUL> Negate() | <DIV> Negate()  )*
 }
 
-void Negate() #void: {}  {
-    (<NOT> #Negate)* Length()
+void Negate() #void : {}  {
+    (<NOT>)* #Negate Length()
 }
 
 void Length() #void: {} {
-    Parentheses() (<DOT> Call() )*
+    Parentheses() (<DOT> Call() )* #Length
 }
 
 void Parentheses() #void: {} {

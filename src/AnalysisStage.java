@@ -1,7 +1,5 @@
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
 
 import pt.up.fe.comp.TestUtils;
 import pt.up.fe.comp.jmm.JmmNode;
@@ -17,20 +15,20 @@ import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
 
 public class AnalysisStage implements JmmAnalysis {
-
     @Override
     public JmmSemanticsResult semanticAnalysis(JmmParserResult parserResult) {
+        List<Report> reports = new ArrayList<>();
 
         if (TestUtils.getNumReports(parserResult.getReports(), ReportType.ERROR) > 0) {
             var errorReport = new Report(ReportType.ERROR, Stage.SEMANTIC, -1,
                     "Started semantic analysis but there are errors from previous stage");
-            return new JmmSemanticsResult(parserResult, null, Arrays.asList(errorReport));
+            return new JmmSemanticsResult(parserResult, null, Collections.singletonList(errorReport));
         }
 
         if (parserResult.getRootNode() == null) {
             var errorReport = new Report(ReportType.ERROR, Stage.SEMANTIC, -1,
                     "Started semantic analysis but AST root node is null");
-            return new JmmSemanticsResult(parserResult, null, Arrays.asList(errorReport));
+            return new JmmSemanticsResult(parserResult, null, Collections.singletonList(errorReport));
         }
 
         JmmNode node = parserResult.getRootNode();
@@ -56,8 +54,7 @@ public class AnalysisStage implements JmmAnalysis {
         varPrinter.visit(node, null);
 
         // No Symbol Table being calculated yet
-        return new JmmSemanticsResult(parserResult, null, new ArrayList<>());
-
+        return new JmmSemanticsResult(parserResult, null, reports);
     }
 
 }
