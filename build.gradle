@@ -41,7 +41,7 @@ sourceSets {
         java {
             srcDir 'src'
             srcDir 'src-lib'
-            srcDir 'javacc'
+            //srcDir 'javacc'
             srcDir 'generated'
         }
     }

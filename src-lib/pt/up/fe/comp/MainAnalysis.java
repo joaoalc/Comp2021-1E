@@ -1,7 +1,9 @@
 package pt.up.fe.comp;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.JmmParserResult;
@@ -10,6 +12,8 @@ import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.ast.examples.ExamplePostorderVisitor;
 import pt.up.fe.comp.jmm.ast.examples.ExamplePreorderVisitor;
 import pt.up.fe.comp.jmm.ast.examples.ExampleVisitor;
+import pt.up.fe.comp.jmm.ast.examples.OpVerifierVisitor;
+import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.specs.util.SpecsIo;
 
@@ -45,6 +49,12 @@ public class MainAnalysis implements JmmAnalysis { // }, JmmOptimization, Jasmin
         }
 
         JmmNode node = parserResult.getRootNode().sanitize();
+
+        List<Report> reports = new ArrayList<>();
+        var opVisitor = new OpVerifierVisitor();
+        System.out.println(opVisitor.visit(node, reports));
+
+
 
         System.out.println("VISITOR");
         ExampleVisitor visitor = new ExampleVisitor("Identifier", "id");
