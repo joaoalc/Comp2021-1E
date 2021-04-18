@@ -5,7 +5,6 @@ import pt.up.fe.comp.jmm.analysis.table.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 class SimpleSymbolTable implements SymbolTable {
     private List<String> imports;
@@ -63,7 +62,6 @@ class SimpleSymbolTable implements SymbolTable {
     }
 
     /**
-     * @param methodName
      * @return a list of parameters of the given method
      */
     @Override
@@ -72,11 +70,10 @@ class SimpleSymbolTable implements SymbolTable {
     }
 
     /**
-     * @param methodName
      * @return a list of local variables declared in the given method
      */
     @Override
     public List<Symbol> getLocalVariables(String methodName) {
-        return null;
+        return methods.get(methodName).getLocalVariables();
     }
 }

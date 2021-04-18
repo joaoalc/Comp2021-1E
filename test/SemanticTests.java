@@ -1,11 +1,12 @@
 import org.junit.Test;
 import pt.up.fe.comp.TestUtils;
+import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.specs.util.SpecsIo;
 
 public class SemanticTests {
     private void TestTemplate(String filename) {
         String code = SpecsIo.getResource(String.format("fixtures/public/%s", filename));
-        TestUtils.analyse(code);
+        JmmSemanticsResult result = TestUtils.analyse(code);
     }
 
     @Test

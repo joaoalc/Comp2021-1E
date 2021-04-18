@@ -1,39 +1,35 @@
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
 
 import pt.up.fe.comp.TestUtils;
 import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.JmmParserResult;
 import pt.up.fe.comp.jmm.analysis.JmmAnalysis;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
-import pt.up.fe.comp.jmm.ast.examples.ExamplePostorderVisitor;
-import pt.up.fe.comp.jmm.ast.examples.ExamplePreorderVisitor;
-import pt.up.fe.comp.jmm.ast.examples.ExamplePrintVariables;
-import pt.up.fe.comp.jmm.ast.examples.ExampleVisitor;
+import pt.up.fe.comp.jmm.ast.examples.*;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
 
 public class AnalysisStage implements JmmAnalysis {
-
     @Override
     public JmmSemanticsResult semanticAnalysis(JmmParserResult parserResult) {
+        List<Report> reports = new ArrayList<>();
 
         if (TestUtils.getNumReports(parserResult.getReports(), ReportType.ERROR) > 0) {
             var errorReport = new Report(ReportType.ERROR, Stage.SEMANTIC, -1,
                     "Started semantic analysis but there are errors from previous stage");
-            return new JmmSemanticsResult(parserResult, null, Arrays.asList(errorReport));
+            return new JmmSemanticsResult(parserResult, null, Collections.singletonList(errorReport));
         }
 
         if (parserResult.getRootNode() == null) {
             var errorReport = new Report(ReportType.ERROR, Stage.SEMANTIC, -1,
                     "Started semantic analysis but AST root node is null");
-            return new JmmSemanticsResult(parserResult, null, Arrays.asList(errorReport));
+            return new JmmSemanticsResult(parserResult, null, Collections.singletonList(errorReport));
         }
 
         JmmNode node = parserResult.getRootNode();
+        System.out.println("To json: " + node.toJson());
 
         System.out.println("Dump tree with Visitor where you control tree traversal");
         ExampleVisitor visitor = new ExampleVisitor("Identifier", "id");
@@ -42,6 +38,10 @@ public class AnalysisStage implements JmmAnalysis {
         System.out.println("Dump tree with Visitor that automatically performs preorder tree traversal");
         var preOrderVisitor = new ExamplePreorderVisitor("Identifier", "id");
         System.out.println(preOrderVisitor.visit(node, ""));
+
+        var opVisitor = new OpVerifierVisitor();
+        List<Report> repor = new ArrayList<>();
+        System.out.println(opVisitor.visit(node, repor));
 
         System.out.println(
                 "Create histogram of node kinds with Visitor that automatically performs postorder tree traversal");
@@ -56,8 +56,7 @@ public class AnalysisStage implements JmmAnalysis {
         varPrinter.visit(node, null);
 
         // No Symbol Table being calculated yet
-        return new JmmSemanticsResult(parserResult, null, new ArrayList<>());
-
+        return new JmmSemanticsResult(parserResult, null, reports);
     }
 
 }
