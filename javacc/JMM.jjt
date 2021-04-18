@@ -200,7 +200,7 @@ void Assignment() #Assignment : {} {
 void WhileStatement() #WhileStatement : {} {
     <WHILE> (
         <LEFT_PARENTHESES>
-        | recover_error(
+        | recoverError(
               new int[]{LEFT_BRACE, INTEGER, TRUE, FALSE, IDENTIFIER, THIS, NEW, NOT, LEFT_PARENTHESES},
               "Got '" + getToken(1).toString() + "' expected '(' token"
           )
@@ -211,7 +211,7 @@ void WhileStatement() #WhileStatement : {} {
     }
 
     catch (ParseException e) {
-        recover_error(
+        recoverError(
             new int[] {LEFT_BRACE, INTEGER, TRUE, FALSE, IDENTIFIER, THIS, NEW, NOT, LEFT_PARENTHESES},
             "Found invalid expression '" + e.currentToken + "'"
         );
@@ -219,7 +219,7 @@ void WhileStatement() #WhileStatement : {} {
 
     (
         <RIGHT_PARENTHESES>
-        | recover_error(
+        | recoverError(
               new int[] {LEFT_BRACE, IF, WHILE, INTEGER, TRUE, FALSE, IDENTIFIER, THIS, NEW, NOT, LEFT_PARENTHESES},
               "Got '" + getToken(1).toString() + "' expected ')' token"
           )
@@ -230,12 +230,12 @@ void WhileStatement() #WhileStatement : {} {
     }
 
     catch (ParseException e) {
-        recover_error(new int[]{RIGHT_BRACE}, "Found invalid statement '" + e.currentToken + "'");
+        recoverError(new int[]{RIGHT_BRACE}, "Found invalid statement '" + e.currentToken + "'");
     }
 }
 
 JAVACODE
-void recover_error(int[] skipTo, String msg) {
+void recoverError(int[] skipTo, String msg) {
      ParseException e = generateParseException();
 
      Report report_error = Report.newError(Stage.SYNTATIC, e.currentToken.beginLine, e.currentToken.beginColumn, msg, e);
@@ -261,15 +261,13 @@ void recover_error(int[] skipTo, String msg) {
              t = getToken(1);
          }
      }
-
-     // System.err.println("Tokens skipped " + skipped_tokens);
 }
 
 void Expression() #void: {} {
-    LT() (<AND> LT() )*
+    LessThan() (<AND> LessThan() )*
 }
 
-void LT() #void : {} {
+void LessThan() #void : {} {
     AddSub() (<LT> AddSub() #Less_Than(2) )*
 }
 
@@ -286,8 +284,32 @@ void Negate() #void : {}  {
 }
 
 void Length() #void: {} {
-    Parentheses() (<DOT> Call() )*
+    Parentheses() (<DOT> Call() #DotOperation)*
 }
+/*void LessThan() #Less_Than : {} {
+    AddSub() (<LT> AddSub() )* // TODO: Is it really * ?
+}
+
+void AddSub() #AddSub(2) : {} {
+    MultDiv() (Operation() )*
+}
+
+void Operation() : {} {
+    <ADD> MultDiv() {jjtThis.put("op", "PLUS");}
+    | <SUB> MultDiv() {jjtThis.put("op", "MINUS");}
+}
+
+void MultDiv() #MultDiv(2) : {} {
+    Negate() (<MUL> Negate() | <DIV> Negate() )*
+}
+
+void Negate() #void : {}  {
+    (<NOT>)* #Negate DotOperation()
+}
+
+void DotOperation() #void: {} {
+    Parentheses() (<DOT> Call() )* #DotOperation
+}*/
 
 void Parentheses() #void: {} {
     ( <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> ) |

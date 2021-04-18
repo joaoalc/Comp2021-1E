@@ -10,12 +10,11 @@ import pt.up.fe.comp.jmm.ast.examples.*;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
+import visitor.OpVerifierVisitor;
 
 public class AnalysisStage implements JmmAnalysis {
     @Override
     public JmmSemanticsResult semanticAnalysis(JmmParserResult parserResult) {
-        List<Report> reports = new ArrayList<>();
-
         if (TestUtils.getNumReports(parserResult.getReports(), ReportType.ERROR) > 0) {
             var errorReport = new Report(ReportType.ERROR, Stage.SEMANTIC, -1,
                     "Started semantic analysis but there are errors from previous stage");
@@ -49,14 +48,12 @@ public class AnalysisStage implements JmmAnalysis {
         var kindCount = new HashMap<String, Integer>();
         postOrderVisitor.visit(node, kindCount);
         System.out.println("Kinds count: " + kindCount + "\n");
+        List<Report> reports = new ArrayList<>();
 
-        System.out.println(
-                "Print variables name and line, and their corresponding parent with Visitor that automatically performs preorder tree traversal");
-        var varPrinter = new ExamplePrintVariables("Variable", "name", "line");
-        varPrinter.visit(node, null);
+        OpVerifierVisitor opVerifierVisitor = new OpVerifierVisitor();
+        opVerifierVisitor.visit(node, reports);
 
         // No Symbol Table being calculated yet
         return new JmmSemanticsResult(parserResult, null, reports);
     }
-
 }

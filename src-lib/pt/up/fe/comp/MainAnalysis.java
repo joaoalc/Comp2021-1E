@@ -50,6 +50,8 @@ public class MainAnalysis implements JmmAnalysis { // }, JmmOptimization, Jasmin
 
         JmmNode node = parserResult.getRootNode().sanitize();
 
+        System.out.println(node.toJson());
+
         List<Report> reports = new ArrayList<>();
         var opVisitor = new OpVerifierVisitor();
         System.out.println(opVisitor.visit(node, reports));
