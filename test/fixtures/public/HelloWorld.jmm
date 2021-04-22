@@ -2,8 +2,6 @@ import ioPlus;
 class HelloWorld {
 	public static void main(String[] args) {
 	    int a;
-		while (4 < 5) {
-		    ioPlus.printHelloWorld();
-		}
+        ioPlus.printHelloWorld();
 	}
 }

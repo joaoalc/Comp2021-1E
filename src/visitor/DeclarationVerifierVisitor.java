@@ -2,53 +2,79 @@ package visitor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import pt.up.fe.comp.jmm.JmmNode;
-import pt.up.fe.comp.jmm.ast.AJmmVisitor;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
-import pt.up.fe.comp.jmm.ast.SymbolTable;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
 
-import javax.management.Attribute;
+import table.MySymbolTable;
 
-public class OpVerifierVisitor extends PreorderJmmVisitor<List<Report>, Boolean> {
+public class DeclarationVerifierVisitor extends PreorderJmmVisitor<List<Report>, Boolean> {
+    public MySymbolTable symbolTable = new MySymbolTable();
 
-    public SymbolTable symbolTable = new SymbolTable();
-
-    public OpVerifierVisitor() {
-        System.out.println("OpVerifierVisitor got called");
+    public DeclarationVerifierVisitor() {
         //addVisit("Call", (node, reports) -> this.visitOp(node, reports)); // Method reference
 
         //TODO: consider other scopes I guess
         //addVisit("WhileStatement", (node, reports) -> this.visitOp(node, reports));
         //addVisit("IfStatement", (node, reports) -> this.visitOp(node, reports));
 
-        addVisit("VarDeclaration", (node, reports) -> this.addToTable(node, reports));
+        addVisit("ImportDeclaration", this::importDeclaration);
+        addVisit("ClassDeclaration", this::classDeclaration);
+        //addVisit("VarDeclaration", this::addToTable);
 
         //addVisit("Less_Than", (node, reports) -> this.visitOp(node, reports)); // Method reference
         setDefaultVisit(this::defaultVisit); // Method reference
     }
 
-    private boolean addToTable(JmmNode node, List<Report> reports){
+    private boolean importDeclaration(JmmNode node, List<Report> reports) {
+        // TODO: Probably we will not want a simple string in the future
+        StringBuilder importString = new StringBuilder();
 
+        // Get the first identifier's name
+        importString.append(node.get("name"));
+
+        // Get the other identifiers' names after each dot
+        for (int i = 0; i < node.getChildren().size(); i++) {
+            String importIdentifier = node.getChildren().get(i).get("name");
+
+            importString.append(".").append(importIdentifier);
+        }
+
+        symbolTable.addImport(importString.toString());
+
+        return true;
+    }
+
+    private boolean classDeclaration(JmmNode node, List<Report> reports) {
+        String class_name = node.get("name");
+        Optional<String> super_name = node.getOptional("super_name");
+
+        symbolTable.setClassName(class_name);
+        super_name.ifPresent(s -> symbolTable.setSuperClassName(s));
+
+        return true;
+    }
+
+    /*
+    private boolean addToTable(JmmNode node, List<Report> reports) {
         var children = node.getChildren();
-        if(children.size() == 2){
 
+        if (children.size() == 2) {
             String type;
-            if(node.getChildren().get(0).getKind().compareTo("Int") == 0){
+            if (node.getChildren().get(0).getKind().compareTo("Int") == 0) {
                 type = "int";
             }
-            else if(node.getChildren().get(0).getKind().compareTo("Boolean") == 0){
+            else if (node.getChildren().get(0).getKind().compareTo("Boolean") == 0) {
                 type = "boolean";
             }
-            else if(node.getChildren().get(0).getKind().compareTo("IntArray") == 0){
+            else if (node.getChildren().get(0).getKind().compareTo("IntArray") == 0) {
                 type = "int[]";
             }
-            else{
+            else {
                 type = node.getChildren().get(0).get("name");
             }
 
@@ -57,10 +83,10 @@ public class OpVerifierVisitor extends PreorderJmmVisitor<List<Report>, Boolean>
 
             ArrayList<String> arr = new ArrayList<>();
             arr.add(type);
-            if(symbolTable.insert(name, arr) == 0){
+            if (symbolTable.(name, arr) == 0) {
                 return true;
             }
-            else{
+            else {
                 Report rep = new Report(ReportType.ERROR, Stage.SEMANTIC, 0, "Variable " + name + " is already declared in scope.");
                 reports.add(rep);
                 return false;
@@ -71,9 +97,9 @@ public class OpVerifierVisitor extends PreorderJmmVisitor<List<Report>, Boolean>
             return false;
         }
         //symbolTable.insert(node.get(), );
-    }
+    }*/
 
-    private Boolean visitOp(JmmNode node, List<Report> reports){
+    private Boolean visitOp(JmmNode node, List<Report> reports) {
         //System.out.println("OP: " + node + " -> " + node.get("op"));
         System.out.println("Found node: " + node.getKind());
         var children = node.getChildren();
@@ -81,6 +107,7 @@ public class OpVerifierVisitor extends PreorderJmmVisitor<List<Report>, Boolean>
 
         System.out.println("LEFT CHILD: " + children.get(0));
         System.out.println("RIGHT CHILD: " + children.get(1));
+
         return true;
     }
 

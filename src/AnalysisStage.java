@@ -9,9 +9,8 @@ import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
-import visitor.OpVerifierVisitor;
-//import visitor.OpVerifierVisitor;
-
+import visitor.DeclarationVerifierVisitor;
+import visitor.OperationVerifierVisitor;
 
 public class AnalysisStage implements JmmAnalysis {
     @Override
@@ -29,30 +28,14 @@ public class AnalysisStage implements JmmAnalysis {
         }
 
         JmmNode node = parserResult.getRootNode();
-        //System.out.println("To json: " + node.toJson());
 
-        /*System.out.println("Dump tree with Visitor where you control tree traversal");
-        ExampleVisitor visitor = new ExampleVisitor("Identifier", "id");
-        System.out.println(visitor.visit(node, ""));
+        List<Report> reports = new ArrayList<>();
 
-        System.out.println("Dump tree with Visitor that automatically performs preorder tree traversal");
-        var preOrderVisitor = new ExamplePreorderVisitor("Identifier", "id");
-        System.out.println(preOrderVisitor.visit(node, ""));
-        */
-/*        var opVisitor = new OpVerifierVisitor();
-        List<Report> repor = new ArrayList<>();
-        opVisitor.visitOp(node, repor);
+        DeclarationVerifierVisitor declarationVerifierVisitor = new DeclarationVerifierVisitor();
+        declarationVerifierVisitor.visit(node, reports);
 
-        System.out.println(
-                "Create histogram of node kinds with Visitor that automatically performs postorder tree traversal");
-        var postOrderVisitor = new ExamplePostorderVisitor();
-        var kindCount = new HashMap<String, Integer>();
-        postOrderVisitor.visit(node, kindCount);
-        System.out.println("Kinds count: " + kindCount + "\n");
-*/      List<Report> reports = new ArrayList<>();
-
-        OpVerifierVisitor opVerifierVisitor = new OpVerifierVisitor();
-        opVerifierVisitor.visit(node, reports);
+        OperationVerifierVisitor operationVerifierVisitor = new OperationVerifierVisitor();
+        operationVerifierVisitor.visit(node);
 
         // No Symbol Table being calculated yet
         return new JmmSemanticsResult(parserResult, null, reports);

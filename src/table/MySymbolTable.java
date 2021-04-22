@@ -1,3 +1,5 @@
+package table;
+
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
@@ -6,12 +8,39 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-class SimpleSymbolTable implements SymbolTable {
-    private List<String> imports;
+public class MySymbolTable implements SymbolTable {
+    private final List<String> imports = new ArrayList<>();
     private String class_name;
-    private String super_class_name;
-    private HashMap<Symbol, ?> fields;
+    private String super_class_name = null;
+    private HashMap<Symbol, Object> fields;
     private HashMap<String, Method> methods;
+    private final HashMap<Symbol, Object> localVariables = new HashMap<>();
+
+    public void addImport(String importName) {
+        imports.add(importName);
+    }
+
+    public void setClassName(String class_name) {
+        this.class_name = class_name;
+    }
+
+    public void setSuperClassName(String super_class_name) {
+        this.super_class_name = super_class_name;
+    }
+
+    public void addField(Type type, String name, Object value) {
+        fields.put(new Symbol(type, name), value);
+    }
+
+    public void addMethod(Type return_type, String name, List<Symbol> parameters) {
+        Method method = new Method(name, return_type, parameters);
+
+        methods.put(method.getIdentifier(), method);
+    }
+
+    public void addLocalVariable(Type type, String name, Object value) {
+        localVariables.put(new Symbol(type, name), value);
+    }
 
     /**
      * @return a list of fully qualified names of imports
@@ -62,6 +91,7 @@ class SimpleSymbolTable implements SymbolTable {
     }
 
     /**
+     * @param methodName
      * @return a list of parameters of the given method
      */
     @Override
@@ -70,10 +100,11 @@ class SimpleSymbolTable implements SymbolTable {
     }
 
     /**
+     * @param methodName
      * @return a list of local variables declared in the given method
      */
     @Override
     public List<Symbol> getLocalVariables(String methodName) {
-        return methods.get(methodName).getLocalVariables();
+        return new ArrayList<>(localVariables.keySet());
     }
 }

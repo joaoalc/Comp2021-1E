@@ -12,7 +12,7 @@ import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.ast.examples.ExamplePostorderVisitor;
 import pt.up.fe.comp.jmm.ast.examples.ExamplePreorderVisitor;
 import pt.up.fe.comp.jmm.ast.examples.ExampleVisitor;
-import visitor.OpVerifierVisitor;
+import visitor.DeclarationVerifierVisitor;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.specs.util.SpecsIo;
@@ -53,7 +53,7 @@ public class MainAnalysis implements JmmAnalysis { // }, JmmOptimization, Jasmin
         System.out.println(node.toJson());
 
         List<Report> reports = new ArrayList<>();
-        var opVisitor = new OpVerifierVisitor();
+        var opVisitor = new DeclarationVerifierVisitor();
         System.out.println(opVisitor.visit(node, reports));
 
 

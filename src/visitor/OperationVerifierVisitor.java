@@ -1,4 +1,4 @@
-/*package visitor;
+package visitor;
 
 import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
@@ -6,8 +6,8 @@ import pt.up.fe.comp.jmm.report.Report;
 
 import java.util.List;
 
-public class OpVerifierVisitor extends PreorderJmmVisitor<List<Report>, Boolean> {
-    public OpVerifierVisitor() {
+public class OperationVerifierVisitor extends PreorderJmmVisitor<List<Report>, Boolean> {
+    public OperationVerifierVisitor() {
         addVisit("Operation", this::visitOp);
     }
 
@@ -34,4 +34,3 @@ public class OpVerifierVisitor extends PreorderJmmVisitor<List<Report>, Boolean>
         System.out.println("CHILD RIGHT:" + right);
     }
 }
-*/
