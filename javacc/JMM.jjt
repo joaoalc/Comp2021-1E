@@ -1,5 +1,6 @@
 options {
     LOOKAHEAD=1;
+    NODE_SCOPE_HOOK = true;
 }
 
 PARSER_BEGIN(JMM)
@@ -23,6 +24,14 @@ public class JMM {
 
     public List<Report> getReports() {
         return this.reports;
+    }
+
+    void jjtreeOpenNodeScope(Node n) {
+        ((SimpleNode)n).put("line", Integer.toString(getToken(1).beginLine));
+        ((SimpleNode)n).put("col", Integer.toString(getToken(1).beginColumn));
+    }
+
+    void jjtreeCloseNodeScope(Node n) {
     }
 }
 

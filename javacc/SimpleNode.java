@@ -16,6 +16,9 @@ public class SimpleNode implements Node, JmmNode {
     protected JMM parser;
     protected HashMap<String, String> attributes = new HashMap<>();
 
+    protected int line = -1;
+    protected int col = -1;
+
     // added
     public int val;
     public Operator op = null;
