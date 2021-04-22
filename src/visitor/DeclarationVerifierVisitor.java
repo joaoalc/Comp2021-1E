@@ -5,11 +5,14 @@ import java.util.List;
 import java.util.Optional;
 
 import pt.up.fe.comp.jmm.JmmNode;
+import pt.up.fe.comp.jmm.analysis.table.Symbol;
+import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
 
+import table.Method;
 import table.MySymbolTable;
 
 public class DeclarationVerifierVisitor extends PreorderJmmVisitor<List<Report>, Boolean> {
@@ -25,6 +28,7 @@ public class DeclarationVerifierVisitor extends PreorderJmmVisitor<List<Report>,
         addVisit("ImportDeclaration", this::importDeclaration);
         addVisit("ClassDeclaration", this::classDeclaration);
         addVisit("VarDeclaration", this::varDeclaration);
+        addVisit("MethodDeclaration", this::methodDeclaration);
 
         //addVisit("Less_Than", (node, reports) -> this.visitOp(node, reports)); // Method reference
         setDefaultVisit(this::defaultVisit); // Method reference
@@ -59,6 +63,29 @@ public class DeclarationVerifierVisitor extends PreorderJmmVisitor<List<Report>,
 
         return true;
     }
+
+    private boolean methodDeclaration(JmmNode node, List<Report> reports) {
+
+        Method method;
+
+        if(node.getChildren().size() >= 1){
+            JmmNode child = node.getChildren().get(0);
+            //Main
+            String name = "main";
+            Type returnType = new Type("void", false);
+            Symbol parameter;
+            if(child.getKind().compareTo("Main") == 0){
+                parameter = new Symbol(new Type("String", true), child.getChildren().get(0).get("name"));
+                List<Symbol> parameters = new ArrayList<>();
+                parameters.add(parameter);
+                method = new Method(name, returnType, parameters);
+                return true;
+            }
+        }
+
+        return true;
+    }
+
 
     private boolean varDeclaration(JmmNode node, List<Report> reports) {
         // Type() <IDENTIFIER> {} <SEMICOLON>

@@ -157,7 +157,7 @@ void MethodDeclaration() #MethodDeclaration : {} {
     (
         (
             (<STATIC> <VOID> <MAIN>
-            <LEFT_PARENTHESES> <STRING> <LEFT_BRACKET> <RIGHT_BRACKET> <IDENTIFIER> #MainArg <RIGHT_PARENTHESES>) #Main <LEFT_BRACE>
+            <LEFT_PARENTHESES> <STRING> <LEFT_BRACKET> <RIGHT_BRACKET> MainArg() <RIGHT_PARENTHESES>) #Main <LEFT_BRACE>
             MethodBody() #MethodBody
         ) |
         (
@@ -169,6 +169,10 @@ void MethodDeclaration() #MethodDeclaration : {} {
         )
     )
     <RIGHT_BRACE> #Method
+}
+
+void MainArg() : { Token t; }{
+    t=<IDENTIFIER> { jjtThis.put("name", t.image); }
 }
 
 void MethodBody() #void : {} {
