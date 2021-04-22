@@ -6,11 +6,12 @@ import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.JmmParserResult;
 import pt.up.fe.comp.jmm.analysis.JmmAnalysis;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
-import pt.up.fe.comp.jmm.ast.examples.*;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
 import visitor.OpVerifierVisitor;
+//import visitor.OpVerifierVisitor;
+
 
 public class AnalysisStage implements JmmAnalysis {
     @Override
@@ -28,19 +29,19 @@ public class AnalysisStage implements JmmAnalysis {
         }
 
         JmmNode node = parserResult.getRootNode();
-        System.out.println("To json: " + node.toJson());
+        //System.out.println("To json: " + node.toJson());
 
-        System.out.println("Dump tree with Visitor where you control tree traversal");
+        /*System.out.println("Dump tree with Visitor where you control tree traversal");
         ExampleVisitor visitor = new ExampleVisitor("Identifier", "id");
         System.out.println(visitor.visit(node, ""));
 
         System.out.println("Dump tree with Visitor that automatically performs preorder tree traversal");
         var preOrderVisitor = new ExamplePreorderVisitor("Identifier", "id");
         System.out.println(preOrderVisitor.visit(node, ""));
-
-        var opVisitor = new OpVerifierVisitor();
+        */
+/*        var opVisitor = new OpVerifierVisitor();
         List<Report> repor = new ArrayList<>();
-        System.out.println(opVisitor.visit(node, repor));
+        opVisitor.visitOp(node, repor);
 
         System.out.println(
                 "Create histogram of node kinds with Visitor that automatically performs postorder tree traversal");
@@ -48,7 +49,7 @@ public class AnalysisStage implements JmmAnalysis {
         var kindCount = new HashMap<String, Integer>();
         postOrderVisitor.visit(node, kindCount);
         System.out.println("Kinds count: " + kindCount + "\n");
-        List<Report> reports = new ArrayList<>();
+*/      List<Report> reports = new ArrayList<>();
 
         OpVerifierVisitor opVerifierVisitor = new OpVerifierVisitor();
         opVerifierVisitor.visit(node, reports);

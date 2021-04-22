@@ -144,7 +144,7 @@ void ClassBody() : {} {
 }
 
 void VarDeclaration() #VarDeclaration : {Token t;} {
-    Type() Identifier() <SEMICOLON>
+    Type() Identifier() {} <SEMICOLON>
 }
 
 void MethodDeclaration() #MethodDeclaration: {} {
@@ -324,10 +324,10 @@ void Call() #void : {Token t;} {
 
 void _Expression() #void: {} {
     (
-        <INTEGER> #Int
+        Integer()
         | <TRUE> #True
         | <FALSE> #False
-        | <IDENTIFIER> #Identifier
+        | Identifier()
         | <THIS> #This
         | NewExpression() #NewExpression
     )
@@ -345,3 +345,12 @@ void NewExpression(): {} {
 void __Expression() #void: {} {
      [ <LEFT_BRACKET> Expression() #Index <RIGHT_BRACKET> __Expression() ]
 }
+
+void Integer(): {Token value;} {
+    value=<INTEGER> { jjtThis.put("value", value.image); }
+}
+
+
+/*void Bool(): {Token value;}{
+    value=<TRUE> { jjtThis.put("value", value.image); }| value=<FALSE> #Bool { jjtThis.put("value", value.image); }
+}*/

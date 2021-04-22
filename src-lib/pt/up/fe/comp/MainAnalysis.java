@@ -12,7 +12,7 @@ import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.ast.examples.ExamplePostorderVisitor;
 import pt.up.fe.comp.jmm.ast.examples.ExamplePreorderVisitor;
 import pt.up.fe.comp.jmm.ast.examples.ExampleVisitor;
-import pt.up.fe.comp.jmm.ast.examples.OpVerifierVisitor;
+import visitor.OpVerifierVisitor;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.specs.util.SpecsIo;
