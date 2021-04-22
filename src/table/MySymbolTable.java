@@ -7,14 +7,15 @@ import pt.up.fe.comp.jmm.analysis.table.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MySymbolTable implements SymbolTable {
     private final List<String> imports = new ArrayList<>();
     private String class_name;
     private String super_class_name = null;
-    private HashMap<Symbol, Object> fields;
-    private HashMap<String, Method> methods;
-    private final HashMap<Symbol, Object> localVariables = new HashMap<>();
+    private final Map<Symbol, Object> fields = new HashMap<>();
+    private final Map<String, Method> methods = new HashMap<>();
+    private final Map<Symbol, Object> localVariables = new HashMap<>();
 
     public void addImport(String importName) {
         imports.add(importName);
@@ -36,6 +37,10 @@ public class MySymbolTable implements SymbolTable {
         Method method = new Method(name, return_type, parameters);
 
         methods.put(method.getIdentifier(), method);
+    }
+
+    public void addField(Type type, String name) {
+        fields.put(new Symbol(type, name), null);
     }
 
     public void addLocalVariable(Type type, String name, Object value) {

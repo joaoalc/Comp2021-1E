@@ -123,14 +123,14 @@ TOKEN: {
 }
 
 SimpleNode Program(): {} {
-    ImportDeclaration()
+    (ImportDeclaration())*
     ClassDeclaration()
     <EOF>
     { return jjtThis; }
 }
 
 void ImportDeclaration() #ImportDeclaration: {Token t;} {
-    (<IMPORT> t=<IDENTIFIER> { jjtThis.put("name", t.image); } (ImportDot())* <SEMICOLON> )*
+    <IMPORT> t=<IDENTIFIER> { jjtThis.put("name", t.image); } (ImportDot())* <SEMICOLON>
 }
 
 void ImportDot() : {Token t;} {
@@ -149,10 +149,10 @@ void ClassBody() : {} {
 }
 
 void VarDeclaration() #VarDeclaration : {Token t;} {
-    Type() <IDENTIFIER> {} <SEMICOLON>
+    Type() t=<IDENTIFIER> { jjtThis.put("name", t.image); } <SEMICOLON>
 }
 
-void MethodDeclaration() #MethodDeclaration: {} {
+void MethodDeclaration() #MethodDeclaration : {} {
     <PUBLIC>
     (
         (

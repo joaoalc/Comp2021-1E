@@ -7,6 +7,12 @@ public class SemanticTests {
     private void TestTemplate(String filename) {
         String code = SpecsIo.getResource(String.format("fixtures/public/%s", filename));
         JmmSemanticsResult result = TestUtils.analyse(code);
+        System.out.println(result.getRootNode().toJson());
+    }
+
+    @Test
+    public void IDKTest() {
+        TestTemplate("IDK.jmm");
     }
 
     @Test

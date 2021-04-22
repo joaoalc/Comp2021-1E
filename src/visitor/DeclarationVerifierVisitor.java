@@ -24,7 +24,7 @@ public class DeclarationVerifierVisitor extends PreorderJmmVisitor<List<Report>,
 
         addVisit("ImportDeclaration", this::importDeclaration);
         addVisit("ClassDeclaration", this::classDeclaration);
-        //addVisit("VarDeclaration", this::addToTable);
+        addVisit("VarDeclaration", this::varDeclaration);
 
         //addVisit("Less_Than", (node, reports) -> this.visitOp(node, reports)); // Method reference
         setDefaultVisit(this::defaultVisit); // Method reference
@@ -38,13 +38,11 @@ public class DeclarationVerifierVisitor extends PreorderJmmVisitor<List<Report>,
         importString.append(node.get("name"));
 
         // Get the other identifiers' names after each dot
-        for (int i = 0; i < node.getChildren().size(); i++) {
-            String importIdentifier = node.getChildren().get(i).get("name");
+        for (JmmNode child : node.getChildren()) {
+            String importIdentifier = child.get("name");
 
             importString.append(".").append(importIdentifier);
         }
-
-        symbolTable.addImport(importString.toString());
 
         return true;
     }
@@ -55,6 +53,17 @@ public class DeclarationVerifierVisitor extends PreorderJmmVisitor<List<Report>,
 
         symbolTable.setClassName(class_name);
         super_name.ifPresent(s -> symbolTable.setSuperClassName(s));
+
+        System.out.println("Class name: " + symbolTable.getClassName());
+        System.out.println("Superclass name: " + symbolTable.getSuper());
+
+        return true;
+    }
+
+    private boolean varDeclaration(JmmNode node, List<Report> reports) {
+        // Type() <IDENTIFIER> {} <SEMICOLON>
+
+//        symbolTable.add
 
         return true;
     }
