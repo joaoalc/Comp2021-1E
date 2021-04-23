@@ -10,6 +10,7 @@ import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
+import table.MySymbolTable;
 import visitor.DeclarationVerifierVisitor;
 import visitor.OperationVerifierVisitor;
 
@@ -34,6 +35,8 @@ public class AnalysisStage implements JmmAnalysis {
 
         DeclarationVerifierVisitor declarationVerifierVisitor = new DeclarationVerifierVisitor();
         declarationVerifierVisitor.visit(node, reports);
+
+        MySymbolTable symbolTable = declarationVerifierVisitor.getSymbolTable();
 
         OperationVerifierVisitor operationVerifierVisitor = new OperationVerifierVisitor();
         operationVerifierVisitor.visit(node);
