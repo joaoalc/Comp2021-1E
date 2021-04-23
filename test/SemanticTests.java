@@ -11,11 +11,6 @@ public class SemanticTests {
     }
 
     @Test
-    public void IDKTest() {
-        TestTemplate("IDK.jmm");
-    }
-
-    @Test
     public void FindMaximumTest() {
         TestTemplate("FindMaximum.jmm");
     }

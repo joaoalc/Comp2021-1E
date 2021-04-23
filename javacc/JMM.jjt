@@ -284,11 +284,11 @@ void LessThan() #LessThan : {} {
 }
 
 void AddSub() #void : {} {
-    MultDiv() (<ADD> MultDiv() #AddSub(2) | <SUB> MultDiv() #AddSub(2) )*
+    MultDiv() (<ADD> MultDiv() #AddSub | <SUB> MultDiv() #AddSub )*
 }
 
 void MultDiv() #void : {} {
-    Negate() (<MUL> Negate() #MultDiv(2) | <DIV> Negate() #MultDiv(2) )*
+    Negate() (<MUL> Negate() #MultDiv | <DIV> Negate() #MultDiv )*
 }
 
 void Negate() #void : {}  {

@@ -14,6 +14,8 @@ import pt.up.fe.comp.jmm.report.Report;
 import table.Method;
 import table.MySymbolTable;
 
+import static utils.Utils.getChildrenOfKind;
+
 public class DeclarationVerifierVisitor extends PreorderJmmVisitor<List<Report>, Boolean> {
     public MySymbolTable symbolTable = new MySymbolTable();
 
@@ -132,10 +134,5 @@ public class DeclarationVerifierVisitor extends PreorderJmmVisitor<List<Report>,
         return new Type(type_name, is_array);
     }
 
-    private List<JmmNode> getChildrenOfKind(JmmNode node, String kind) {
-        return node.getChildren()
-                .stream()
-                .filter(c -> c.getKind().equals(kind))
-                .collect(Collectors.toList());
-    }
+
 }
