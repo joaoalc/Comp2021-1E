@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
+
 public class JMM {
     private List<Report> reports = new ArrayList();
 
@@ -152,17 +153,17 @@ void VarDeclaration() #VarDeclaration : {Token t;} {
     Type() t=<IDENTIFIER> { jjtThis.put("name", t.image); } <SEMICOLON>
 }
 
-void MethodDeclaration() #MethodDeclaration : {} {
+void MethodDeclaration() #MethodDeclaration : {Token t;} {
     <PUBLIC>
     (
         (
-            (<STATIC> <VOID> <MAIN>
-            <LEFT_PARENTHESES> <STRING> <LEFT_BRACKET> <RIGHT_BRACKET> MainArg() <RIGHT_PARENTHESES>) #Main <LEFT_BRACE>
+            <STATIC> <VOID> t=<MAIN> { jjtThis.put("name", t.image); }
+            <LEFT_PARENTHESES> <STRING> <LEFT_BRACKET> <RIGHT_BRACKET> <IDENTIFIER> <RIGHT_PARENTHESES> <LEFT_BRACE>
             MethodBody() #MethodBody
         ) |
         (
-            Type() <IDENTIFIER> #FunctionName <LEFT_PARENTHESES>
-            [ (Type() <IDENTIFIER> #ArgName) ("," Type() <IDENTIFIER> #ArgName  )* ]
+            Type() t=<IDENTIFIER> { jjtThis.put("name", t.image); } <LEFT_PARENTHESES>
+            [ Argument() ("," Argument()  )* ]
             <RIGHT_PARENTHESES> <LEFT_BRACE>
             MethodBody() #MethodBody
             <RETURN> Expression() <SEMICOLON> #MethodReturn
@@ -171,8 +172,8 @@ void MethodDeclaration() #MethodDeclaration : {} {
     <RIGHT_BRACE> #Method
 }
 
-void MainArg() : { Token t; }{
-    t=<IDENTIFIER> { jjtThis.put("name", t.image); }
+void Argument() #Argument : {Token t;} {
+    Type() t=<IDENTIFIER> { jjtThis.put("name", t.image); }
 }
 
 void MethodBody() #void : {} {
@@ -180,12 +181,11 @@ void MethodBody() #void : {} {
     ( Statement() )*
 }
 
-void Type() #void : {} {
-    ( <INT> ((<LEFT_BRACKET><RIGHT_BRACKET> #IntArray) | {} #Int))
-    | <BOOLEAN> #Boolean
-    | <IDENTIFIER>
+void Type() #Type : {Token t;} {
+    ( t=<INT> {jjtThis.put("name", t.image); } ((<LEFT_BRACKET> <RIGHT_BRACKET> {jjtThis.put("is_array", "true");} ) | {} {jjtThis.put("is_array", "false"); } ))
+    | t=<BOOLEAN> { jjtThis.put("name", t.image); jjtThis.put("is_array", "false"); }
+    | t=<IDENTIFIER> { jjtThis.put("name", t.image); jjtThis.put("is_array", "false");}
 }
-
 
 void Statement() #void : {} {
     ( <LEFT_BRACE> ( Statement() )* <RIGHT_BRACE> )
@@ -327,8 +327,8 @@ void Parentheses() #void: {} {
 }
 
 void Call() #void : {Token t;} {
-    "length" #length |
-    (t=<IDENTIFIER> {jjtThis.put("name", t.image);} #Call  <LEFT_PARENTHESES> [ Expression() ( <COMMA> Expression() )* ] <RIGHT_PARENTHESES> )
+    "length"  |
+    (t=<IDENTIFIER> #Call  <LEFT_PARENTHESES> [ Expression() ( <COMMA> Expression() )* ] <RIGHT_PARENTHESES> )
 }
 
 void _Expression() #void: {} {
@@ -355,10 +355,9 @@ void __Expression() #void: {} {
      [ <LEFT_BRACKET> Expression() #Index <RIGHT_BRACKET> __Expression() ]
 }
 
-void Integer(): {Token value;} {
-    value=<INTEGER> { jjtThis.put("value", value.image); }
+void Integer(): {Token t;} {
+    t=<INTEGER> { jjtThis.put("value", t.image); }
 }
-
 
 /*void Bool(): {Token value;}{
     value=<TRUE> { jjtThis.put("value", value.image); }| value=<FALSE> #Bool { jjtThis.put("value", value.image); }

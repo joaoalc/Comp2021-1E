@@ -3,14 +3,13 @@ package visitor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
 import pt.up.fe.comp.jmm.report.Report;
-import pt.up.fe.comp.jmm.report.ReportType;
-import pt.up.fe.comp.jmm.report.Stage;
 
 import table.Method;
 import table.MySymbolTable;
@@ -19,11 +18,7 @@ public class DeclarationVerifierVisitor extends PreorderJmmVisitor<List<Report>,
     public MySymbolTable symbolTable = new MySymbolTable();
 
     public DeclarationVerifierVisitor() {
-        //addVisit("Call", (node, reports) -> this.visitOp(node, reports)); // Method reference
-
         //TODO: consider other scopes I guess
-        //addVisit("WhileStatement", (node, reports) -> this.visitOp(node, reports));
-        //addVisit("IfStatement", (node, reports) -> this.visitOp(node, reports));
 
         addVisit("ImportDeclaration", this::importDeclaration);
         addVisit("ClassDeclaration", this::classDeclaration);
@@ -48,6 +43,8 @@ public class DeclarationVerifierVisitor extends PreorderJmmVisitor<List<Report>,
             importString.append(".").append(importIdentifier);
         }
 
+        symbolTable.addImport(importString.toString());
+
         return true;
     }
 
@@ -65,75 +62,36 @@ public class DeclarationVerifierVisitor extends PreorderJmmVisitor<List<Report>,
     }
 
     private boolean methodDeclaration(JmmNode node, List<Report> reports) {
+        JmmNode return_type_node = node.getChildren().get(0);
+        Type return_type = parseTypeNode(return_type_node);
 
-        Method method;
+        String name = node.get("name");
 
-        if(node.getChildren().size() >= 1){
-            JmmNode child = node.getChildren().get(0);
-            //Main
-            String name = "main";
-            Type returnType = new Type("void", false);
-            Symbol parameter;
-            if(child.getKind().compareTo("Main") == 0){
-                parameter = new Symbol(new Type("String", true), child.getChildren().get(0).get("name"));
-                List<Symbol> parameters = new ArrayList<>();
-                parameters.add(parameter);
-                method = new Method(name, returnType, parameters);
-                return true;
-            }
+        List<JmmNode> argumentNodes = getChildrenOfKind(node, "Argument");
+        List<Symbol> arguments = new ArrayList<>();
+
+        for (JmmNode argumentNode : argumentNodes) {
+            JmmNode type_node = argumentNode.getChildren().get(0);
+            Type type = parseTypeNode(type_node);
+            String argument_name = argumentNode.get("name");
+            arguments.add(new Symbol(type, argument_name));
         }
+
+        symbolTable.addMethod(return_type, name, arguments);
 
         return true;
     }
-
 
     private boolean varDeclaration(JmmNode node, List<Report> reports) {
-        // Type() <IDENTIFIER> {} <SEMICOLON>
+        JmmNode typeNode = node.getChildren().get(0);
+        Type type = parseTypeNode(typeNode);
 
-//        symbolTable.add
+        String name = node.get("name");
+
+        symbolTable.addField(type, name);
 
         return true;
     }
-
-    /*
-    private boolean addToTable(JmmNode node, List<Report> reports) {
-        var children = node.getChildren();
-
-        if (children.size() == 2) {
-            String type;
-            if (node.getChildren().get(0).getKind().compareTo("Int") == 0) {
-                type = "int";
-            }
-            else if (node.getChildren().get(0).getKind().compareTo("Boolean") == 0) {
-                type = "boolean";
-            }
-            else if (node.getChildren().get(0).getKind().compareTo("IntArray") == 0) {
-                type = "int[]";
-            }
-            else {
-                type = node.getChildren().get(0).get("name");
-            }
-
-            String name = "abc";
-            name = node.getChildren().get(1).get("name");
-
-            ArrayList<String> arr = new ArrayList<>();
-            arr.add(type);
-            if (symbolTable.(name, arr) == 0) {
-                return true;
-            }
-            else {
-                Report rep = new Report(ReportType.ERROR, Stage.SEMANTIC, 0, "Variable " + name + " is already declared in scope.");
-                reports.add(rep);
-                return false;
-            }
-        }
-        else {
-            System.out.println("Has n children: " + children.size());
-            return false;
-        }
-        //symbolTable.insert(node.get(), );
-    }*/
 
     private Boolean visitOp(JmmNode node, List<Report> reports) {
         //System.out.println("OP: " + node + " -> " + node.get("op"));
@@ -146,7 +104,6 @@ public class DeclarationVerifierVisitor extends PreorderJmmVisitor<List<Report>,
 
         return true;
     }
-
 
     private Boolean defaultVisit(JmmNode node, List<Report> reports) {
         /*System.out.println("Node: " + node.getKind());
@@ -168,4 +125,17 @@ public class DeclarationVerifierVisitor extends PreorderJmmVisitor<List<Report>,
         return true;
     }
 
+    private Type parseTypeNode(JmmNode node) {
+        String type_name = node.get("name");
+        boolean is_array = Boolean.parseBoolean(node.get("is_array"));
+
+        return new Type(type_name, is_array);
+    }
+
+    private List<JmmNode> getChildrenOfKind(JmmNode node, String kind) {
+        return node.getChildren()
+                .stream()
+                .filter(c -> c.getKind().equals(kind))
+                .collect(Collectors.toList());
+    }
 }
