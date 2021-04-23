@@ -12,6 +12,7 @@ import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
 import table.MySymbolTable;
 import visitor.DeclarationVisitor;
+import visitor.VarDeclarationVisitor;
 import visitor.OperationVisitor;
 
 public class AnalysisStage implements JmmAnalysis {
@@ -40,6 +41,9 @@ public class AnalysisStage implements JmmAnalysis {
 
         OperationVisitor operationVerifierVisitor = new OperationVisitor();
         operationVerifierVisitor.visit(node);
+
+        VarDeclarationVisitor mvec = new VarDeclarationVisitor(declarationVerifierVisitor.getSymbolTable());
+        mvec.visit(node);
 
         // No Symbol Table being calculated yet
         return new JmmSemanticsResult(parserResult, null, reports);

@@ -24,6 +24,13 @@ public class Method {
         local_variables.put(new Symbol(type, name), value);
     }
 
+    public boolean localVariableExists(Symbol symbol){
+        if(local_variables.getOrDefault(symbol, null) == null){
+            return false;
+        }
+        return true;
+    }
+
     public String getName() {
         return name;
     }

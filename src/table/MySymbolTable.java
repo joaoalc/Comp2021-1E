@@ -33,9 +33,15 @@ public class MySymbolTable implements SymbolTable {
         fields.put(new Symbol(type, name), value);
     }
 
+    public boolean fieldExists(Symbol symbol){
+        if(fields.getOrDefault(symbol, null) == null){
+            return false;
+        }
+        return true;
+    }
+
     public void addMethod(Type return_type, String name, List<Symbol> parameters) {
         Method method = new Method(name, return_type, parameters);
-
         methods.put(method.getIdentifier(), method);
     }
 
@@ -45,6 +51,19 @@ public class MySymbolTable implements SymbolTable {
 
     public void addLocalVariable(Type type, String name, Object value) {
         localVariables.put(new Symbol(type, name), value);
+    }
+
+    public Method getMethod(Method method){
+        return methods.getOrDefault(method.getIdentifier(), null);
+    }
+
+    public boolean methodExists(String methodName, List<Symbol> methodArgs){
+        Method tmpMethod = new Method(methodName, new Type("", false), methodArgs);
+        String methodIdentifier = tmpMethod.getIdentifier();
+        if(methods.getOrDefault(methodIdentifier, null) != null){
+            return true;
+        }
+        return false;
     }
 
     /**

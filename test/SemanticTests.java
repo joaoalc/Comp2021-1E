@@ -13,7 +13,7 @@ public class SemanticTests {
     private void TestTemplate(String filename) {
         String code = SpecsIo.getResource(String.format("fixtures/public/%s", filename));
         JmmSemanticsResult result = TestUtils.analyse(code);
-        // System.out.println(result.getRootNode().toJson());
+        System.out.println(result.getRootNode().toJson());
     }
 
     private void failureTest(String filename) {
@@ -21,6 +21,11 @@ public class SemanticTests {
         JmmParserResult result = TestUtils.parse(fileContents);
         List<Report> reports = result.getReports();
         mustFail(reports);
+    }
+
+    @Test
+    public void IDKTest() {
+        TestTemplate("IDK.jmm");
     }
 
     @Test

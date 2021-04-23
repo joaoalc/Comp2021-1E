@@ -8,7 +8,7 @@ import java.util.List;
 
 public class OperationVisitor extends PreorderJmmVisitor<List<Report>, Boolean> {
     public OperationVisitor() {
-        addVisit("Operation", this::visitOp);
+        addVisit("Operator", this::visitOp);
     }
 
     public boolean visitOp(JmmNode node, List<Report> reports) {

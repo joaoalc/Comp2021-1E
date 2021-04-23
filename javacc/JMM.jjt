@@ -279,8 +279,8 @@ void Expression() #void : {} {
     LessThan() (<AND> LessThan() )*
 }
 
-void LessThan() #LessThan : {} {
-    AddSub() (<LT> AddSub() )*
+void LessThan() #void: {} {
+    AddSub() (<LT> AddSub() #LessThan)*
 }
 
 void AddSub() #void : {} {
@@ -296,7 +296,7 @@ void Negate() #void : {}  {
 }
 
 void Length() #void: {} {
-    Parentheses() (<DOT> Call() #DotOperation)*
+    Parentheses() (<DOT> Call() )*
 }
 
 void Parentheses() #void: {} {
@@ -306,16 +306,16 @@ void Parentheses() #void: {} {
 }
 
 void Call() #void : {Token t;} {
-    "length"  |
-    (t=<IDENTIFIER> #Call  <LEFT_PARENTHESES> [ Expression() ( <COMMA> Expression() )* ] <RIGHT_PARENTHESES> )
+    t="length" {jjtThis.put("name", t.image);} #length |
+    (t=<IDENTIFIER> { jjtThis.put("name", t.image); } #Call <LEFT_PARENTHESES> [ Expression() ( <COMMA> Expression() )* ] <RIGHT_PARENTHESES> )
 }
 
-void _Expression() #void: {} {
+void _Expression() #void: { Token t; } {
     (
         Integer()
         | <TRUE> #True
         | <FALSE> #False
-        | <IDENTIFIER>
+        | t=<IDENTIFIER> { jjtThis.put("name", t.image); } #Identifier
         | <THIS> #This
         | NewExpression() #NewExpression
     )
