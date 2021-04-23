@@ -16,10 +16,10 @@ import table.MySymbolTable;
 
 import static utils.Utils.getChildrenOfKind;
 
-public class DeclarationVerifierVisitor extends PreorderJmmVisitor<List<Report>, Boolean> {
+public class DeclarationVisitor extends PreorderJmmVisitor<List<Report>, Boolean> {
     private final MySymbolTable symbolTable = new MySymbolTable();
 
-    public DeclarationVerifierVisitor() {
+    public DeclarationVisitor() {
         //TODO: consider other scopes I guess
 
         addVisit("ImportDeclaration", this::importDeclaration);

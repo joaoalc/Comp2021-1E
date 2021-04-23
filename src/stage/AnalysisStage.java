@@ -11,8 +11,8 @@ import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
 import table.MySymbolTable;
-import visitor.DeclarationVerifierVisitor;
-import visitor.OperationVerifierVisitor;
+import visitor.DeclarationVisitor;
+import visitor.OperationVisitor;
 
 public class AnalysisStage implements JmmAnalysis {
     @Override
@@ -33,12 +33,12 @@ public class AnalysisStage implements JmmAnalysis {
 
         List<Report> reports = new ArrayList<>();
 
-        DeclarationVerifierVisitor declarationVerifierVisitor = new DeclarationVerifierVisitor();
+        DeclarationVisitor declarationVerifierVisitor = new DeclarationVisitor();
         declarationVerifierVisitor.visit(node, reports);
 
         MySymbolTable symbolTable = declarationVerifierVisitor.getSymbolTable();
 
-        OperationVerifierVisitor operationVerifierVisitor = new OperationVerifierVisitor();
+        OperationVisitor operationVerifierVisitor = new OperationVisitor();
         operationVerifierVisitor.visit(node);
 
         // No Symbol Table being calculated yet

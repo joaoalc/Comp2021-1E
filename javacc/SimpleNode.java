@@ -21,7 +21,6 @@ public class SimpleNode implements Node, JmmNode {
 
     // added
     public int val;
-    public Operator op = null;
 
     public SimpleNode(int i) {
         id = i;

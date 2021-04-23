@@ -1,56 +1,101 @@
 import org.junit.Test;
 
 import pt.up.fe.comp.TestUtils;
+import pt.up.fe.comp.jmm.JmmParserResult;
+import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.specs.util.SpecsIo;
 
+import java.util.List;
+
+import static pt.up.fe.comp.TestUtils.mustFail;
+
 public class ParserTests {
-    public void TestTemplate(String filename) {
+    private void sucessfullTest(String filename) {
         String fileContents = SpecsIo.getResource(String.format("fixtures/public/%s", filename));
         TestUtils.parse(fileContents);
     }
 
+    private void failureTest(String filename) {
+        String fileContents = SpecsIo.getResource(String.format("fixtures/public/fail/syntactical/%s", filename));
+        JmmParserResult result = TestUtils.parse(fileContents);
+        List<Report> reports = result.getReports();
+        mustFail(reports);
+    }
+
     @Test
 	public void FindMaximumTest() {
-        TestTemplate("FindMaximum.jmm");
+        sucessfullTest("FindMaximum.jmm");
     }
 
     @Test
     public void HelloWorldTest() {
-        TestTemplate("HelloWorld.jmm");
+        sucessfullTest("HelloWorld.jmm");
     }
 
     @Test
     public void LazysortTest() {
-        TestTemplate("Lazysort.jmm");
+        sucessfullTest("Lazysort.jmm");
     }
 
     @Test
     public void LifeTest() {
-        TestTemplate("Life.jmm");
+        sucessfullTest("Life.jmm");
     }
 
     @Test
     public void MonteCarloPiTest() {
-        TestTemplate("MonteCarloPi.jmm");
+        sucessfullTest("MonteCarloPi.jmm");
     }
 
     @Test
     public void QuicksortTest() {
-        TestTemplate("Quicksort.jmm");
+        sucessfullTest("Quicksort.jmm");
     }
 
     @Test
     public void SimpleTest() {
-        TestTemplate("Simple.jmm");
+        sucessfullTest("Simple.jmm");
     }
 
     @Test
     public void TicTacToeTest() {
-        TestTemplate("TicTacToe.jmm");
+        sucessfullTest("TicTacToe.jmm");
     }
 
     @Test
     public void WhileAndIFTest() {
-        TestTemplate("WhileAndIF.jmm");
+        sucessfullTest("WhileAndIF.jmm");
+    }
+
+    // Fail Tests
+
+    @Test
+    public void BlowUpTest() {
+        failureTest("BlowUp.jmm");
+    }
+
+    @Test
+    public void CompleteWhileTest() {
+        failureTest("CompleteWhileTest.jmm");
+    }
+
+    @Test
+    public void LengthErrorTest() {
+        failureTest("LengthError.jmm");
+    }
+
+    @Test
+    public void MissingRightParTest() {
+        failureTest("MissingRightPar.jmm");
+    }
+
+    @Test
+    public void MultipleSequentialTest() {
+        failureTest("MultipleSequential.jmm");
+    }
+
+    @Test
+    public void NestedLoopTest() {
+        failureTest("NestedLoop.jmm");
     }
 }

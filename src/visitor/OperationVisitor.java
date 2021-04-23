@@ -6,13 +6,13 @@ import pt.up.fe.comp.jmm.report.Report;
 
 import java.util.List;
 
-public class OperationVerifierVisitor extends PreorderJmmVisitor<List<Report>, Boolean> {
-    public OperationVerifierVisitor() {
+public class OperationVisitor extends PreorderJmmVisitor<List<Report>, Boolean> {
+    public OperationVisitor() {
         addVisit("Operation", this::visitOp);
     }
 
     public boolean visitOp(JmmNode node, List<Report> reports) {
-        switch (node.get("op")) {
+        switch (node.get("operator")) {
             case "PLUS":
                 verifyInt(node, reports);
                 break;
