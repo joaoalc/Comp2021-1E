@@ -210,7 +210,7 @@ void WhileStatement() #WhileStatement : {} {
     <WHILE> (
         <LEFT_PARENTHESES>
         | recoverError(
-              new int[]{LEFT_BRACE, INTEGER, TRUE, FALSE, IDENTIFIER, THIS, NEW, NOT, LEFT_PARENTHESES},
+              new int[] { LEFT_BRACE, INTEGER, TRUE, FALSE, IDENTIFIER, THIS, NEW, NOT, LEFT_PARENTHESES },
               "Got '" + getToken(1).toString() + "' expected '(' token"
           )
     )
@@ -247,6 +247,9 @@ JAVACODE
 void recoverError(int[] skipTo, String msg) {
      ParseException e = generateParseException();
 
+     /* System.err.println("Found error on line " + e.currentToken.beginLine + ", column " + e.currentToken.beginColumn);
+     System.err.println("\t" + msg);*/
+
      Report report_error = Report.newError(Stage.SYNTATIC, e.currentToken.beginLine, e.currentToken.beginColumn, msg, e);
 
      this.reports.add(report_error);
@@ -272,16 +275,16 @@ void recoverError(int[] skipTo, String msg) {
      }
 }
 
-void Expression() #void: {} {
+void Expression() #void : {} {
     LessThan() (<AND> LessThan() )*
 }
 
-void LessThan() #void : {} {
-    AddSub() (<LT> AddSub() #Less_Than(2) )*
+void LessThan() #LessThan : {} {
+    AddSub() (<LT> AddSub() )*
 }
 
 void AddSub() #void : {} {
-    MultDiv() (<ADD> MultDiv() #AddSub(2) | <SUB> MultDiv() #AddSub(2)  )*
+    MultDiv() (<ADD> MultDiv() #AddSub(2) | <SUB> MultDiv() #AddSub(2) )*
 }
 
 void MultDiv() #void : {} {
@@ -295,30 +298,6 @@ void Negate() #void : {}  {
 void Length() #void: {} {
     Parentheses() (<DOT> Call() #DotOperation)*
 }
-/*void LessThan() #Less_Than : {} {
-    AddSub() (<LT> AddSub() )* // TODO: Is it really * ?
-}
-
-void AddSub() #AddSub(2) : {} {
-    MultDiv() (Operation() )*
-}
-
-void Operation() : {} {
-    <ADD> MultDiv() {jjtThis.put("op", "PLUS");}
-    | <SUB> MultDiv() {jjtThis.put("op", "MINUS");}
-}
-
-void MultDiv() #MultDiv(2) : {} {
-    Negate() (<MUL> Negate() | <DIV> Negate() )*
-}
-
-void Negate() #void : {}  {
-    (<NOT>)* #Negate DotOperation()
-}
-
-void DotOperation() #void: {} {
-    Parentheses() (<DOT> Call() )* #DotOperation
-}*/
 
 void Parentheses() #void: {} {
     ( <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> ) |
