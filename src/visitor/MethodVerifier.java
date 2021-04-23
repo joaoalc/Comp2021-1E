@@ -48,7 +48,6 @@ public class MethodVerifier extends PreorderJmmVisitor<List<Report>, Boolean> {
                     return false;
                 }
             }
-            System.out.println("Method exists.");
 
 
             //TODO: check arguments

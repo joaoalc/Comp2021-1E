@@ -34,7 +34,6 @@ public class VarDeclarationVisitor extends PreorderJmmVisitor<List<Report>, Bool
         if(method == null){
             if(!symbolTable.fieldExists(symbol)) {
                 symbolTable.addField(varType, varName);
-                System.out.println(varType.getName() + " " + varType.isArray() + " " + varName + " Stored in global table");
                 return true;
             }
             else{
@@ -52,7 +51,6 @@ public class VarDeclarationVisitor extends PreorderJmmVisitor<List<Report>, Bool
                 return false;
             }
             table_method.addLocalVariable(varType, varName, null);
-            System.out.println(varType.getName() + " " + varType.isArray() + " " + varName + " Stored in method " + table_method.getName() + " table");
         }
 
         return true;
@@ -62,10 +60,8 @@ public class VarDeclarationVisitor extends PreorderJmmVisitor<List<Report>, Bool
 
     public Method FindParentMethod(JmmNode node){
         JmmNode currentNode = node;
-        System.out.println(currentNode.getKind());
         while(currentNode.getKind().compareTo("ClassBody") != 0 && currentNode.getKind().compareTo("MethodDeclaration") != 0){
             currentNode = currentNode.getParent();
-            System.out.println("Parent node: " + currentNode.getKind());
         }
         if(currentNode.getKind().compareTo("ClassBody") == 0){
             return null;
@@ -76,7 +72,6 @@ public class VarDeclarationVisitor extends PreorderJmmVisitor<List<Report>, Bool
             Type return_type = parseTypeNode(return_type_node);
 
             String name = currentNode.get("name");
-            System.out.println("Func name: " + name);
 
             List<JmmNode> argumentNodes = getChildrenOfKind(currentNode, "Argument");
             List<Symbol> arguments = new ArrayList<>();
@@ -87,9 +82,6 @@ public class VarDeclarationVisitor extends PreorderJmmVisitor<List<Report>, Bool
                 String argument_name = argumentNode.get("name");
                 arguments.add(new Symbol(type, argument_name));
             }
-            System.out.println(name);
-            System.out.println(return_type);
-            System.out.println(arguments.size());
             return new Method(name, return_type, arguments);
         }
     }

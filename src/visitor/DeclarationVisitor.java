@@ -57,9 +57,6 @@ public class DeclarationVisitor extends PreorderJmmVisitor<List<Report>, Boolean
         symbolTable.setClassName(class_name);
         super_name.ifPresent(s -> symbolTable.setSuperClassName(s));
 
-        System.out.println("Class name: " + symbolTable.getClassName());
-        System.out.println("Superclass name: " + symbolTable.getSuper());
-
         return true;
     }
 
