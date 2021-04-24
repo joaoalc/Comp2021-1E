@@ -284,11 +284,11 @@ void LessThan() #void: {} {
 }
 
 void AddSub() #void : {} {
-    MultDiv() (<ADD> MultDiv() #AddSub | <SUB> MultDiv() #AddSub )*
+    MultDiv() (<ADD> MultDiv() #Add(2) | <SUB> MultDiv() #Sub(2) )*
 }
 
 void MultDiv() #void : {} {
-    Negate() (<MUL> Negate() #MultDiv | <DIV> Negate() #MultDiv )*
+    Negate() (<MUL> Negate() #Mult(2) | <DIV> Negate() #Div(2) )*
 }
 
 void Negate() #void : {}  {
@@ -296,18 +296,18 @@ void Negate() #void : {}  {
 }
 
 void Length() #void: {} {
-    Parentheses() (<DOT> Call() )*
+    Parentheses() (<DOT> Call() #FCall(2) )*
 }
 
 void Parentheses() #void: {} {
-    ( <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> ) |
-    ( <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ) |
+    ( <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> ) #Parenthesis |
+    ( <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ) #Parenthesis |
     _Expression()
 }
 
-void Call() #void : {Token t;} {
-    t="length" {jjtThis.put("name", t.image);} #length |
-    (t=<IDENTIFIER> { jjtThis.put("name", t.image); } #Call <LEFT_PARENTHESES> [ Expression() ( <COMMA> Expression() )* ] <RIGHT_PARENTHESES> )
+void Call() : {Token t;} {
+    t="length" {jjtThis.put("name", t.image);}  |
+    (t=<IDENTIFIER> { jjtThis.put("name", t.image); }  <LEFT_PARENTHESES> [ Expression() ( <COMMA> Expression() )* ] <RIGHT_PARENTHESES> )
 }
 
 void _Expression() #void: { Token t; } {

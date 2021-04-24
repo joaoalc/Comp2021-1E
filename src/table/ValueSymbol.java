@@ -1,20 +1,19 @@
-package pt.up.fe.comp.jmm.analysis.table;
+package table;
 
-public class Symbol {
-    protected final Type type;
-    protected final String name;
+import pt.up.fe.comp.jmm.analysis.table.Symbol;
+import pt.up.fe.comp.jmm.analysis.table.Type;
 
-    public Symbol(Type type, String name) {
-        this.type = type;
-        this.name = name;
+public class ValueSymbol extends Symbol {
+    String value;
+
+    public ValueSymbol(Type type, String name) {
+        super(type, name);
+        value = null;
     }
 
-    public Type getType() {
-        return type;
-    }
-
-    public String getName() {
-        return name;
+    public ValueSymbol(Type type, String name, String value) {
+        super(type, name);
+        this.value = value;
     }
 
     @Override
@@ -22,21 +21,16 @@ public class Symbol {
         return "Symbol [type=" + type + ", name=" + name + "]";
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((type == null) ? 0 : type.hashCode());
+        result = prime * result + ((value == null) ? 0 : value.hashCode());
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -47,16 +41,16 @@ public class Symbol {
             return false;
         Symbol other = (Symbol) obj;
         if (name == null) {
-            if (other.name != null)
+            if (other.getName() != null)
                 return false;
         }
-        else if (!name.equals(other.name))
+        else if (!name.equals(other.getName()))
             return false;
         if (type == null) {
-            if (other.type != null)
+            if (other.getType() != null)
                 return false;
         }
-        else if (!type.equals(other.type))
+        else if (!type.equals(other.getType()))
             return false;
         return true;
     }

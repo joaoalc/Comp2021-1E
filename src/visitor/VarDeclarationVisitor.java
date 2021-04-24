@@ -33,7 +33,7 @@ public class VarDeclarationVisitor extends PreorderJmmVisitor<List<Report>, Bool
         //Add to class' (global) symbol table
         if(method == null){
             if(!symbolTable.fieldExists(symbol)) {
-                symbolTable.addField(varType, varName);
+                symbolTable.addField(varType, varName, null);
                 return true;
             }
             else{
@@ -51,6 +51,7 @@ public class VarDeclarationVisitor extends PreorderJmmVisitor<List<Report>, Bool
                 return false;
             }
             table_method.addLocalVariable(varType, varName, null);
+            System.out.println("added variable");
         }
 
         return true;

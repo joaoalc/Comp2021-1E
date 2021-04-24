@@ -1,5 +1,6 @@
 package table;
 
+import com.sun.jdi.Value;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 
@@ -12,7 +13,7 @@ public class Method {
     private String name;
     private Type return_type;
     private List<Symbol> parameters;
-    private final HashMap<Symbol, Object> local_variables = new HashMap<>();
+    private final HashMap<String, ValueSymbol> local_variables = new HashMap<>();
 
     public Method(String name, Type return_type, List<Symbol> parameters) {
         this.name = name;
@@ -20,8 +21,8 @@ public class Method {
         this.parameters = parameters;
     }
 
-    public void addLocalVariable(Type type, String name, Object value) {
-        local_variables.put(new Symbol(type, name), value);
+    public void addLocalVariable(Type type, String name, String value) {
+        local_variables.put(name, new ValueSymbol(type, name, value));
     }
 
     public boolean localVariableExists(Symbol symbol){
@@ -44,7 +45,7 @@ public class Method {
     }
 
     public List<Symbol> getLocalVariables() {
-        return new ArrayList<>(local_variables.keySet());
+        return new ArrayList<>(local_variables.values());
     }
 
     public String getIdentifier() {

@@ -13,9 +13,8 @@ public class MySymbolTable implements SymbolTable {
     private final List<String> imports = new ArrayList<>();
     private String class_name;
     private String super_class_name = null;
-    private final Map<Symbol, Object> fields = new HashMap<>();
+    private final Map<String, ValueSymbol> fields = new HashMap<>();
     private final Map<String, Method> methods = new HashMap<>();
-    private final Map<Symbol, Object> localVariables = new HashMap<>();
 
     public void addImport(String importName) {
         imports.add(importName);
@@ -29,12 +28,19 @@ public class MySymbolTable implements SymbolTable {
         this.super_class_name = super_class_name;
     }
 
-    public void addField(Type type, String name, Object value) {
-        fields.put(new Symbol(type, name), value);
+    public void addField(Type type, String name, String value) {
+        fields.put(name, new ValueSymbol(type, name, value));
+    }
+
+    public boolean fieldExists(String var_name){
+        if(fields.getOrDefault(var_name, null) == null){
+            return false;
+        }
+        return true;
     }
 
     public boolean fieldExists(Symbol symbol){
-        if(fields.getOrDefault(symbol, null) == null){
+        if(fields.getOrDefault(symbol.getName(), null) == null){
             return false;
         }
         return true;
@@ -46,11 +52,7 @@ public class MySymbolTable implements SymbolTable {
     }
 
     public void addField(Type type, String name) {
-        fields.put(new Symbol(type, name), null);
-    }
-
-    public void addLocalVariable(Type type, String name, Object value) {
-        localVariables.put(new Symbol(type, name), value);
+        fields.put(name, new ValueSymbol(type, name));
     }
 
     public Method getMethod(Method method){
@@ -95,7 +97,7 @@ public class MySymbolTable implements SymbolTable {
      */
     @Override
     public List<Symbol> getFields() {
-        return new ArrayList<>(fields.keySet());
+        return new ArrayList<>(fields.values());
     }
 
     /**
@@ -129,6 +131,6 @@ public class MySymbolTable implements SymbolTable {
      */
     @Override
     public List<Symbol> getLocalVariables(String methodName) {
-        return new ArrayList<>(localVariables.keySet());
+        return null;
     }
 }
