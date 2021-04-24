@@ -13,9 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class SumVisitor extends PostorderJmmVisitor<List<Report>, Boolean> {
+public class SumSubVisitor extends PostorderJmmVisitor<List<Report>, Boolean> {
     MySymbolTable symbolTable;
-    public SumVisitor(MySymbolTable symbolTable) {
+    public SumSubVisitor(MySymbolTable symbolTable) {
         addVisit("Add", this::verifySum);
         addVisit("Sub", this::verifySubtraction);
 

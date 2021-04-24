@@ -24,4 +24,21 @@ public class Utils {
                 .filter(c -> c.getKind().equals(kind))
                 .collect(Collectors.toList());
     }
+
+    public static boolean isInteger(String s) {
+        if(s.isEmpty()) return false;
+        int i = 0;
+        if(s.charAt(0) == '-'){
+            if(s.length() == 1){
+                return false;
+            }
+            i = 1;
+        }
+
+        for(int loopVar = i; loopVar < s.length(); loopVar++) {
+            if(!Character.isDigit(s.charAt(i))) return false;
+        }
+        return true;
+    }
+
 }
