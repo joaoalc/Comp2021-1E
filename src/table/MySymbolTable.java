@@ -100,6 +100,8 @@ public class MySymbolTable implements SymbolTable {
         return new ArrayList<>(fields.values());
     }
 
+    public Symbol getField(String varName) { return fields.getOrDefault(varName, null);}
+
     /**
      * @return a list with the names of the methods of the class
      */

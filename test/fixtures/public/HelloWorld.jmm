@@ -1,10 +1,8 @@
 import ioPlus;
 class HelloWorld {
-    int b;
-    int b;
 	public static void main(String[] args) {
 	    int a;
-	    a = c + 2;
+	    a = a + 2;
         ioPlus.printHelloWorld();
 	}
 }

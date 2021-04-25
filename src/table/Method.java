@@ -48,6 +48,9 @@ public class Method {
         return new ArrayList<>(local_variables.values());
     }
 
+    public Symbol getLocalVariable(String varName) {
+        return local_variables.getOrDefault(varName, null);}
+
     public String getIdentifier() {
         List<String> parameter_types = parameters.stream().map(Symbol::getName).collect(Collectors.toList());
 

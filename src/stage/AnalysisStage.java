@@ -43,9 +43,6 @@ public class AnalysisStage implements JmmAnalysis {
         VarDeclarationVisitor mvec = new VarDeclarationVisitor(declarationVerifierVisitor.getSymbolTable());
         mvec.visit(node);
 
-        MultDivVisitor m_d_vis = new MultDivVisitor(symbolTable);
-        m_d_vis.visit(node);
-
         SumSubVisitor a_s_vis = new SumSubVisitor(symbolTable);
         a_s_vis.visit(node);
 

@@ -16,6 +16,10 @@ public class ValueSymbol extends Symbol {
         this.hasValue = value;
     }
 
+    public boolean hasValue(){
+        return hasValue;
+    }
+
     @Override
     public String toString() {
         return "Symbol [type=" + type + ", name=" + name + "]";
