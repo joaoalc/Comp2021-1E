@@ -61,6 +61,7 @@ public class SumSubVisitor extends PostorderJmmVisitor<List<Report>, Boolean> {
                 if(secondChild.getKind().compareTo("Identifier") == 0){
                     //Check if identifier is declared
                     Method method = NodeFindingMethods.FindParentMethod(secondChild);
+                    method = symbolTable.getMethod(method);
                     Symbol symbol = NodeFindingMethods.getVariable(method, symbolTable, secondChild.get("name"));
                     if(symbol == null){
                         //TODO: Undeclared variable report
