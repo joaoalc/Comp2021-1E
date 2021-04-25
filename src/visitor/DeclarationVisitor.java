@@ -24,7 +24,7 @@ public class DeclarationVisitor extends PreorderJmmVisitor<List<Report>, Boolean
 
         addVisit("ImportDeclaration", this::importDeclaration);
         addVisit("ClassDeclaration", this::classDeclaration);
-        addVisit("VarDeclaration", this::varDeclaration);
+        //addVisit("VarDeclaration", this::varDeclaration);
         addVisit("MethodDeclaration", this::methodDeclaration);
 
         //addVisit("Less_Than", (node, reports) -> this.visitOp(node, reports)); // Method reference

@@ -2,8 +2,10 @@ package utils;
 
 import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
+import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import table.Method;
+import table.MySymbolTable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +47,15 @@ public class NodeFindingMethods {
         boolean is_array = Boolean.parseBoolean(node.get("is_array"));
 
         return new Type(type_name, is_array);
+    }
+
+    public static boolean variableExists(Method method, MySymbolTable symbolTable, Symbol symbol){
+        if(!method.localVariableExists(symbol)){
+            if(!symbolTable.fieldExists(symbol)){
+                return false;
+            }
+        }
+        return true;
     }
 
 }

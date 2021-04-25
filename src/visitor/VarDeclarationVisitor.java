@@ -32,12 +32,14 @@ public class VarDeclarationVisitor extends PreorderJmmVisitor<List<Report>, Bool
 
         //Add to class' (global) symbol table
         if(method == null){
+            System.out.println(symbol.getName());
             if(!symbolTable.fieldExists(symbol)) {
                 symbolTable.addField(varType, varName, false);
                 return true;
             }
             else{
                 //TODO: Create report: Repeat variable in class
+                System.out.println("Redeclaration of variable " + symbol);
             }
         }
         else{
@@ -48,6 +50,7 @@ public class VarDeclarationVisitor extends PreorderJmmVisitor<List<Report>, Bool
             }
             if(table_method.localVariableExists(symbol)){
                 //TODO: Create report: Repeat variable in method
+                System.out.println("This variable " + symbol + " does not exist");
                 return false;
             }
             table_method.addLocalVariable(varType, varName, false);
