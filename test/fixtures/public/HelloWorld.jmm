@@ -1,8 +1,8 @@
 import ioPlus;
 class HelloWorld {
 	public static void main(String[] args) {
-	    int a;
-	    a = 1 + a;
+	    boolean a;
+	    a = 1 < 2;
         ioPlus.printHelloWorld();
 	}
 }

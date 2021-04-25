@@ -276,11 +276,11 @@ void recoverError(int[] skipTo, String msg) {
 }
 
 void Expression() #void : {} {
-    LessThan() (<AND> LessThan() #And )*
+    LessThan() (<AND> LessThan() #And(2) )*
 }
 
 void LessThan() #void: {} {
-    AddSub() (<LT> AddSub() #LessThan)*
+    AddSub() (<LT> AddSub() #LessThan(2) )*
 }
 
 void AddSub() #void : {} {
