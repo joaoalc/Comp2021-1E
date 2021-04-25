@@ -44,12 +44,12 @@ public class SumSubVisitor extends PostorderJmmVisitor<List<Report>, Boolean> {
                     Symbol symbol = NodeFindingMethods.getVariable(method, symbolTable, firstChild.get("name"));
                     if(symbol == null){
                         //TODO: Undeclared variable report
-                        System.out.println("This variable hasnt been declared");
+                        System.out.println("First variable hasnt been declared");
                         return false;
                     }
                     if(!((ValueSymbol) symbol).hasValue()){
                         //TODO: Uninitialized variable report
-                        System.out.println("This variable hasnt been given a value");
+                        System.out.println("First variable hasnt been given a value");
                         return false;
                     }
 
@@ -65,12 +65,12 @@ public class SumSubVisitor extends PostorderJmmVisitor<List<Report>, Boolean> {
                     Symbol symbol = NodeFindingMethods.getVariable(method, symbolTable, secondChild.get("name"));
                     if(symbol == null){
                         //TODO: Undeclared variable report
-                        System.out.println("This variable hasnt been declared");
+                        System.out.println("Second variable hasnt been declared");
                         return false;
                     }
                     if(!((ValueSymbol) symbol).hasValue()){
                         //TODO: Uninitialized variable report
-                        System.out.println("This variable hasnt been given a value");
+                        System.out.println("Second variable hasnt been given a value");
                         return false;
                     }
 
