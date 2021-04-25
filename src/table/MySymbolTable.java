@@ -28,7 +28,7 @@ public class MySymbolTable implements SymbolTable {
         this.super_class_name = super_class_name;
     }
 
-    public void addField(Type type, String name, String value) {
+    public void addField(Type type, String name, boolean value) {
         fields.put(name, new ValueSymbol(type, name, value));
     }
 

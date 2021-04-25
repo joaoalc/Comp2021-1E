@@ -21,7 +21,7 @@ public class Method {
         this.parameters = parameters;
     }
 
-    public void addLocalVariable(Type type, String name, String value) {
+    public void addLocalVariable(Type type, String name, boolean value) {
         local_variables.put(name, new ValueSymbol(type, name, value));
     }
 

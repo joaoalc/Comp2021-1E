@@ -1,8 +1,9 @@
 import ioPlus;
 class HelloWorld {
+    int b;
 	public static void main(String[] args) {
 	    int a;
-	    a = 3 + 3 / 2;
+	    a = c + 2;
         ioPlus.printHelloWorld();
 	}
 }

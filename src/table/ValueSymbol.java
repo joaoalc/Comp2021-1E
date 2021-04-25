@@ -4,16 +4,16 @@ import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 
 public class ValueSymbol extends Symbol {
-    String value;
+    boolean hasValue;
 
     public ValueSymbol(Type type, String name) {
         super(type, name);
-        value = null;
+        hasValue = false;
     }
 
-    public ValueSymbol(Type type, String name, String value) {
+    public ValueSymbol(Type type, String name, boolean value) {
         super(type, name);
-        this.value = value;
+        this.hasValue = value;
     }
 
     @Override
@@ -21,15 +21,16 @@ public class ValueSymbol extends Symbol {
         return "Symbol [type=" + type + ", name=" + name + "]";
     }
 
+    /*
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((type == null) ? 0 : type.hashCode());
-        result = prime * result + ((value == null) ? 0 : value.hashCode());
+        result = prime * result + ((hasValue == false) ? 0 : hasValue.hashCode());
         return result;
-    }
+    }*/
 
     @Override
     public boolean equals(Object obj) {
