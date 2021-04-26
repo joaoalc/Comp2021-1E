@@ -202,8 +202,8 @@ void IfStatement() #IfStatement : {} {
         Statement()
 }
 
-void Assignment() #Assignment : {} {
-    <IDENTIFIER> #Identifier [ <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ] <ASSIGN> Expression() <SEMICOLON>
+void Assignment() #Assignment : { Token t; } {
+    t=<IDENTIFIER> { jjtThis.put("name", t.image); } #Identifier [ <LEFT_BRACKET> Expression() #Index <RIGHT_BRACKET> ] <ASSIGN> Expression() <SEMICOLON>
 }
 
 void WhileStatement() #WhileStatement : {} {
@@ -301,7 +301,7 @@ void Length() #void: {} {
 
 void Parentheses() #void: {} {
     ( <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> ) #Parenthesis |
-    ( <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ) #Parenthesis |
+    ( <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ) #Index |
     _Expression()
 }
 

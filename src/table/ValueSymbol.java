@@ -20,6 +20,10 @@ public class ValueSymbol extends Symbol {
         return hasValue;
     }
 
+    public void setHasValue(boolean hasValue){
+        this.hasValue = hasValue;
+    }
+
     @Override
     public String toString() {
         return "Symbol [type=" + type + ", name=" + name + "]";
