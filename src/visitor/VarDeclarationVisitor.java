@@ -8,6 +8,7 @@ import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
 import pt.up.fe.comp.jmm.report.Report;
 import table.Method;
 import table.MySymbolTable;
+import utils.NodeFindingMethods;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,7 @@ public class VarDeclarationVisitor extends PreorderJmmVisitor<List<Report>, Bool
         Type varType = new Type(node.getChildren().get(0).get("name"), Boolean.parseBoolean(node.getChildren().get(0).get("is_array")));
         Symbol symbol = new Symbol(varType, varName);
 
-        Method method = FindParentMethod(node);
+        Method method = NodeFindingMethods.FindParentMethod(node, symbolTable);
 
         //Add to class' (global) symbol table
         if(method == null){
@@ -54,6 +55,8 @@ public class VarDeclarationVisitor extends PreorderJmmVisitor<List<Report>, Bool
                 return false;
             }
             table_method.addLocalVariable(varType, varName, false);
+            node.getChildren().get(0).put("type", varType.getName());
+            node.getChildren().get(0).put("is_array", String.valueOf(varType.isArray()));
             System.out.println("added variable");
         }
 

@@ -18,7 +18,7 @@ import static utils.Utils.getChildrenOfKind;
 public class VarAssignmentVisitor extends PreorderJmmVisitor<List<Report>, Boolean> {
     MySymbolTable symbolTable;
     public VarAssignmentVisitor(MySymbolTable symbolTable) {
-        addVisit("Assignment", this::varAssignment);
+        //addVisit("Assignment", this::varAssignment);
         this.symbolTable = symbolTable;
 
     }

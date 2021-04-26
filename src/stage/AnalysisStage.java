@@ -37,10 +37,6 @@ public class AnalysisStage implements JmmAnalysis {
 
         MySymbolTable symbolTable = declarationVerifierVisitor.getSymbolTable();
 
-        // Verify declaration of variables
-        VarDeclarationVisitor mvec = new VarDeclarationVisitor(declarationVerifierVisitor.getSymbolTable());
-        mvec.visit(node, reports);
-
         // Verify binary operations
         ExpressionVisitor a_s_vis = new ExpressionVisitor(symbolTable);
         a_s_vis.visit(node, reports);

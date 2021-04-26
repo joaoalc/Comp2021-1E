@@ -1,8 +1,8 @@
 import ioPlus;
 class HelloWorld {
 	public static void main(String[] args) {
-	    int[] a;
-	    a = 1 + a.length;
+	    int a;
+	    a = 5;
         ioPlus.printHelloWorld();
 	}
 }

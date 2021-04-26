@@ -1,7 +1,9 @@
 package visitor;
 
+import com.sun.jdi.Value;
 import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
+import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.PostorderJmmVisitor;
 import pt.up.fe.comp.jmm.report.Report;
 import table.Method;
@@ -25,7 +27,11 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
         addVisit("LessThan", this::verifySumSub);
         addVisit("And", this::verifyAnd);
         addVisit("Parentheses", this::verifyParentheses);
+        addVisit("Index", this::verifyIndex);
         addVisit("FCall", this::verifyCall);
+        addVisit("Assignment", this::varAssignment);
+        addVisit("NewExpression", this::verifyParentheses);
+        addVisit("VarDeclaration", this::varDeclaration);
 
         this.symbolTable = symbolTable;
     }
@@ -143,6 +149,21 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
         return true;
     }
 
+    public boolean verifyIndex(JmmNode node, List<Report> reports) {
+        JmmNode child = node.getChildren().get(0);
+
+        if(!child.get("type").equals("int")){
+            //TODO: Semantic error, index isn't int
+            System.out.println("Index isn't int");
+            return false;
+        }
+
+        node.put("type", child.get("type"));
+        node.put("is_array", child.get("is_array"));
+
+        return true;
+    }
+
     public boolean verifyCall(JmmNode node, List<Report> reports){
         if (node.getChildren().size() == 2){
             boolean ownFunction = node.getChildren().get(0).getKind().equals("This");
@@ -213,6 +234,139 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
             //TODO: check arguments
             return true;
         }
+        return true;
+    }
+
+    public boolean varAssignment(JmmNode node, List<Report> reports){
+        //Without index
+        if(node.getChildren().size() == 2){
+            if(node.getChildren().get(0).getOptional("name").isEmpty()){
+                //TODO: Index on non variable error
+                System.out.println("Index on non variable error");
+                return false;
+            }
+            else if(node.getChildren().get(1).get("is_array").equals("true")){
+                //TODO: Assigning array to array index error
+                System.out.println("Assigning array to array index error");
+                return false;
+            }
+
+            Method method = NodeFindingMethods.FindParentMethod(node, symbolTable);
+            ValueSymbol var_symbol = (ValueSymbol) NodeFindingMethods.getVariable(method, symbolTable, node.getChildren().get(0).get("name"));
+
+            if(var_symbol != null){
+                //TODO: Undeclared variable error
+                System.out.println("Undeclared variable.");
+                return false;
+            }
+            else if(var_symbol.getType().isArray()){
+                //TODO: Index on non array variable error
+                System.out.println("Index on non array variable error");
+                return false;
+            }
+            else if(!var_symbol.getType().getName().equals(var_symbol.getType())){
+                //TODO: Type mismatch error
+                System.out.println("Type mismatch error.");
+                return false;
+            }
+            System.out.println("Variable " + var_symbol + " has a value now!");
+            var_symbol.setHas_value(true);
+            return true;
+        }
+        //With index
+        //else if(node.getChildren().size() == 3)
+/*
+        Method method = FindParentMethod(node);
+
+
+        //No index
+        if(node.getChildren().size() == 2){
+            String var_name = node.getChildren().get(1).get("name");
+            ValueSymbol variable = (ValueSymbol) NodeFindingMethods.getVariable(method, symbolTable, var_name);
+
+            if(node.getChildren().get(2).get("type").compareTo(variable.getType().getName()) != 0 || node.getChildren().get(2).get("is_array").compareTo(String.valueOf(variable.getType().isArray())) != 0){
+                //TODO: Add report and stop execution
+                System.out.println("Invalid type");
+                return false;
+            }
+
+            variable.setHas_value(true);
+
+            return true;
+        }
+        //Index
+        else if(node.getChildren().size() == 3){
+            //TODO: Array assignment handling
+        }
+ */
+
+
+
+        /*
+        if(method == null){
+            System.out.println(symbol.getName());
+            if(!symbolTable.fieldExists(symbol)) {
+                symbolTable.addField(varType, varName, false);
+                return true;
+            }
+            else{
+                //TODO: Create report: Repeat variable in class
+                System.out.println("Redeclaration of variable " + symbol);
+            }
+        }
+        else{
+            Method table_method = symbolTable.getMethod(method);
+            if(table_method == null){
+                System.out.println("Error: Unreported class");
+                return false;
+            }
+            if(table_method.localVariableExists(symbol)){
+                //TODO: Create report: Repeat variable in method
+                System.out.println("This variable " + symbol + " does not exist");
+                return false;
+            }
+            table_method.addLocalVariable(varType, varName, false);
+            System.out.println("added variable");
+        }*/
+
+        return true;
+    }
+
+    public boolean varDeclaration(JmmNode node, List<Report> reports){
+        String varName = node.get("name");
+
+        Type varType = new Type(node.getChildren().get(0).get("name"), Boolean.parseBoolean(node.getChildren().get(0).get("is_array")));
+        Symbol symbol = new Symbol(varType, varName);
+
+        Method method = NodeFindingMethods.FindParentMethod(node, symbolTable);
+
+        //Add to class' (global) symbol table
+        if(method == null){
+            System.out.println(symbol.getName());
+            if(!symbolTable.fieldExists(symbol)) {
+                symbolTable.addField(varType, varName, false);
+                return true;
+            }
+            else{
+                //TODO: Create report: Repeat variable in class
+                System.out.println("Redeclaration of variable " + symbol);
+            }
+        }
+        else{
+            Method table_method = symbolTable.getMethod(method);
+            if(table_method == null){
+                System.out.println("Error: Unreported class");
+                return false;
+            }
+            if(table_method.localVariableExists(symbol)){
+                //TODO: Create report: Repeat variable in method
+                System.out.println("This variable " + symbol + " does not exist");
+                return false;
+            }
+            table_method.addLocalVariable(varType, varName, false);
+            System.out.println("added variable");
+        }
+
         return true;
     }
 
