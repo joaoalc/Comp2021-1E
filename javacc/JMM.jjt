@@ -319,11 +319,11 @@ void _Expression() #void: { Token t; } {
     __Expression()
 }
 
-void NewExpression(): {} {
+void NewExpression(): { Token t; } {
     <NEW>
     (
-        <INT> <LEFT_BRACKET> Expression() #IntArray <RIGHT_BRACKET> |
-        <IDENTIFIER> #VarCreation <LEFT_PARENTHESES> <RIGHT_PARENTHESES>
+        t=<INT> <LEFT_BRACKET> Expression() #IntArray <RIGHT_BRACKET> |
+        t=<IDENTIFIER> { jjtThis.put("type", t.image); jjtThis.put("is_array", "false"); } #VarCreation <LEFT_PARENTHESES> <RIGHT_PARENTHESES>
     )
 }
 

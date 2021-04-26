@@ -44,9 +44,8 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
         if (variablesNotDeclared(firstChild, secondChild, reports))
             return false;
 
-        if (!firstChild.get("type").equals("boolean") && firstChild.get("is_array").compareTo("false") != 0) {
+        if ((!firstChild.get("type").equals("boolean")) || firstChild.get("is_array").compareTo("false") != 0) {
             reports.add(newSemanticReport(node, "Second value isn't an boolean"));
-
             return false;
         }
 
@@ -254,7 +253,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
             Method method = NodeFindingMethods.FindParentMethod(node, symbolTable);
             ValueSymbol var_symbol = (ValueSymbol) NodeFindingMethods.getVariable(method, symbolTable, node.getChildren().get(0).get("name"));
 
-            if(var_symbol != null){
+            if(var_symbol == null){
                 //TODO: Undeclared variable error
                 System.out.println("Undeclared variable.");
                 return false;
@@ -264,7 +263,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
                 System.out.println("Index on non array variable error");
                 return false;
             }
-            else if(!var_symbol.getType().getName().equals(var_symbol.getType())){
+            else if(!var_symbol.getType().getName().equals(node.getChildren().get(1).get("type"))){
                 //TODO: Type mismatch error
                 System.out.println("Type mismatch error.");
                 return false;
