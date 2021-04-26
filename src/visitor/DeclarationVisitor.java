@@ -3,7 +3,6 @@ package visitor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
@@ -11,7 +10,6 @@ import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
 import pt.up.fe.comp.jmm.report.Report;
 
-import table.Method;
 import table.MySymbolTable;
 
 import static utils.Utils.getChildrenOfKind;
@@ -55,7 +53,7 @@ public class DeclarationVisitor extends PreorderJmmVisitor<List<Report>, Boolean
         Optional<String> super_name = node.getOptional("super_name");
 
         symbolTable.setClassName(class_name);
-        super_name.ifPresent(s -> symbolTable.setSuperClassName(s));
+        super_name.ifPresent(symbolTable::setSuperClassName);
 
         return true;
     }

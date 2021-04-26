@@ -247,9 +247,6 @@ JAVACODE
 void recoverError(int[] skipTo, String msg) {
      ParseException e = generateParseException();
 
-     /* System.err.println("Found error on line " + e.currentToken.beginLine + ", column " + e.currentToken.beginColumn);
-     System.err.println("\t" + msg);*/
-
      Report report_error = Report.newError(Stage.SYNTATIC, e.currentToken.beginLine, e.currentToken.beginColumn, msg, e);
 
      this.reports.add(report_error);
@@ -300,14 +297,14 @@ void Length() #void: {} {
 }
 
 void Parentheses() #void: {} {
-    ( <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> ) #Parenthesis |
+    ( <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> ) #Parentheses |
     ( <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ) #Index |
     _Expression()
 }
 
-void Call() : {Token t;} {
-    t="length" {jjtThis.put("name", t.image);}  |
-    (t=<IDENTIFIER> { jjtThis.put("name", t.image); }  <LEFT_PARENTHESES> [ Expression() ( <COMMA> Expression() )* ] <RIGHT_PARENTHESES> )
+void Call() #void : {Token t;} {
+    t="length" { jjtThis.put("name", t.image); } #Length |
+    (t=<IDENTIFIER> { jjtThis.put("name", t.image); }  <LEFT_PARENTHESES> [ Expression() ( <COMMA> Expression() )* ] <RIGHT_PARENTHESES> ) #Call
 }
 
 void _Expression() #void: { Token t; } {

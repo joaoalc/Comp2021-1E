@@ -1,8 +1,0 @@
-import ioPlus;
-import IMPORTante.abc;
-import joke.funny;
-class HelloWorld {
-    public static void main(String[] args) {
-        ioPlus.printHelloWorld();
-    }
-}

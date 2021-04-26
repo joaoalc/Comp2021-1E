@@ -2,7 +2,7 @@ import ioPlus;
 class HelloWorld {
 	public static void main(String[] args) {
 	    int[] a;
-	    a[1] = 1 + 2;
+	    a = 1 + a.length;
         ioPlus.printHelloWorld();
 	}
 }

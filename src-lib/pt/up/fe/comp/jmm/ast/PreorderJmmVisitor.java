@@ -58,9 +58,9 @@ public class PreorderJmmVisitor<D, R> extends AJmmVisitor<D, R> {
 
         // Preorder: then, visit each children
         List<R> childrenResults = new ArrayList<>();
-        for (var child : jmmNode.getChildren()) {
+
+        for (var child : jmmNode.getChildren())
             childrenResults.add(visit(child, data));
-        }
 
         return reduce.apply(nodeResult, childrenResults);
     }

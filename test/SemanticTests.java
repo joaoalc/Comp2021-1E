@@ -24,11 +24,6 @@ public class SemanticTests {
     }
 
     @Test
-    public void IDKTest() {
-        TestTemplate("IDK.jmm");
-    }
-
-    @Test
     public void FindMaximumTest() {
         TestTemplate("FindMaximum.jmm");
     }
@@ -75,53 +70,53 @@ public class SemanticTests {
 
     // Failure tests
 
-    @Test
-    public void ArrIndexNotInt() {
-        failureTest("arr_index_not_int.jmm");
-    }
-
-    @Test
-    public void ArrSizeNotInt() {
-        failureTest("arr_size_not_int.jmm");
-    }
-
-    @Test
-    public void BadArguments() {
-        failureTest("badArguments.jmm");
-    }
-
-    @Test
-    public void BinopIncomp() {
-        failureTest("binop_incomp.jmm");
-    }
-
-    @Test
-    public void FuncNotFound() {
-        failureTest("funcNotFound.jmm");
-    }
-
-    @Test
-    public void SimpleLength() {
-        failureTest("simple_length.jmm");
-    }
-
-    @Test
-    public void VarExpIncomp() {
-        failureTest("var_exp_incomp.jmm");
-    }
-
-    @Test
-    public void VarLitIncomp() {
-        failureTest("var_lit_incomp.jmm");
-    }
-
-    @Test
-    public void VarUndef() {
-        failureTest("var_undef.jmm");
-    }
-
-    @Test
-    public void VarNotInit() {
-        failureTest("varNotInit.jmm");
-    }
+//    @Test
+//    public void ArrIndexNotInt() {
+//        failureTest("arr_index_not_int.jmm");
+//    }
+//
+//    @Test
+//    public void ArrSizeNotInt() {
+//        failureTest("arr_size_not_int.jmm");
+//    }
+//
+//    @Test
+//    public void BadArguments() {
+//        failureTest("badArguments.jmm");
+//    }
+//
+//    @Test
+//    public void BinopIncomp() {
+//        failureTest("binop_incomp.jmm");
+//    }
+//
+//    @Test
+//    public void FuncNotFound() {
+//        failureTest("funcNotFound.jmm");
+//    }
+//
+//    @Test
+//    public void SimpleLength() {
+//        failureTest("simple_length.jmm");
+//    }
+//
+//    @Test
+//    public void VarExpIncomp() {
+//        failureTest("var_exp_incomp.jmm");
+//    }
+//
+//    @Test
+//    public void VarLitIncomp() {
+//        failureTest("var_lit_incomp.jmm");
+//    }
+//
+//    @Test
+//    public void VarUndef() {
+//        failureTest("var_undef.jmm");
+//    }
+//
+//    @Test
+//    public void VarNotInit() {
+//        failureTest("varNotInit.jmm");
+//    }
 }

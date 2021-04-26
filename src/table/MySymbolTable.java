@@ -33,17 +33,11 @@ public class MySymbolTable implements SymbolTable {
     }
 
     public boolean fieldExists(String var_name){
-        if(fields.getOrDefault(var_name, null) == null){
-            return false;
-        }
-        return true;
+        return fields.getOrDefault(var_name, null) != null;
     }
 
     public boolean fieldExists(Symbol symbol){
-        if(fields.getOrDefault(symbol.getName(), null) == null){
-            return false;
-        }
-        return true;
+        return fields.getOrDefault(symbol.getName(), null) != null;
     }
 
     public void addMethod(Type return_type, String name, List<Symbol> parameters) {

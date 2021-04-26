@@ -12,7 +12,8 @@ import static pt.up.fe.comp.TestUtils.mustFail;
 public class ParserTests {
     private void sucessfullTest(String filename) {
         String fileContents = SpecsIo.getResource(String.format("fixtures/public/%s", filename));
-        TestUtils.parse(fileContents);
+        JmmParserResult result = TestUtils.parse(fileContents);
+        System.out.println(result.getRootNode().toJson());
     }
 
     private void failureTest(String filename) {
