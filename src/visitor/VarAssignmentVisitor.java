@@ -1,9 +1,7 @@
 package visitor;
 
-import com.sun.jdi.Value;
 import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
-import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
 import pt.up.fe.comp.jmm.report.Report;
@@ -42,7 +40,7 @@ public class VarAssignmentVisitor extends PreorderJmmVisitor<List<Report>, Boole
                 return false;
             }
 
-            variable.setHasValue(true);
+            variable.setHas_value(true);
 
             return true;
         }

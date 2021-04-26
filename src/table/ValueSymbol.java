@@ -4,24 +4,25 @@ import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 
 public class ValueSymbol extends Symbol {
-    boolean hasValue;
+    boolean has_value;
 
     public ValueSymbol(Type type, String name) {
         super(type, name);
-        hasValue = false;
+
+        has_value = false;
     }
 
     public ValueSymbol(Type type, String name, boolean value) {
         super(type, name);
-        this.hasValue = value;
+        this.has_value = value;
     }
 
     public boolean hasValue(){
-        return hasValue;
+        return has_value;
     }
 
-    public void setHasValue(boolean hasValue){
-        this.hasValue = hasValue;
+    public void setHas_value(boolean has_value){
+        this.has_value = has_value;
     }
 
     @Override
