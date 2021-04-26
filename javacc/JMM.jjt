@@ -314,7 +314,7 @@ void _Expression() #void: { Token t; } {
         | t=<FALSE> { jjtThis.put("type", "boolean"); jjtThis.put("is_array", "false"); } #False
         | t=<IDENTIFIER> { jjtThis.put("name", t.image); } #Identifier
         | <THIS> #This
-        | NewExpression() #NewExpression
+        | NewExpression()
     )
     __Expression()
 }
@@ -322,7 +322,7 @@ void _Expression() #void: { Token t; } {
 void NewExpression(): { Token t; } {
     <NEW>
     (
-        t=<INT> <LEFT_BRACKET> Expression() #IntArray <RIGHT_BRACKET> |
+        <INT> <LEFT_BRACKET> Expression() #IntArray <RIGHT_BRACKET> |
         t=<IDENTIFIER> { jjtThis.put("type", t.image); jjtThis.put("is_array", "false"); } #VarCreation <LEFT_PARENTHESES> <RIGHT_PARENTHESES>
     )
 }
