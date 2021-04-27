@@ -240,9 +240,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
     }
 
     public boolean verifyCall(JmmNode node, List<Report> reports){
-        System.out.println(node.getChildren().size());
         if (node.getChildren().size() == 2){
-            boolean ownFunction = node.getChildren().get(0).getKind().equals("This");
 
             //Check if it's a length call, if it is, the thing calling it has to be an array
             if (node.getChildren().get(1).getKind().equals("Length")){
@@ -284,6 +282,8 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
                 }
             }
 
+            boolean ownFunction = node.getChildren().get(0).getKind().equals("This");
+
             //this.etc()
             if(ownFunction) {
                 ArrayList<Symbol> symbols = new ArrayList<>();
@@ -304,8 +304,16 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
                 }
 
                 if (!symbolTable.methodExists(node.getChildren().get(1).get("name"), arguments)) {
-                    System.out.println("Undeclared method, add report here and stop execution");
-                    return false;
+                    if(symbolTable.getSuper() == null){
+                        //TODO: Add report
+                        System.out.println("Undeclared method, add report here and stop execution");
+                        return false;
+                    }
+                    //The method could be from the superclass if none is found with the same name and arguments
+                    else{
+                        node.put("type", "");
+                        node.put("is_array", "");
+                    }
                 }
                 //if method exists with same arguments
                 else{
@@ -316,13 +324,58 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
                     //symbolTable.getMethod()
                 }
             }
-
-            //<import_name>.etc()
+            // <import_name>.etc()
+            //  or
+            // varName.etc()
+            //  or
+            // className.etc()
             else{
-//                if (!symbolTable.getImports().contains(node.getChildren().get(0).get("name"))){
-//                    System.out.println("Undeclared import, add report here and stop execution");
-//                    return false;
-//                }
+
+                String name = node.getChildren().get(0).get("name");
+                System.out.println("name");
+                //If it's an import
+                if(symbolTable.importExists(name)){
+                    node.put("type", "");
+                    node.put("is_array", "");
+                    return true;
+                }
+
+                Method method = NodeFindingMethods.FindParentMethod(node, symbolTable);
+                ValueSymbol symbol;
+                if(method != null) {
+                    symbol = (ValueSymbol) NodeFindingMethods.getVariable(method, symbolTable, name);
+                }
+                else{
+                    symbol = (ValueSymbol) NodeFindingMethods.getVariable(symbolTable, name);
+                }
+                if(symbol != null){
+                    if(!symbol.hasValue()){
+
+                        //TODO: Undeclared variable warning
+                        System.out.println("(warning) undeclared variable calling method");
+                        return true;
+                    }
+                }
+                else{
+                    //If it's the current class' name
+                    if(node.getChildren().get(0).get("name").equals(symbolTable.getClassName())){
+                        //TODO: Own class check like the one above
+                        System.out.println("Not implemented yet");
+                        return true;
+                    }
+                    //If it's the superclass' name
+                    else if(node.getChildren().get(0).get("name").equals(symbolTable.getSuper())){
+                        node.put("type", "");
+                        node.put("is_array", "");
+                        return true;
+                    }
+
+
+                }
+                node.put("type", symbol.getType().getName());
+                node.put("is_array", String.valueOf(symbol.getType().isArray()));
+                return true;
+
 
             }
 
@@ -330,9 +383,6 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
             return true;
         }
         else{
-            //new Constructor();
-            System.out.println(node.getChildren().size());
-            //if(node.getChildren().get)
         }
         return true;
     }

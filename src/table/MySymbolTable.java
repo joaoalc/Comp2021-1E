@@ -68,6 +68,15 @@ public class MySymbolTable implements SymbolTable {
         return methods.getOrDefault(methodIdentifier, null);
     }
 
+    public boolean importExists(String importName){
+        for(String i: imports){
+            if(importName.equals(i)){
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * @return a list of fully qualified names of imports
      */
