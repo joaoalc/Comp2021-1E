@@ -24,7 +24,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
         addVisit("Sub", this::verifySumSub);
         addVisit("Mult", this::verifySumSub);
         addVisit("Div", this::verifySumSub);
-        addVisit("LessThan", this::verifySumSub);
+        addVisit("LessThan", this::verifyLessThan);
         addVisit("And", this::verifyAnd);
         addVisit("Parentheses", this::verifyParentheses);
         addVisit("Index", this::verifyIndex);
@@ -33,32 +33,92 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
         addVisit("NewExpression", this::verifyParentheses);
         addVisit("VarDeclaration", this::varDeclaration);
         addVisit("IntArray", this::verifyArray);
+        addVisit("Identifier", this::addValueToNodeOptional);
+        addVisit("IfStatement", this::verifyIfStatement);
+        addVisit("WhileStatement", this::verifyIfStatement);
 
         this.symbolTable = symbolTable;
     }
 
     public boolean verifyAnd(JmmNode node, List<Report> reports) {
-
         JmmNode firstChild = node.getChildren().get(0);
         JmmNode secondChild = node.getChildren().get(1);
 
         if (variablesNotDeclared(firstChild, secondChild, reports))
             return false;
 
-        if ((!firstChild.get("type").equals("boolean")) || firstChild.get("is_array").compareTo("false") != 0) {
-            reports.add(newSemanticReport(node, "Second value isn't an boolean"));
-            return false;
+        else {
+            Method method;
+            if(firstChild.getOptional("name").isPresent()){
+                method = NodeFindingMethods.FindParentMethod(firstChild, symbolTable);
+                Symbol var = NodeFindingMethods.getVariable(method, symbolTable, firstChild.get("name"));
+                firstChild.put("type", var.getType().getName());
+                firstChild.put("is_array", String.valueOf(var.getType().isArray()));
+            }
+            if(secondChild.getOptional("name").isPresent()){
+                method = NodeFindingMethods.FindParentMethod(secondChild, symbolTable);
+                Symbol var = NodeFindingMethods.getVariable(method, symbolTable, secondChild.get("name"));
+                secondChild.put("type", var.getType().getName());
+                secondChild.put("is_array", String.valueOf(var.getType().isArray()));
+            }
+
+
+            if (firstChild.get("type").compareTo("boolean") != 0 || firstChild.get("is_array").compareTo("false") != 0) {
+                reports.add(newSemanticReport(node, "Second value isn't an integer"));
+
+                return false;
+            }
+
+            if (secondChild.get("type").compareTo("boolean") != 0 || secondChild.get("is_array").compareTo("false") != 0) {
+                reports.add(newSemanticReport(node, "First value isn't an integer"));
+
+                return false;
+            }
+
+            node.put("type", "boolean");
+            node.put("is_array", "false");
         }
+        return true;
+    }
 
-        if (!secondChild.get("type").equals("boolean") && secondChild.get("is_array").compareTo("false") != 0) {
-            reports.add(newSemanticReport(node, "First value isn't an boolean"));
+    public boolean verifyLessThan(JmmNode node, List<Report> reports) {
+        JmmNode firstChild = node.getChildren().get(0);
+        JmmNode secondChild = node.getChildren().get(1);
 
+        if (variablesNotDeclared(firstChild, secondChild, reports))
             return false;
+
+        else {
+            Method method;
+            if(firstChild.getOptional("name").isPresent()){
+                method = NodeFindingMethods.FindParentMethod(firstChild, symbolTable);
+                Symbol var = NodeFindingMethods.getVariable(method, symbolTable, firstChild.get("name"));
+                firstChild.put("type", var.getType().getName());
+                firstChild.put("is_array", String.valueOf(var.getType().isArray()));
+            }
+            if(secondChild.getOptional("name").isPresent()){
+                method = NodeFindingMethods.FindParentMethod(secondChild, symbolTable);
+                Symbol var = NodeFindingMethods.getVariable(method, symbolTable, secondChild.get("name"));
+                secondChild.put("type", var.getType().getName());
+                secondChild.put("is_array", String.valueOf(var.getType().isArray()));
+            }
+
+
+            if (firstChild.get("type").compareTo("int") != 0 || firstChild.get("is_array").compareTo("false") != 0) {
+                reports.add(newSemanticReport(node, "Second value isn't an integer"));
+
+                return false;
+            }
+
+            if (secondChild.get("type").compareTo("int") != 0 || secondChild.get("is_array").compareTo("false") != 0) {
+                reports.add(newSemanticReport(node, "First value isn't an integer"));
+
+                return false;
+            }
+
+            node.put("type", "boolean");
+            node.put("is_array", "false");
         }
-
-        node.put("type", "boolean");
-        node.put("is_array", "false");
-
         return true;
     }
 
@@ -188,6 +248,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
                 if (node.getChildren().get(0).getOptional("name").isPresent()) {
                     Method method = NodeFindingMethods.FindParentMethod(node, symbolTable);
 
+                    //If it has a method, find in method and then symbol table
                     if(method != null){
                         if(method.getLocalVariable(node.getChildren().get(0).get("name")) == null) {
                             if(symbolTable.getField(node.getChildren().get(0).get("name")) == null) {
@@ -197,12 +258,17 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
                             }
                         }
                     }
-
-                    if (symbolTable.getField(node.getChildren().get(0).get("name")) == null){
+                    //If it doesn't have a method, find in symbol table only
+                    else if (symbolTable.getField(node.getChildren().get(0).get("name")) == null){
+                        System.out.println(node.getChildren().get(0).getKind());
                         reports.add(newSemanticReport(node, "Undeclared variable"));
 
                         return false;
                     }
+
+                    node.put("type", "int");
+                    node.put("is_array", "false");
+                    return true;
                 }
                 else if(node.getChildren().get(0).get("is_array").equals("true")) {
                     node.put("type", "int");
@@ -253,6 +319,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
     }
 
     public boolean varAssignment(JmmNode node, List<Report> reports){
+        System.out.println("Node kind: " + node.getKind());
         //Without index
         if(node.getChildren().size() == 2){
             if(node.getChildren().get(0).getOptional("name").isEmpty()){
@@ -365,6 +432,30 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
         node.put("type", child.get("type"));
         node.put("is_array", "true");
 
+        return true;
+    }
+
+    public boolean addValueToNodeOptional(JmmNode node, List<Report> reports){
+        Method method = NodeFindingMethods.FindParentMethod(node, symbolTable);
+        Symbol symbol = NodeFindingMethods.getVariable(method, symbolTable, node.get("name"));
+
+        if(symbol == null){
+            //In the case of variable declarations where the value isn't in the symbol table yet
+            return true;
+        }
+        node.put("type", symbol.getType().getName());
+        node.put("is_array", String.valueOf(symbol.getType().isArray()));
+        return true;
+    }
+
+    public boolean verifyIfStatement(JmmNode node, List<Report> reports){
+        if((!node.getChildren().get(0).get("type").equals("boolean")) || node.getChildren().get(0).get("is_array").equals("true")){
+            //TODO: Wrong variable type in if statement error
+            System.out.println("Wrong type inside of if.");
+            return false;
+        }
+        //node.put("type", "boolean");
+        //node.put("is_array", "true");
         return true;
     }
 

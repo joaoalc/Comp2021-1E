@@ -1,10 +1,10 @@
 import ioPlus;
 class HelloWorld {
     int a;
+	    int[] b;
 	public static void main(String[] args) {
-	    int b;
-	    a = 5;
-	    b = a + 3;
+	    b = new int[10];
+	    a = b.length;
         ioPlus.printHelloWorld();
 	}
 }
