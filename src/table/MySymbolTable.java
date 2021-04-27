@@ -62,6 +62,12 @@ public class MySymbolTable implements SymbolTable {
         return false;
     }
 
+    public Method getMethod(String methodName, List<Symbol> methodArgs){
+        Method tmpMethod = new Method(methodName, new Type("", false), methodArgs);
+        String methodIdentifier = tmpMethod.getIdentifier();
+        return methods.getOrDefault(methodIdentifier, null);
+    }
+
     /**
      * @return a list of fully qualified names of imports
      */

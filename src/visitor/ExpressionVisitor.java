@@ -240,6 +240,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
     }
 
     public boolean verifyCall(JmmNode node, List<Report> reports){
+        System.out.println(node.getChildren().size());
         if (node.getChildren().size() == 2){
             boolean ownFunction = node.getChildren().get(0).getKind().equals("This");
 
@@ -293,14 +294,26 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
 
                 //Get function arguments;
                 for (int i = 0; i < node.getChildren().get(1).getChildren().size(); i++){
+
                     // String varName = node.getChildren().get(1).getChildren().get(i).get("name");
                     //System.out.println("Argument number: " + i + " " + varName);
                     //TODO: See which function we are in so we can get that method's local variables
+
+                    arguments.add(new ValueSymbol(new Type(node.getChildren().get(1).getChildren().get(i).get("type"), Boolean.parseBoolean(node.getChildren().get(1).getChildren().get(i).get("is_array"))), "-", false));
+
                 }
 
                 if (!symbolTable.methodExists(node.getChildren().get(1).get("name"), arguments)) {
                     System.out.println("Undeclared method, add report here and stop execution");
                     return false;
+                }
+                //if method exists with same arguments
+                else{
+                    Method method = symbolTable.getMethod(node.getChildren().get(1).get("name"), arguments);
+                    node.put("type", method.getReturnType().getName());
+                    node.put("is_array", String.valueOf(method.getReturnType().isArray()));
+                    return true;
+                    //symbolTable.getMethod()
                 }
             }
 
@@ -310,16 +323,22 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
 //                    System.out.println("Undeclared import, add report here and stop execution");
 //                    return false;
 //                }
+
             }
 
             //TODO: check arguments
             return true;
         }
+        else{
+            //new Constructor();
+            System.out.println(node.getChildren().size());
+            //if(node.getChildren().get)
+        }
         return true;
     }
 
     public boolean varAssignment(JmmNode node, List<Report> reports){
-        System.out.println("Node kind: " + node.getKind());
+        System.out.println("Node kind: " + node.getChildren().get(1));
         //Without index
         if(node.getChildren().size() == 2){
             if(node.getChildren().get(0).getOptional("name").isEmpty()){
