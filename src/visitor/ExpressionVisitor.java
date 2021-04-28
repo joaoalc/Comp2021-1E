@@ -260,7 +260,6 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
                     }
                     //If it doesn't have a method, find in symbol table only
                     else if (symbolTable.getField(node.getChildren().get(0).get("name")) == null){
-                        System.out.println(node.getChildren().get(0).getKind());
                         reports.add(newSemanticReport(node, "Undeclared variable"));
 
                         return false;
@@ -289,7 +288,6 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
             if(!ownFunction){
 
                 String name = node.getChildren().get(0).get("name");
-                System.out.println("name");
                 //If it's an import
                 if(symbolTable.importExists(name)){
                     node.put("type", "");
@@ -305,6 +303,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
                 else{
                     symbol = (ValueSymbol) NodeFindingMethods.getVariable(symbolTable, name);
                 }
+                System.out.println("Symbol: " + symbol);
                 if(symbol != null){
                     if(!symbol.hasValue()){
 
@@ -317,6 +316,11 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
                     if(symbol.getType().getName().equals(symbolTable.getClassName()) && symbolTable.getSuper() == null){
                         //See if method exists
                         ownFunction = true;
+                    }
+                    else if(symbol.getType().getName().equals(symbolTable.getClassName()) && symbolTable.getSuper() != null){
+                        node.put("type", "");
+                        node.put("is_array", "");
+                        return true;
                     }
                 }
                 else{
@@ -339,6 +343,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
 
                 List<Symbol> arguments = new ArrayList<>();
 
+                System.out.println(node.getChildren().get(1).getChildren().get(0).toJson());
                 //Get function arguments;
                 for (int i = 0; i < node.getChildren().get(1).getChildren().size(); i++){
                     //TODO: See which function we are in so we can get that method's local variables
@@ -346,7 +351,6 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
                     arguments.add(new ValueSymbol(new Type(node.getChildren().get(1).getChildren().get(i).get("type"), Boolean.parseBoolean(node.getChildren().get(1).getChildren().get(i).get("is_array"))), "-", false));
 
                 }
-
                 if (!symbolTable.methodExists(node.getChildren().get(1).get("name"), arguments)) {
                     if(symbolTable.getSuper() == null){
                         //TODO: Add report
@@ -380,7 +384,6 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
     }
 
     public boolean varAssignment(JmmNode node, List<Report> reports){
-        System.out.println("Node kind: " + node.getChildren().get(1));
         //Without index
         if(node.getChildren().size() == 2){
             if(node.getChildren().get(0).getOptional("name").isEmpty()){
@@ -392,7 +395,9 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
             Method method = NodeFindingMethods.FindParentMethod(node, symbolTable);
             ValueSymbol var_symbol = (ValueSymbol) NodeFindingMethods.getVariable(method, symbolTable, node.getChildren().get(0).get("name"));
 
-            System.out.println(NodeFindingMethods.sameType(node.getChildren().get(1).get("type"), var_symbol.getType().getName()));
+            System.out.println("1st " + node.getChildren().get(1).get("type"));
+            System.out.println("2nd " + var_symbol.getType().getName());
+
             if(var_symbol == null){
                 //TODO: Undeclared variable error
                 System.out.println("Undeclared variable.");
@@ -405,10 +410,9 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
             }
             else if(!NodeFindingMethods.sameType(node.getChildren().get(1).get("type"), var_symbol.getType().getName())){
                 //TODO: Type mismatch error
-                System.out.println("Type mismatch error.");
+                System.out.println("Type mismatch error. Line " + node.getChildren().get(1).get("line"));
                 return false;
             }
-            System.out.println("Variable " + var_symbol + " has a value now!");
             var_symbol.setHas_value(true);
             return true;
         }
