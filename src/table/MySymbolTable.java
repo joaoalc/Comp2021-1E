@@ -56,6 +56,7 @@ public class MySymbolTable implements SymbolTable {
     public boolean methodExists(String methodName, List<Symbol> methodArgs){
         Method tmpMethod = new Method(methodName, new Type("", false), methodArgs);
         String methodIdentifier = tmpMethod.getIdentifier();
+
         if(methods.getOrDefault(methodIdentifier, null) != null){
             return true;
         }

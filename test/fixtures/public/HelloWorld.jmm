@@ -1,9 +1,10 @@
 import ioPlus;
-class HelloWorld extends meme{
-    Bruh c;
+class HelloWorld{
+    HelloWorld c;
     int a;
 	public static void main(String[] args) {
-        ioPlus.printHelloWorld();
+
+        c = new HelloWorld();
         c.doStuff(a);
 	}
 

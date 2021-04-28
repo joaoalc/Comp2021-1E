@@ -285,8 +285,54 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
             boolean ownFunction = node.getChildren().get(0).getKind().equals("This");
 
             //this.etc()
+            if(!ownFunction){
+
+                String name = node.getChildren().get(0).get("name");
+                System.out.println("name");
+                //If it's an import
+                if(symbolTable.importExists(name)){
+                    node.put("type", "");
+                    node.put("is_array", "");
+                    return true;
+                }
+
+                Method method = NodeFindingMethods.FindParentMethod(node, symbolTable);
+                ValueSymbol symbol;
+                if(method != null) {
+                    symbol = (ValueSymbol) NodeFindingMethods.getVariable(method, symbolTable, name);
+                }
+                else{
+                    symbol = (ValueSymbol) NodeFindingMethods.getVariable(symbolTable, name);
+                }
+                if(symbol != null){
+                    if(!symbol.hasValue()){
+
+                        //TODO: Uninitialized variable error
+                        System.out.println("error: uninitialized variable calling method");
+                        return true;
+                    }
+                    System.out.println(symbol.getType().getName());
+                    System.out.println(symbolTable.getClassName());
+                    if(symbol.getType().getName().equals(symbolTable.getClassName()) && symbolTable.getSuper() == null){
+                        //See if method exists
+                        ownFunction = true;
+                    }
+                }
+                else{
+                    //TODO: Undeclared variable error
+                    System.out.println("error: uninitialized variable calling method");
+                    return false;
+                }
+                if(!ownFunction) {
+                    node.put("type", symbol.getType().getName());
+                    node.put("is_array", String.valueOf(symbol.getType().isArray()));
+                    return true;
+                }
+
+
+            }
+            //DO NOT DO ELSE IF, THIS VALUE IS CHANGED IN THE FIRST IF
             if(ownFunction) {
-                ArrayList<Symbol> symbols = new ArrayList<>();
                 //Get arguments
                 //Is the method in the table?
 
@@ -294,9 +340,6 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
 
                 //Get function arguments;
                 for (int i = 0; i < node.getChildren().get(1).getChildren().size(); i++){
-
-                    // String varName = node.getChildren().get(1).getChildren().get(i).get("name");
-                    //System.out.println("Argument number: " + i + " " + varName);
                     //TODO: See which function we are in so we can get that method's local variables
 
                     arguments.add(new ValueSymbol(new Type(node.getChildren().get(1).getChildren().get(i).get("type"), Boolean.parseBoolean(node.getChildren().get(1).getChildren().get(i).get("is_array"))), "-", false));
@@ -321,65 +364,13 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
                     node.put("type", method.getReturnType().getName());
                     node.put("is_array", String.valueOf(method.getReturnType().isArray()));
                     return true;
-                    //symbolTable.getMethod()
                 }
             }
             // <import_name>.etc()
             //  or
             // varName.etc()
-            //  or
-            // className.etc()
-            else{
-
-                String name = node.getChildren().get(0).get("name");
-                System.out.println("name");
-                //If it's an import
-                if(symbolTable.importExists(name)){
-                    node.put("type", "");
-                    node.put("is_array", "");
-                    return true;
-                }
-
-                Method method = NodeFindingMethods.FindParentMethod(node, symbolTable);
-                ValueSymbol symbol;
-                if(method != null) {
-                    symbol = (ValueSymbol) NodeFindingMethods.getVariable(method, symbolTable, name);
-                }
-                else{
-                    symbol = (ValueSymbol) NodeFindingMethods.getVariable(symbolTable, name);
-                }
-                if(symbol != null){
-                    if(!symbol.hasValue()){
-
-                        //TODO: Undeclared variable warning
-                        System.out.println("(warning) undeclared variable calling method");
-                        return true;
-                    }
-                }
-                else{
-                    //If it's the current class' name
-                    if(node.getChildren().get(0).get("name").equals(symbolTable.getClassName())){
-                        //TODO: Own class check like the one above
-                        System.out.println("Not implemented yet");
-                        return true;
-                    }
-                    //If it's the superclass' name
-                    else if(node.getChildren().get(0).get("name").equals(symbolTable.getSuper())){
-                        node.put("type", "");
-                        node.put("is_array", "");
-                        return true;
-                    }
 
 
-                }
-                node.put("type", symbol.getType().getName());
-                node.put("is_array", String.valueOf(symbol.getType().isArray()));
-                return true;
-
-
-            }
-
-            //TODO: check arguments
             return true;
         }
         else{

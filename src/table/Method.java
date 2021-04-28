@@ -7,6 +7,7 @@ import pt.up.fe.comp.jmm.analysis.table.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Method {
@@ -52,7 +53,11 @@ public class Method {
         return local_variables.getOrDefault(varName, null);}
 
     public String getIdentifier() {
-        List<String> parameter_types = parameters.stream().map(Symbol::getName).collect(Collectors.toList());
+
+        List<String> parameter_types = new ArrayList<String>();
+        for(Symbol i: parameters){
+            parameter_types.add(i.getType().getName());
+        }
 
         return String.join("-", name, String.join("-", parameter_types));
     }
