@@ -13,13 +13,16 @@ import java.util.stream.Collectors;
 public class Method {
     private String name;
     private Type return_type;
-    private List<Symbol> parameters;
+    private List<ValueSymbol> parameters;
     private final HashMap<String, ValueSymbol> local_variables = new HashMap<>();
 
-    public Method(String name, Type return_type, List<Symbol> parameters) {
+    public Method(String name, Type return_type, List<ValueSymbol> parameters) {
         this.name = name;
         this.return_type = return_type;
         this.parameters = parameters;
+        for(ValueSymbol param: parameters){
+            local_variables.put(param.getName(), param);
+        }
     }
 
     public void addLocalVariable(Type type, String name, boolean value) {
@@ -41,7 +44,7 @@ public class Method {
         return return_type;
     }
 
-    public List<Symbol> getParameters() {
+    public List<ValueSymbol> getParameters() {
         return parameters;
     }
 

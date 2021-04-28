@@ -11,6 +11,7 @@ import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
 import pt.up.fe.comp.jmm.report.Report;
 
 import table.MySymbolTable;
+import table.ValueSymbol;
 
 import static utils.Utils.getChildrenOfKind;
 
@@ -65,13 +66,13 @@ public class DeclarationVisitor extends PreorderJmmVisitor<List<Report>, Boolean
         String name = node.get("name");
 
         List<JmmNode> argumentNodes = getChildrenOfKind(node, "Argument");
-        List<Symbol> arguments = new ArrayList<>();
+        List<ValueSymbol> arguments = new ArrayList<>();
 
         for (JmmNode argumentNode : argumentNodes) {
             JmmNode type_node = argumentNode.getChildren().get(0);
             Type type = parseTypeNode(type_node);
             String argument_name = argumentNode.get("name");
-            arguments.add(new Symbol(type, argument_name));
+            arguments.add(new ValueSymbol(type, argument_name));
         }
 
         symbolTable.addMethod(return_type, name, arguments);

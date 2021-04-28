@@ -40,7 +40,7 @@ public class MySymbolTable implements SymbolTable {
         return fields.getOrDefault(symbol.getName(), null) != null;
     }
 
-    public void addMethod(Type return_type, String name, List<Symbol> parameters) {
+    public void addMethod(Type return_type, String name, List<ValueSymbol> parameters) {
         Method method = new Method(name, return_type, parameters);
         methods.put(method.getIdentifier(), method);
     }
@@ -53,7 +53,7 @@ public class MySymbolTable implements SymbolTable {
         return methods.getOrDefault(method.getIdentifier(), null);
     }
 
-    public boolean methodExists(String methodName, List<Symbol> methodArgs){
+    public boolean methodExists(String methodName, List<ValueSymbol> methodArgs){
         Method tmpMethod = new Method(methodName, new Type("", false), methodArgs);
         String methodIdentifier = tmpMethod.getIdentifier();
 
@@ -63,7 +63,7 @@ public class MySymbolTable implements SymbolTable {
         return false;
     }
 
-    public Method getMethod(String methodName, List<Symbol> methodArgs){
+    public Method getMethod(String methodName, List<ValueSymbol> methodArgs){
         Method tmpMethod = new Method(methodName, new Type("", false), methodArgs);
         String methodIdentifier = tmpMethod.getIdentifier();
         return methods.getOrDefault(methodIdentifier, null);
@@ -134,7 +134,7 @@ public class MySymbolTable implements SymbolTable {
      */
     @Override
     public List<Symbol> getParameters(String methodName) {
-        return methods.get(methodName).getParameters();
+        return null;//methods.get(methodName).getParameters();
     }
 
     /**

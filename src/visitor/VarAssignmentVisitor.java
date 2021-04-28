@@ -97,13 +97,13 @@ public class VarAssignmentVisitor extends PreorderJmmVisitor<List<Report>, Boole
             String name = currentNode.get("name");
 
             List<JmmNode> argumentNodes = getChildrenOfKind(currentNode, "Argument");
-            List<Symbol> arguments = new ArrayList<>();
+            List<ValueSymbol> arguments = new ArrayList<>();
 
             for (JmmNode argumentNode : argumentNodes) {
                 JmmNode type_node = argumentNode.getChildren().get(0);
                 Type type = parseTypeNode(type_node);
                 String argument_name = argumentNode.get("name");
-                arguments.add(new Symbol(type, argument_name));
+                arguments.add(new ValueSymbol(type, argument_name));
             }
             return new Method(name, return_type, arguments);
         }

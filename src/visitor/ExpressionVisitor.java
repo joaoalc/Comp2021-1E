@@ -303,7 +303,6 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
                 else{
                     symbol = (ValueSymbol) NodeFindingMethods.getVariable(symbolTable, name);
                 }
-                System.out.println("Symbol: " + symbol);
                 if(symbol != null){
                     if(!symbol.hasValue()){
 
@@ -311,8 +310,6 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
                         System.out.println("error: uninitialized variable calling method");
                         return true;
                     }
-                    System.out.println(symbol.getType().getName());
-                    System.out.println(symbolTable.getClassName());
                     if(symbol.getType().getName().equals(symbolTable.getClassName()) && symbolTable.getSuper() == null){
                         //See if method exists
                         ownFunction = true;
@@ -341,9 +338,8 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
                 //Get arguments
                 //Is the method in the table?
 
-                List<Symbol> arguments = new ArrayList<>();
+                List<ValueSymbol> arguments = new ArrayList<>();
 
-                System.out.println(node.getChildren().get(1).getChildren().get(0).toJson());
                 //Get function arguments;
                 for (int i = 0; i < node.getChildren().get(1).getChildren().size(); i++){
                     //TODO: See which function we are in so we can get that method's local variables
