@@ -1,6 +1,7 @@
 package visitor;
 
 import com.sun.jdi.Value;
+import org.w3c.dom.Node;
 import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
@@ -63,13 +64,13 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
             }
 
 
-            if (firstChild.get("type").compareTo("boolean") != 0 || firstChild.get("is_array").compareTo("false") != 0) {
+            if ( (!NodeFindingMethods.sameType(firstChild.get("type"), "boolean")) || (!NodeFindingMethods.sameType(firstChild.get("is_array"), "false"))) {
                 reports.add(newSemanticReport(node, "Second value isn't an integer"));
 
                 return false;
             }
 
-            if (secondChild.get("type").compareTo("boolean") != 0 || secondChild.get("is_array").compareTo("false") != 0) {
+            if ((!NodeFindingMethods.sameType(secondChild.get("type"), "boolean")) || (!NodeFindingMethods.sameType(secondChild.get("is_array"), "false"))) {
                 reports.add(newSemanticReport(node, "First value isn't an integer"));
 
                 return false;
@@ -104,13 +105,13 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
             }
 
 
-            if (firstChild.get("type").compareTo("int") != 0 || firstChild.get("is_array").compareTo("false") != 0) {
+            if ((!NodeFindingMethods.sameType(firstChild.get("type"), "int")) || (!NodeFindingMethods.sameType(firstChild.get("is_array"), "false"))) {
                 reports.add(newSemanticReport(node, "Second value isn't an integer"));
 
                 return false;
             }
 
-            if (secondChild.get("type").compareTo("int") != 0 || secondChild.get("is_array").compareTo("false") != 0) {
+            if ( (!NodeFindingMethods.sameType(secondChild.get("type"), "int")) || (!NodeFindingMethods.sameType(secondChild.get("is_array"), "false"))) {
                 reports.add(newSemanticReport(node, "First value isn't an integer"));
 
                 return false;
@@ -145,13 +146,13 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
             }
 
 
-            if (firstChild.get("type").compareTo("int") != 0 || firstChild.get("is_array").compareTo("false") != 0) {
+            if ((!NodeFindingMethods.sameType(firstChild.get("type"), "int")) || (!NodeFindingMethods.sameType(firstChild.get("is_array"), "false"))) {
                 reports.add(newSemanticReport(node, "Second value isn't an integer"));
 
                 return false;
             }
 
-            if (secondChild.get("type").compareTo("int") != 0 || secondChild.get("is_array").compareTo("false") != 0) {
+            if ( (!NodeFindingMethods.sameType(secondChild.get("type"), "int")) || (!NodeFindingMethods.sameType(secondChild.get("is_array"), "false"))) {
                 reports.add(newSemanticReport(node, "First value isn't an integer"));
 
                 return false;
@@ -165,7 +166,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
 
     public boolean variablesNotDeclared(JmmNode firstChild, JmmNode secondChild, List<Report> reports) {
         if (firstChild.getOptional("type").isEmpty()) {
-            if (firstChild.getKind().compareTo("Identifier") == 0) {
+            if (NodeFindingMethods.sameType(firstChild.getKind(), "Identifier")) {
                 //Check if identifier is declared
                 Method method = NodeFindingMethods.FindParentMethod(firstChild);
                 method = symbolTable.getMethod(method);
@@ -189,7 +190,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
         }
 
         else if (secondChild.getOptional("type").isEmpty()) {
-            if (secondChild.getKind().compareTo("Identifier") == 0) {
+            if (NodeFindingMethods.sameType(secondChild.getKind(), "Identifier")) {
                 //Check if identifier is declared
                 Method method = NodeFindingMethods.FindParentMethod(secondChild);
                 method = symbolTable.getMethod(method);
@@ -227,7 +228,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
     public boolean verifyIndex(JmmNode node, List<Report> reports) {
         JmmNode child = node.getChildren().get(0);
 
-        if(!child.get("type").equals("int")){
+        if(!(NodeFindingMethods.sameType(child.get("type"), "int"))){
             //TODO: Semantic error, index isn't int
             System.out.println("Index isn't int");
             return false;
@@ -269,7 +270,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
                     node.put("is_array", "false");
                     return true;
                 }
-                else if(node.getChildren().get(0).get("is_array").equals("true")) {
+                else if((NodeFindingMethods.sameType(node.getChildren().get(0).get("is_array"), "true"))) {
                     node.put("type", "int");
                     node.put("is_array", "false");
                     return true;
@@ -401,7 +402,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
                 System.out.println("Index on non array variable error");
                 return false;
             }
-            else if(!var_symbol.getType().getName().equals(node.getChildren().get(1).get("type"))){
+            else if(!NodeFindingMethods.sameType(node.getChildren().get(1).get("type"), var_symbol.getType().getName())){
                 //TODO: Type mismatch error
                 System.out.println("Type mismatch error.");
                 return false;
@@ -432,7 +433,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
                 System.out.println("Index on non array variable error");
                 return false;
             }
-            else if(!var_symbol.getType().getName().equals(node.getChildren().get(2).get("type"))){
+            else if(!NodeFindingMethods.sameType(node.getChildren().get(2).get("type"), var_symbol.getType().getName())){
                 //TODO: Type mismatch error
                 System.out.println("Type mismatch error.");
                 return false;
@@ -509,7 +510,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
     }
 
     public boolean verifyIfStatement(JmmNode node, List<Report> reports){
-        if((!node.getChildren().get(0).get("type").equals("boolean")) || node.getChildren().get(0).get("is_array").equals("true")){
+        if((! NodeFindingMethods.sameType(node.getChildren().get(0).get("type"), "boolean")) || NodeFindingMethods.sameType(node.getChildren().get(0).get("is_array"), "true")){
             //TODO: Wrong variable type in if statement error
             System.out.println("Wrong type inside of if.");
             return false;

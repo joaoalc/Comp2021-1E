@@ -101,4 +101,15 @@ public class NodeFindingMethods {
         return true;
     }
 
+    public static boolean sameType(String type, String intended_type){
+        if(type.equals("")){
+            return true;
+        }
+        if(intended_type.equals(""))
+        if(type.equals(intended_type)){
+            return true;
+        }
+        return false;
+    }
+
 }
