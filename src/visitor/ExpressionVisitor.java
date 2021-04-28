@@ -384,15 +384,12 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
         if(node.getChildren().size() == 2){
             if(node.getChildren().get(0).getOptional("name").isEmpty()){
                 //TODO: Index on non variable error
-                System.out.println("Index on non variable error");
+                System.out.println("Index on non variable error. Line " + node.getChildren().get(0).get("line"));
                 return false;
             }
 
             Method method = NodeFindingMethods.FindParentMethod(node, symbolTable);
             ValueSymbol var_symbol = (ValueSymbol) NodeFindingMethods.getVariable(method, symbolTable, node.getChildren().get(0).get("name"));
-
-            System.out.println("1st " + node.getChildren().get(1).get("type"));
-            System.out.println("2nd " + var_symbol.getType().getName());
 
             if(var_symbol == null){
                 //TODO: Undeclared variable error
@@ -401,7 +398,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
             }
             else if(var_symbol.getType().isArray() != Boolean.parseBoolean(node.getChildren().get(1).get("is_array"))){
                 //TODO: Index on non array variable error
-                System.out.println("Index on non array variable error");
+                System.out.println("Index on non array variable error on line " + node.getChildren().get(1).get("line"));
                 return false;
             }
             else if(!NodeFindingMethods.sameType(node.getChildren().get(1).get("type"), var_symbol.getType().getName())){
@@ -444,7 +441,6 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
                 System.out.println("Uninitalized array.");
                 return false;
             }
-            System.out.println("Variable " + var_symbol + " has had a value assigned to one of it's indexes!");
             return true;
         }
         return true;
