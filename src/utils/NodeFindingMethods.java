@@ -102,13 +102,12 @@ public class NodeFindingMethods {
     }
 
     public static boolean sameType(String type, String intended_type){
-        if(type.equals("")){
+        if(type.equals(""))
             return true;
-        }
         if(intended_type.equals(""))
-        if(type.equals(intended_type)){
             return true;
-        }
+        if(type.equals(intended_type))
+            return true;
         return false;
     }
 

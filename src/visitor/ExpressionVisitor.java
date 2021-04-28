@@ -392,6 +392,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
             Method method = NodeFindingMethods.FindParentMethod(node, symbolTable);
             ValueSymbol var_symbol = (ValueSymbol) NodeFindingMethods.getVariable(method, symbolTable, node.getChildren().get(0).get("name"));
 
+            System.out.println(NodeFindingMethods.sameType(node.getChildren().get(1).get("type"), var_symbol.getType().getName()));
             if(var_symbol == null){
                 //TODO: Undeclared variable error
                 System.out.println("Undeclared variable.");
