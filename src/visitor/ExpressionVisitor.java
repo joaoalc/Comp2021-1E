@@ -37,6 +37,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
         addVisit("Identifier", this::addValueToNodeOptional);
         addVisit("IfStatement", this::verifyIfStatement);
         addVisit("WhileStatement", this::verifyIfStatement);
+        addVisit("Negate", this::verifyNegate);
 
         this.symbolTable = symbolTable;
     }
@@ -213,6 +214,30 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
             //System.out.println("2nd node Doesnt have a value.");
         }
 
+        return false;
+    }
+
+    public boolean variablesNotDeclared(JmmNode child, List<Report> reports) {
+        if (child.getOptional("type").isEmpty()) {
+            if (NodeFindingMethods.sameType(child.getKind(), "Identifier")) {
+                //Check if identifier is declared
+                Method method = NodeFindingMethods.FindParentMethod(child);
+                method = symbolTable.getMethod(method);
+                Symbol symbol = NodeFindingMethods.getVariable(method, symbolTable, child.get("name"));
+
+                if (symbol == null) {
+                    reports.add(newSemanticReport(child, "First variable hasn't been declared"));
+
+                    return true;
+                }
+
+                if (!((ValueSymbol) symbol).hasValue()) {
+                    reports.add(newSemanticReport(child, "First variable hasn't been given a value"));
+
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -418,7 +443,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
             }
 
             Method method = NodeFindingMethods.FindParentMethod(node, symbolTable);
-            ValueSymbol var_symbol = (ValueSymbol) NodeFindingMethods.getVariable(method, symbolTable, node.getChildren().get(0).get("name"));
+            ValueSymbol var_symbol = NodeFindingMethods.getVariable(method, symbolTable, node.getChildren().get(0).get("name"));
 
             if(var_symbol == null){
                 //TODO: Undeclared variable error
@@ -428,7 +453,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
             //Note: This only works cause we do not have multidimensional arrays
             else if((!var_symbol.getType().isArray()) || node.getChildren().get(2).get("is_array").equals("true")){
                 //TODO: Index on non array variable error
-                System.out.println("Index on non array variable error");
+                System.out.println("Index on non array variable error line " + node.getChildren().get(2).get("line"));
                 return false;
             }
             else if(!NodeFindingMethods.sameType(node.getChildren().get(2).get("type"), var_symbol.getType().getName())){
@@ -438,9 +463,10 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
             }
             if(!var_symbol.hasValue()){
                 //TODO: Uninitialized array error
-                System.out.println("Uninitalized array.");
+                System.out.println("Uninitalized array. Line " + node.getChildren().get(0).get("line") + " col " + node.getChildren().get(0).get("col"));
                 return false;
             }
+            var_symbol.setHas_value(true);
             return true;
         }
         return true;
@@ -450,7 +476,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
         String varName = node.get("name");
 
         Type varType = new Type(node.getChildren().get(0).get("name"), Boolean.parseBoolean(node.getChildren().get(0).get("is_array")));
-        Symbol symbol = new Symbol(varType, varName);
+        ValueSymbol symbol = new ValueSymbol(varType, varName);
 
         Method method = NodeFindingMethods.FindParentMethod(node, symbolTable);
 
@@ -495,7 +521,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
 
     public boolean addValueToNodeOptional(JmmNode node, List<Report> reports){
         Method method = NodeFindingMethods.FindParentMethod(node, symbolTable);
-        Symbol symbol = NodeFindingMethods.getVariable(method, symbolTable, node.get("name"));
+        ValueSymbol symbol = (ValueSymbol) NodeFindingMethods.getVariable(method, symbolTable, node.get("name"));
 
         if(symbol == null){
             //In the case of variable declarations where the value isn't in the symbol table yet
@@ -503,6 +529,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
         }
         node.put("type", symbol.getType().getName());
         node.put("is_array", String.valueOf(symbol.getType().isArray()));
+        node.put("declared", String.valueOf(symbol.hasValue()));
         return true;
     }
 
@@ -517,4 +544,20 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
         return true;
     }
 
+    public boolean verifyNegate(JmmNode node, List<Report> reports) {
+
+        if(NodeFindingMethods.sameType(node.getChildren().get(0).get("type"), "boolean"))
+            if(NodeFindingMethods.sameType(node.getChildren().get(0).get("is_array"), "false")){
+                if(node.getChildren().get(0).getKind().equals("Identifier")){
+                    if(!variablesNotDeclared(node.getChildren().get(0), reports)){
+                        node.put("type", "boolean");
+                        node.put("is_array", "false");
+                    }
+                }
+                //Any type gets converted to boolean aswell
+                node.put("type", "boolean");
+                node.put("is_array", "false");
+            }
+        return true;
+    }
 }

@@ -1,5 +1,6 @@
 package utils;
 
+import com.sun.jdi.Value;
 import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
@@ -78,12 +79,12 @@ public class NodeFindingMethods {
         return new Type(type_name, is_array);
     }
 
-    public static Symbol getVariable(MySymbolTable symbolTable, String varName){
+    public static ValueSymbol getVariable(MySymbolTable symbolTable, String varName){
         return symbolTable.getField(varName);
     }
 
-    public static Symbol getVariable(Method method, MySymbolTable symbolTable, String varName){
-        Symbol result;
+    public static ValueSymbol getVariable(Method method, MySymbolTable symbolTable, String varName){
+        ValueSymbol result;
 
         result = method.getLocalVariable(varName);
         if(result == null){
@@ -93,7 +94,7 @@ public class NodeFindingMethods {
         return result;
     }
 
-    public static boolean variableExists(Method method, MySymbolTable symbolTable, Symbol symbol){
+    public static boolean variableExists(Method method, MySymbolTable symbolTable, ValueSymbol symbol){
         if(!method.localVariableExists(symbol)){
             if(!symbolTable.fieldExists(symbol)){
                 return false;

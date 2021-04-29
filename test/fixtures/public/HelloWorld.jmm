@@ -1,11 +1,10 @@
 import ioPlus;
 class HelloWorld{
-    HelloWorld c;
+    int[] c;
     int a;
 	public static void main(String[] args) {
-
-        c = new HelloWorld();
-        c.doStuff(a);
+        c = new int[10];
+        c[3] = a;
 	}
 
 	public int doStuff(int a){

@@ -28,7 +28,7 @@ public class VarDeclarationVisitor extends PreorderJmmVisitor<List<Report>, Bool
         String varName = node.get("name");
 
         Type varType = new Type(node.getChildren().get(0).get("name"), Boolean.parseBoolean(node.getChildren().get(0).get("is_array")));
-        Symbol symbol = new Symbol(varType, varName);
+        ValueSymbol symbol = new ValueSymbol(varType, varName);
 
         Method method = NodeFindingMethods.FindParentMethod(node, symbolTable);
 
