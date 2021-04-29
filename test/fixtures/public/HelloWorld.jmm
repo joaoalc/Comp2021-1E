@@ -4,7 +4,7 @@ class HelloWorld{
     int a;
 	public static void main(String[] args) {
         c = new int[10];
-        c[3] = a;
+        a = c[3];
 	}
 
 	public int doStuff(int a){
