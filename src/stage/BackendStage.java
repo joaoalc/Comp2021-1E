@@ -47,14 +47,14 @@ public class BackendStage implements JasminBackend {
             // Convert the OLLIR to a String containing the equivalent Jasmin code
             String jasminCode = "";
 
-            String accessModifier = acessModifierToString(ollirClass.getClassAccessModifier());
+            String classAccessModifier = acessModifierToString(ollirClass.getClassAccessModifier());
 
-            if (accessModifier.isEmpty())
-                accessModifier = "public";
+            if (classAccessModifier.isEmpty())
+                classAccessModifier = "public";
 
             String className = ollirClass.getClassName();
 
-            jasminCode += String.format(".class %s %s\n", accessModifier, className);
+            jasminCode += String.format(".class %s %s\n", classAccessModifier, className);
 
             String superClassName = ollirClass.getSuperClass();
 
@@ -64,8 +64,29 @@ public class BackendStage implements JasminBackend {
             jasminCode += String.format(".super %s\n\n", superClassName);
 
             for (Method method : ollirClass.getMethods()) {
-                jasminCode += String.format(".method %s\n", method.getMethodName());
+                // Method name
+                String methodName = method.getMethodName();
 
+                if (method.isConstructMethod())
+                    methodName = "<init>";
+
+                // Method access modifier
+                String methodAccessModifier = acessModifierToString(method.getMethodAccessModifier());
+
+                if (!methodAccessModifier.isEmpty())
+                    methodAccessModifier += " ";
+
+                // Method parameters
+                String paramsCode = "";
+
+                for (Element parameter : method.getParams())
+                    paramsCode += parameter;
+
+                jasminCode += String.format(".method %s%s(%s)\n", methodAccessModifier, methodName, paramsCode);
+
+                String instructionCode = "";
+
+                // Iterate over method's instructions
                 for (Instruction instruction : method.getInstructions()) {
                     switch (instruction.getInstType()) {
                         case CALL:
@@ -83,7 +104,7 @@ public class BackendStage implements JasminBackend {
                             generate((CondBranchInstruction) instruction);
                             break;
                         case RETURN:
-                            generate((ReturnInstruction) instruction);
+                            instructionCode = generate((ReturnInstruction) instruction);
                             break;
                         case GETFIELD:
                             generate((GetFieldInstruction) instruction);
@@ -100,6 +121,7 @@ public class BackendStage implements JasminBackend {
                     }
                 }
 
+                jasminCode += instructionCode;
                 jasminCode += ".end method\n\n";
             }
 
@@ -164,8 +186,8 @@ public class BackendStage implements JasminBackend {
 
     }
 
-    private void generate(ReturnInstruction instruction) {
-
+    private String generate(ReturnInstruction instruction) {
+        return "return";
     }
 
     private void generate(GetFieldInstruction instruction) {
