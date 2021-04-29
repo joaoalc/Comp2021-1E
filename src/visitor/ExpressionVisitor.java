@@ -14,6 +14,7 @@ import utils.NodeFindingMethods;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static utils.Utils.newSemanticReport;
 
@@ -251,16 +252,35 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
     }
 
     public boolean verifyIndex(JmmNode node, List<Report> reports) {
-        JmmNode child = node.getChildren().get(0);
+        JmmNode array = node.getChildren().get(0);
+        if(array.getOptional("name").isEmpty()){
+            //TODO: Add report here
+            System.out.println("Non variable used as array for index");
+            return false;
+        }
+        System.out.println(array.toJson());
+        if(!(array.get("is_array").equals("true"))){
+            //TODO: Add report here
+            System.out.println("Non array used as array for index. Line " + array.get("line"));
+            return false;
+        }
+        if(variablesNotDeclared(array, reports)){
+            //TODO: Add report here
+            System.out.println("Undeclared array used as array for index. Line " + array.get("line"));
+            return false;
+        }
 
-        if(!(NodeFindingMethods.sameType(child.get("type"), "int"))){
+
+        JmmNode index = node.getChildren().get(1);
+
+        if((!NodeFindingMethods.sameType(index.get("type"), "int")) || (!NodeFindingMethods.sameType(index.get("is_array"), "false"))){
             //TODO: Semantic error, index isn't int
             System.out.println("Index isn't int");
             return false;
         }
 
-        node.put("type", child.get("type"));
-        node.put("is_array", child.get("is_array"));
+        node.put("type", array.get("type"));
+        node.put("is_array", "false");
 
         return true;
     }
@@ -312,7 +332,38 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
             //this.etc()
             if(!ownFunction){
 
-                String name = node.getChildren().get(0).get("name");
+                Optional<String> opName = node.getChildren().get(0).getOptional("name");
+                if(opName.isEmpty()){
+                    if(node.getChildren().get(0).get("type") == symbolTable.getClassName() && symbolTable.getSuper() == null){
+
+
+                        List<ValueSymbol> arguments = new ArrayList<>();
+
+                        //Get function arguments;
+                        for (int i = 0; i < node.getChildren().get(1).getChildren().size(); i++){
+                            //TODO: See which function we are in so we can get that method's local variables
+
+                            arguments.add(new ValueSymbol(new Type(node.getChildren().get(1).getChildren().get(i).get("type"), Boolean.parseBoolean(node.getChildren().get(1).getChildren().get(i).get("is_array"))), "-", false));
+
+                        }
+
+                        if (!symbolTable.methodExists(node.getChildren().get(1).get("name"), arguments)) {
+                            //TODO: Exception
+                            System.out.println("Method does not exist. Line " + node.getChildren().get(1).get("line"));
+                        }
+                        else{
+                            Method m = symbolTable.getMethod(node.getChildren().get(1).get("name"), arguments);
+                            node.put("type", m.getReturnType().getName());
+                            node.put("is_array", String.valueOf(m.getReturnType().isArray()));
+                        }
+                    }
+
+                    node.put("type", "");
+                    node.put("is_array", "");
+                    return true;
+                }
+                String name = opName.get();
+
                 //If it's an import
                 if(symbolTable.importExists(name)){
                     node.put("type", "");
@@ -323,10 +374,10 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
                 Method method = NodeFindingMethods.FindParentMethod(node, symbolTable);
                 ValueSymbol symbol;
                 if(method != null) {
-                    symbol = (ValueSymbol) NodeFindingMethods.getVariable(method, symbolTable, name);
+                    symbol = NodeFindingMethods.getVariable(method, symbolTable, name);
                 }
                 else{
-                    symbol = (ValueSymbol) NodeFindingMethods.getVariable(symbolTable, name);
+                    symbol = NodeFindingMethods.getVariable(symbolTable, name);
                 }
                 if(symbol != null){
                     if(!symbol.hasValue()){
@@ -434,6 +485,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
             var_symbol.setHas_value(true);
             return true;
         }
+        /*
         //With index
         else if(node.getChildren().size() == 3){
             if(node.getChildren().get(0).getOptional("name").isEmpty()){
@@ -468,7 +520,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
             }
             var_symbol.setHas_value(true);
             return true;
-        }
+        }*/
         return true;
     }
 
