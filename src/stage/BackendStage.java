@@ -15,6 +15,8 @@ import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.specs.util.SpecsIo;
 
+import javax.naming.NoPermissionException;
+
 /**
  * Copyright 2021 SPeCS.
  * <p>
@@ -36,70 +38,149 @@ public class BackendStage implements JasminBackend {
         try {
             // Example of what you can do with the OLLIR class
 
-            ollirClass.checkMethodLabels();  // check the use of labels in the OLLIR loaded
-            ollirClass.buildCFGs();          // build the CFG of each method
-            ollirClass.outputCFGs();         // output to .dot files the CFGs, one per method
-            ollirClass.buildVarTables();     // build the table of variables for each method
-            ollirClass.show();               // print to console main information about the input OLLIR
+            ollirClass.checkMethodLabels();  // Check the use of labels in the OLLIR loaded
+            ollirClass.buildCFGs();          // Build the CFG of each method
+            ollirClass.outputCFGs();         // Output to .dot files the CFGs, one per method
+            ollirClass.buildVarTables();     // Build the table of variables for each method
+            ollirClass.show();               // Print to console main information about the input OLLIR
+
+            // Convert the OLLIR to a String containing the equivalent Jasmin code
+            String jasminCode = "";
+
+            String accessModifier = acessModifierToString(ollirClass.getClassAccessModifier());
+
+            if (accessModifier.isEmpty())
+                accessModifier = "public";
+
+            String className = ollirClass.getClassName();
+
+            jasminCode += String.format(".class %s %s\n", accessModifier, className);
+
+            String superClassName = ollirClass.getSuperClass();
+
+            if (superClassName == null)
+                superClassName = "java/lang/Object";
+
+            jasminCode += String.format(".super %s\n\n", superClassName);
 
             for (Method method : ollirClass.getMethods()) {
-                System.out.println("Method name: " + method.getMethodName());
+                jasminCode += String.format(".method %s\n", method.getMethodName());
 
                 for (Instruction instruction : method.getInstructions()) {
-                    System.out.println("Instruction: " + instruction.getInstType());
-
                     switch (instruction.getInstType()) {
                         case CALL:
+                            generate((CallInstruction) instruction);
                             break;
                         case GOTO:
+                            generate((GotoInstruction) instruction);
                             break;
                         case NOPER:
                             break;
                         case ASSIGN:
+                            generate((AssignInstruction) instruction);
                             break;
                         case BRANCH:
+                            generate((CondBranchInstruction) instruction);
                             break;
                         case RETURN:
+                            generate((ReturnInstruction) instruction);
                             break;
                         case GETFIELD:
+                            generate((GetFieldInstruction) instruction);
                             break;
                         case PUTFIELD:
+                            generate((PutFieldInstruction) instruction);
                             break;
                         case UNARYOPER:
+                            generate((UnaryOpInstruction) instruction);
                             break;
                         case BINARYOPER:
+                            generate((BinaryOpInstruction) instruction);
                             break;
                     }
                 }
-            }
 
-            // Convert the OLLIR to a String containing the equivalent Jasmin code
-            String jasminCode = ""; // Convert node ...
+                jasminCode += ".end method\n\n";
+            }
 
             // More reports from this stage
             List<Report> reports = new ArrayList<>();
+
+            System.out.println(jasminCode);
 
             return new JasminResult(ollirResult, jasminCode, reports);
         }
 
         catch (OllirErrorException e) {
             return new JasminResult(
-                    ollirClass.getClassName(),
-                    null,
-                    Collections.singletonList(
-                            Report.newError(
-                                    Stage.GENERATION,
-                                    -1,
-                                    -1,
-                                    "Exception during Jasmin generation",
-                                    e
-                            )
+                ollirClass.getClassName(),
+                null,
+                Collections.singletonList(
+                    Report.newError(
+                        Stage.GENERATION,
+                        -1,
+                        -1,
+                        "Exception during Jasmin generation",
+                        e
                     )
+                )
             );
         }
     }
 
+    private String acessModifierToString(AccessModifiers accessModifier) {
+        switch (accessModifier) {
+            case PUBLIC:
+                return "public";
+
+            case PRIVATE:
+                return "private";
+
+            case PROTECTED:
+                return "protected";
+
+            case DEFAULT:
+                return "";
+        }
+
+        return "";
+    }
+
+    private String generate(CallInstruction instruction) {
+        instruction.show();
+
+        return "";
+    }
+
+    private void generate(GotoInstruction instruction) {
+
+    }
+
     private void generate(AssignInstruction instruction) {
+
+    }
+
+    private void generate(CondBranchInstruction instruction) {
+
+    }
+
+    private void generate(ReturnInstruction instruction) {
+
+    }
+
+    private void generate(GetFieldInstruction instruction) {
+
+    }
+
+    private void generate(PutFieldInstruction instruction) {
+
+    }
+
+    private void generate(UnaryOpInstruction instruction) {
+
+    }
+
+    private void generate(BinaryOpInstruction instruction) {
 
     }
 }
