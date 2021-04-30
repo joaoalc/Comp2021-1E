@@ -79,13 +79,8 @@ public class BackendStage implements JasminBackend {
 
                 jasminCode += methodName + "(";
 
-                // Method parameters
-                String params = "";
-
-                for (Element parameter : method.getParams())
-                    params += parameter;
-
-                jasminCode += params + ")\n";
+                // Method descriptor
+                jasminCode += generateFunctionDescriptor(method.getParams(), method.getReturnType()) + "\n";
 
                 String instructionCode = "";
 
@@ -126,9 +121,10 @@ public class BackendStage implements JasminBackend {
                             instructionCode = generate((BinaryOpInstruction) instruction);
                             break;
                     }
+
+                    jasminCode += instructionCode;
                 }
 
-                jasminCode += instructionCode;
                 jasminCode += ".end method\n\n";
             }
 
@@ -175,8 +171,59 @@ public class BackendStage implements JasminBackend {
         return "";
     }
 
+    private String elementTypeToString(ElementType elementType) {
+        switch (elementType) {
+            case VOID:
+                return "V";
+
+            case INT32:
+                return "I";
+
+            case ARRAYREF:
+                return "[";
+        }
+
+        return "";
+    }
+
+    private String generateFunctionDescriptor(List<Element> parameters, Type returnType) {
+        String descriptor = "(";
+
+        for (Element parameter : parameters) {
+            descriptor += parameter.toString();
+        }
+
+        descriptor += ")" + elementTypeToString(returnType.getTypeOfElement());
+
+        return descriptor;
+    }
+
     private String generate(CallInstruction instruction) {
-        return "\t" + instruction.getInvocationType() + " " + instruction.getSecondArg() +  "\n";
+        // Invocation type
+        String invocationType = instruction.getInvocationType().toString();
+
+        // Class name
+        String className;
+
+        if (instruction.getFirstArg().isLiteral())
+            className = ((LiteralElement) instruction.getFirstArg()).getLiteral();
+
+        else
+            className = ((Operand) instruction.getFirstArg()).getName();
+
+        // Method name
+        String methodName;
+
+        if (instruction.getSecondArg().isLiteral())
+            methodName = ((LiteralElement) instruction.getSecondArg()).getLiteral();
+
+        else
+            methodName = ((Operand) instruction.getSecondArg()).getName();
+
+        // Descriptor
+        String descriptor = generateFunctionDescriptor(instruction.getListOfOperands(), instruction.getReturnType());
+
+        return String.format("\t%s %s %s%s\n", invocationType, className, methodName, descriptor);
     }
 
     private String generate(GotoInstruction instruction) {
