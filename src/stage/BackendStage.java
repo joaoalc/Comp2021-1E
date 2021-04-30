@@ -1,7 +1,6 @@
 package stage;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -10,12 +9,8 @@ import org.specs.comp.ollir.*;
 import pt.up.fe.comp.jmm.jasmin.JasminBackend;
 import pt.up.fe.comp.jmm.jasmin.JasminResult;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
-import pt.up.fe.comp.jmm.ollir.OllirUtils;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.Stage;
-import pt.up.fe.specs.util.SpecsIo;
-
-import javax.naming.NoPermissionException;
 
 /**
  * Copyright 2021 SPeCS.
@@ -63,60 +58,72 @@ public class BackendStage implements JasminBackend {
 
             jasminCode += String.format(".super %s\n\n", superClassName);
 
+            // Iterate over class methods
             for (Method method : ollirClass.getMethods()) {
+                jasminCode += ".method ";
+
+                // Method access modifier
+                String methodAccessModifier = acessModifierToString(method.getMethodAccessModifier());
+
+                if (!methodAccessModifier.isEmpty())
+                    jasminCode += methodAccessModifier + " ";
+
+                if (method.isStaticMethod())
+                    jasminCode += "static ";
+
                 // Method name
                 String methodName = method.getMethodName();
 
                 if (method.isConstructMethod())
                     methodName = "<init>";
 
-                // Method access modifier
-                String methodAccessModifier = acessModifierToString(method.getMethodAccessModifier());
-
-                if (!methodAccessModifier.isEmpty())
-                    methodAccessModifier += " ";
+                jasminCode += methodName + "(";
 
                 // Method parameters
-                String paramsCode = "";
+                String params = "";
 
                 for (Element parameter : method.getParams())
-                    paramsCode += parameter;
+                    params += parameter;
 
-                jasminCode += String.format(".method %s%s(%s)\n", methodAccessModifier, methodName, paramsCode);
+                jasminCode += params + ")\n";
 
                 String instructionCode = "";
+
+                if (method.isConstructMethod())
+                    instructionCode = "\taload_0\n";
 
                 // Iterate over method's instructions
                 for (Instruction instruction : method.getInstructions()) {
                     switch (instruction.getInstType()) {
                         case CALL:
-                            generate((CallInstruction) instruction);
+                            instructionCode = generate((CallInstruction) instruction);
                             break;
                         case GOTO:
-                            generate((GotoInstruction) instruction);
+                            instructionCode = generate((GotoInstruction) instruction);
                             break;
                         case NOPER:
+                            instructionCode = "";
                             break;
                         case ASSIGN:
-                            generate((AssignInstruction) instruction);
+                            instructionCode = generate((AssignInstruction) instruction);
                             break;
                         case BRANCH:
-                            generate((CondBranchInstruction) instruction);
+                            instructionCode = generate((CondBranchInstruction) instruction);
                             break;
                         case RETURN:
                             instructionCode = generate((ReturnInstruction) instruction);
                             break;
                         case GETFIELD:
-                            generate((GetFieldInstruction) instruction);
+                            instructionCode = generate((GetFieldInstruction) instruction);
                             break;
                         case PUTFIELD:
-                            generate((PutFieldInstruction) instruction);
+                            instructionCode = generate((PutFieldInstruction) instruction);
                             break;
                         case UNARYOPER:
-                            generate((UnaryOpInstruction) instruction);
+                            instructionCode = generate((UnaryOpInstruction) instruction);
                             break;
                         case BINARYOPER:
-                            generate((BinaryOpInstruction) instruction);
+                            instructionCode = generate((BinaryOpInstruction) instruction);
                             break;
                     }
                 }
@@ -169,40 +176,40 @@ public class BackendStage implements JasminBackend {
     }
 
     private String generate(CallInstruction instruction) {
-        instruction.show();
-
-        return "";
+        return "\t" + instruction.getInvocationType() + " " + instruction.getSecondArg() +  "\n";
     }
 
-    private void generate(GotoInstruction instruction) {
-
+    private String generate(GotoInstruction instruction) {
+        return String.format("\tgoto %s\n", instruction.getLabel());
     }
 
-    private void generate(AssignInstruction instruction) {
-
+    private String generate(AssignInstruction instruction) {
+        // lstore
+        return null;
     }
 
-    private void generate(CondBranchInstruction instruction) {
+    private String generate(CondBranchInstruction instruction) {
 
+        return null;
     }
 
     private String generate(ReturnInstruction instruction) {
-        return "return";
+        return "\treturn\n";
     }
 
-    private void generate(GetFieldInstruction instruction) {
-
+    private String generate(GetFieldInstruction instruction) {
+        return null;
     }
 
-    private void generate(PutFieldInstruction instruction) {
-
+    private String generate(PutFieldInstruction instruction) {
+        return null;
     }
 
-    private void generate(UnaryOpInstruction instruction) {
-
+    private String generate(UnaryOpInstruction instruction) {
+        return null;
     }
 
-    private void generate(BinaryOpInstruction instruction) {
-
+    private String generate(BinaryOpInstruction instruction) {
+        return null;
     }
 }
