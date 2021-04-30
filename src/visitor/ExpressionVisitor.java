@@ -12,6 +12,7 @@ import table.MySymbolTable;
 import table.ValueSymbol;
 import utils.NodeFindingMethods;
 
+import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -581,7 +582,6 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
         }
         node.put("type", symbol.getType().getName());
         node.put("is_array", String.valueOf(symbol.getType().isArray()));
-        node.put("declared", String.valueOf(symbol.hasValue()));
         return true;
     }
 
@@ -597,19 +597,54 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
     }
 
     public boolean verifyNegate(JmmNode node, List<Report> reports) {
+        List<Report> reps = new ArrayList<>();
 
-        if(NodeFindingMethods.sameType(node.getChildren().get(0).get("type"), "boolean"))
-            if(NodeFindingMethods.sameType(node.getChildren().get(0).get("is_array"), "false")){
-                if(node.getChildren().get(0).getKind().equals("Identifier")){
-                    if(!variablesNotDeclared(node.getChildren().get(0), reports)){
+        Boolean invalid_type = false;
+        Boolean invalid_array = false;
+
+        JmmNode child_node = node.getChildren().get(0);
+
+
+        if(NodeFindingMethods.sameType(child_node.getOptional("type"), "boolean")) {
+            if (NodeFindingMethods.sameType(child_node.getOptional("is_array"), "false")) {
+                if (child_node.getKind().equals("Identifier")) {
+                    if (!variablesNotDeclared(child_node, reports)) {
                         node.put("type", "boolean");
                         node.put("is_array", "false");
+                        return true;
                     }
+                    //TODO: Add non declared variable report here
+                    System.out.println("(Negate) variable not declared.");
+                    return false;
                 }
                 //Any type gets converted to boolean aswell
                 node.put("type", "boolean");
                 node.put("is_array", "false");
+                return true;
             }
-        return true;
+            else{
+                invalid_array = true;
+            }
+        }
+        else{
+            invalid_type = true;
+        }
+
+        if(invalid_type || invalid_array) {
+            String report_string = "Operator '!' cannot be applied to ";
+            if(child_node.getOptional("type").isEmpty() || child_node.getOptional("is_array").isEmpty()){
+                report_string += "<Empty type>";
+            }
+            else{
+                report_string += child_node.get("type");
+                if(child_node.get("is_array").equals("true"))
+                    report_string += "[]";
+            }
+            reps.add(newSemanticReport(node, report_string));
+            //TODO: Add wrong type variable report here
+            System.out.println(report_string);
+        }
+
+        return false;
     }
 }

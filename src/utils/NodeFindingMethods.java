@@ -11,8 +11,10 @@ import table.ValueSymbol;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static utils.Utils.getChildrenOfKind;
+import static utils.Utils.newSemanticReport;
 
 public class NodeFindingMethods {
 
@@ -111,6 +113,55 @@ public class NodeFindingMethods {
         if(type.equals(intended_type))
             return true;
         return false;
+    }
+
+    public static boolean sameType(Optional<String> type, String intended_type){
+        if(type.isEmpty())
+            return false;
+        if((type.get()).equals(""))
+            return true;
+        if(intended_type.equals(""))
+            return true;
+        if((type.get()).equals(intended_type))
+            return true;
+        return false;
+    }
+
+    public static boolean sameType(Optional<String> type, Optional<String> intended_type){
+        if(type.isEmpty() || intended_type.isEmpty())
+            return false;
+        if((type.get()).equals(""))
+            return true;
+        if((intended_type.get()).equals(""))
+            return true;
+        if((type.get()).equals((intended_type.get())))
+            return true;
+        return false;
+    }
+
+    public static boolean sameType(String type, Optional<String> intended_type){
+        if(intended_type.isEmpty())
+            return false;
+        if(type.equals(""))
+            return true;
+        if((intended_type.get()).equals(""))
+            return true;
+        if(type.equals((intended_type.get())))
+            return true;
+        return false;
+    }
+
+    public static String getTypeStringReport(JmmNode node){
+        String report_string = "";
+        if(node.getOptional("type").isEmpty() || node.getOptional("is_array").isEmpty()){
+            report_string += "<Empty type>";
+        }
+        else{
+            report_string += node.get("type");
+            if(node.get("is_array").equals("true"))
+                report_string += "[]";
+        }
+        return report_string;
     }
 
 }
