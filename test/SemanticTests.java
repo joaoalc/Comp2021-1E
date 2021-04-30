@@ -1,11 +1,26 @@
 import org.junit.Test;
 import pt.up.fe.comp.TestUtils;
+import pt.up.fe.comp.jmm.JmmParserResult;
+import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
+import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.specs.util.SpecsIo;
+
+import java.util.List;
+
+import static pt.up.fe.comp.TestUtils.mustFail;
 
 public class SemanticTests {
     private void TestTemplate(String filename) {
         String code = SpecsIo.getResource(String.format("fixtures/public/%s", filename));
-        TestUtils.analyse(code);
+        JmmSemanticsResult result = TestUtils.analyse(code);
+        System.out.println(result.getRootNode().toJson());
+    }
+
+    private void failureTest(String filename) {
+        String fileContents = SpecsIo.getResource(String.format("fixtures/public/fail/semantic/%s", filename));
+        JmmParserResult result = TestUtils.parse(fileContents);
+        List<Report> reports = result.getReports();
+        mustFail(reports);
     }
 
     @Test
@@ -52,4 +67,56 @@ public class SemanticTests {
     public void WhileAndIFTest() {
         TestTemplate("WhileAndIF.jmm");
     }
+
+    // Failure tests
+
+//    @Test
+//    public void ArrIndexNotInt() {
+//        failureTest("arr_index_not_int.jmm");
+//    }
+//
+//    @Test
+//    public void ArrSizeNotInt() {
+//        failureTest("arr_size_not_int.jmm");
+//    }
+//
+//    @Test
+//    public void BadArguments() {
+//        failureTest("badArguments.jmm");
+//    }
+//
+//    @Test
+//    public void BinopIncomp() {
+//        failureTest("binop_incomp.jmm");
+//    }
+//
+//    @Test
+//    public void FuncNotFound() {
+//        failureTest("funcNotFound.jmm");
+//    }
+//
+//    @Test
+//    public void SimpleLength() {
+//        failureTest("simple_length.jmm");
+//    }
+//
+//    @Test
+//    public void VarExpIncomp() {
+//        failureTest("var_exp_incomp.jmm");
+//    }
+//
+//    @Test
+//    public void VarLitIncomp() {
+//        failureTest("var_lit_incomp.jmm");
+//    }
+//
+//    @Test
+//    public void VarUndef() {
+//        failureTest("var_undef.jmm");
+//    }
+//
+//    @Test
+//    public void VarNotInit() {
+//        failureTest("varNotInit.jmm");
+//    }
 }
