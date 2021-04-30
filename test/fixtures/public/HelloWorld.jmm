@@ -1,8 +1,8 @@
 import ioPlus;
 class HelloWorld{
-    boolean b;
+    int[] a;
 	public static void main(String[] args) {
-	    b = !a;
+	    a = new int[true];
 	}
 
 	public int doStuff(int a){

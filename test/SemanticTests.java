@@ -69,7 +69,7 @@ public class SemanticTests {
     }
 
      //Failure tests
-/*
+
     @Test
     public void ArrIndexNotInt() {
         failureTest("arr_index_not_int.jmm");
@@ -118,5 +118,5 @@ public class SemanticTests {
     @Test
     public void VarNotInit() {
         failureTest("varNotInit.jmm");
-    }*/
+    }
 }

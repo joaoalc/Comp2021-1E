@@ -45,13 +45,17 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
     }
 
     public List<Report> verifyAnd(JmmNode node, Boolean aBoolean) {
+        node.put("type", "boolean");
+        node.put("is_array", "false");
+
         List<Report> reports = new ArrayList<>();
 
         JmmNode firstChild = node.getChildren().get(0);
         JmmNode secondChild = node.getChildren().get(1);
 
-        if (variablesNotDeclared(firstChild, secondChild, reports))
+        if (variablesNotDeclared(firstChild, secondChild, reports)) {
             return reports;
+        }
 
         else {
             Method method;
@@ -71,23 +75,20 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
 
             if ( (!NodeFindingMethods.sameType(firstChild.get("type"), "boolean")) || (!NodeFindingMethods.sameType(firstChild.get("is_array"), "false"))) {
                 reports.add(newSemanticReport(node, "Second value isn't an integer"));
-
                 return reports;
             }
 
             if ((!NodeFindingMethods.sameType(secondChild.get("type"), "boolean")) || (!NodeFindingMethods.sameType(secondChild.get("is_array"), "false"))) {
                 reports.add(newSemanticReport(node, "First value isn't an integer"));
-
                 return reports;
             }
-
-            node.put("type", "boolean");
-            node.put("is_array", "false");
         }
         return reports;
     }
 
     public List<Report> verifyLessThan(JmmNode node, Boolean aBoolean) {
+        node.put("type", "boolean");
+        node.put("is_array", "false");
         List<Report> reports = new ArrayList<>();
 
         JmmNode firstChild = node.getChildren().get(0);
@@ -114,13 +115,11 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
 
             if ((!NodeFindingMethods.sameType(firstChild.get("type"), "int")) || (!NodeFindingMethods.sameType(firstChild.get("is_array"), "false"))) {
                 reports.add(newSemanticReport(node, "Second value isn't an integer"));
-
                 return reports;
             }
 
             if ( (!NodeFindingMethods.sameType(secondChild.get("type"), "int")) || (!NodeFindingMethods.sameType(secondChild.get("is_array"), "false"))) {
                 reports.add(newSemanticReport(node, "First value isn't an integer"));
-
                 return reports;
             }
 
@@ -131,11 +130,14 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
     }
 
     public List<Report> verifySumSub(JmmNode node, Boolean aBoolean) {
+        //We assumed that sums are EXCLUSIVELY between integers and result in another integer
+        node.put("type", "int");
+        node.put("is_array", "false");
+
         List<Report> reports = new ArrayList<>();
 
         JmmNode firstChild = node.getChildren().get(0);
         JmmNode secondChild = node.getChildren().get(1);
-
         if (variablesNotDeclared(firstChild, secondChild, reports))
             return reports;
 
@@ -245,9 +247,21 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
     }
 
     public List<Report> verifyParentheses(JmmNode node, Boolean aBoolean) {
-        List<Report> reports = new ArrayList<>();
+        node.put("type", "");
+        node.put("is_array", "");
 
+
+        List<Report> reports = new ArrayList<>();
         JmmNode child = node.getChildren().get(0);
+
+        //TODO: Add report
+        if(child.getOptional("type").isEmpty()){
+
+            return reports;
+        }
+        if(child.getOptional("is_array").isEmpty()){
+            return reports;
+        }
 
         node.put("type", child.get("type"));
         node.put("is_array", child.get("is_array"));
@@ -256,7 +270,11 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
     }
 
     public List<Report> verifyIndex(JmmNode node, Boolean aBoolean) {
+        //TODO: Check if there are multidimensional arrays
         List<Report> reports = new ArrayList<>();
+        node.put("type" , "");
+        node.put("is_array", "");
+
 
         JmmNode array = node.getChildren().get(0);
         if(array.getOptional("name").isEmpty()){
@@ -286,18 +304,22 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
         }
 
         node.put("type", array.get("type"));
-        node.put("is_array", "false");
+        node.put("is_array", "");
 
         return reports;
     }
 
     public List<Report> verifyCall(JmmNode node, Boolean aBoolean){
+        node.put("type", "");
+        node.put("is_array", "");
         List<Report> reports = new ArrayList<>();
 
-        if (node.getChildren().size() == 2){
 
+        if (node.getChildren().size() == 2){
             //Check if it's a length call, if it is, the thing calling it has to be an array
             if (node.getChildren().get(1).getKind().equals("Length")){
+                node.put("type", "int");
+                node.put("is_array", "false");
                 if (node.getChildren().get(0).getOptional("name").isPresent()) {
                     Method method = NodeFindingMethods.FindParentMethod(node, symbolTable);
 
@@ -468,6 +490,8 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
     }
 
     public List<Report> varAssignment(JmmNode node, Boolean aBoolean){
+        node.put("type", "");
+        node.put("is_array", "");
         List<Report> reports = new ArrayList<>();
 
         //Without index
@@ -478,9 +502,9 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
                 System.out.println("Index on non variable error. Line " + node.getChildren().get(0).get("line"));
                 return reports;
             }
-            //Chain report
+            //TODO: add report
             if(node.getChildren().get(0).getOptional("type").isEmpty() || node.getChildren().get(0).getOptional("is_array").isEmpty()) {
-                reports.add(newSemanticReport(node, "Cannot resolve symbol " + node.getChildren().get(0).get("name")));
+                //reports.add(newSemanticReport(node, "Cannot resolve symbol " + node.getChildren().get(0).get("name")));
                 return reports;
             }
 
@@ -516,6 +540,12 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
 
     public List<Report> varDeclaration(JmmNode node, Boolean aBoolean){
         List<Report> reports = new ArrayList<>();
+
+        if(node.getOptional("name").isEmpty()){
+            //TODO: Add report of some kind?
+            reports.add(newSemanticReport(node, "Assignment to non variable"));
+            return reports;
+        }
 
         String varName = node.get("name");
 
@@ -561,6 +591,17 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
 
         JmmNode child = node.getChildren().get(0);
 
+        if(child.getOptional("type").isEmpty() || child.getOptional("type").isEmpty()){
+            //TODO: add report
+            reports.add(newSemanticReport(node, "Expected type: int, got no type."));
+            return reports;
+        }
+        if(!child.get("type").equals("int")){
+            //TODO: Add error
+            reports.add(newSemanticReport(node, "Expected type: int, got type " + node.getChildren().get(0).get("type")));
+            return reports;
+        }
+
         node.put("type", child.get("type"));
         node.put("is_array", "true");
 
@@ -568,6 +609,8 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
     }
 
     public List<Report> addValueToNodeOptional(JmmNode node, Boolean aBoolean){
+        node.put("type", "");
+        node.put("is_array", "");
         List<Report> reports = new ArrayList<>();
 
         Method method = NodeFindingMethods.FindParentMethod(node, symbolTable);
@@ -590,12 +633,12 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
             System.out.println("Wrong type inside of if.");
             return reports;
         }
-        //node.put("type", "boolean");
-        //node.put("is_array", "true");
         return reports;
     }
 
     public List<Report> verifyNegate(JmmNode node, Boolean aBoolean) {
+        node.put("type", "");
+        node.put("is_array", "");
         List<Report> reports = new ArrayList<>();
 
         Boolean invalid_type = false;
@@ -635,6 +678,8 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
             reports.add(newSemanticReport(node, report_string));
             //TODO: Add wrong type variable report here
             System.out.println(report_string);
+            node.put("type", "");
+            node.put("is_array", "");
         }
 
         return reports;
