@@ -37,9 +37,10 @@ public class AnalysisStage implements JmmAnalysis {
 
         MySymbolTable symbolTable = declarationVerifierVisitor.getSymbolTable();
 
+        List<Report> expressionReports = new ArrayList<>();
         // Verify binary operations
         ExpressionVisitor a_s_vis = new ExpressionVisitor(symbolTable);
-        a_s_vis.visit(node, reports);
+        expressionReports = a_s_vis.visit(node, true);
 
         // No Symbol Table being calculated yet
         return new JmmSemanticsResult(parserResult, null, reports);
