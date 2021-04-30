@@ -1,11 +1,14 @@
-import ioPlus;
-class HelloWorld{
-    int[] a;
-	public static void main(String[] args) {
-	    a = new int[true];
-	}
+/*  REASON:
+    Array indices must be integer.
+*/
 
-	public int doStuff(int a){
-	    return 3;
-	}
+class T {
+    public static void main(String[] s) { 
+        int[] a;
+        int c;
+        // This is valid in Java
+        a = new int[0];
+        c = a[true];
+        
+    }
 }

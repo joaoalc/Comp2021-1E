@@ -40,6 +40,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
         addVisit("IfStatement", this::verifyIfStatement);
         addVisit("WhileStatement", this::verifyIfStatement);
         addVisit("Negate", this::verifyNegate);
+        setDefaultVisit(this::defaultVisit);
 
         this.symbolTable = symbolTable;
     }
@@ -282,7 +283,6 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
             System.out.println("Non variable used as array for index");
             return reports;
         }
-        System.out.println(array.toJson());
         if(!(array.get("is_array").equals("true"))){
             reports.add(newSemanticReport(node, "Array type expected; found: " + NodeFindingMethods.getTypeStringReport(node.getChildren().get(0))));
             return reports;
@@ -305,6 +305,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
 
         node.put("type", array.get("type"));
         node.put("is_array", "");
+        node.put("name", array.get("name"));
 
         return reports;
     }
@@ -517,11 +518,8 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
                 System.out.println("Undeclared variable.");
                 return reports;
             }
-            else if(var_symbol.getType().isArray() != Boolean.parseBoolean(node.getChildren().get(1).get("is_array"))){
-                if(var_symbol.getType().isArray())
-                    reports.add(newSemanticReport(node, "Variable " + node.getChildren().get(0).get("name") + " should be an array but isn't."));
-                else
-                    reports.add(newSemanticReport(node, "Variable " + node.getChildren().get(0).get("name") + " shouldn't be an array but is."));
+            else if((var_symbol.getType().isArray() == false) && node.getChildren().get(1).get("is_array").equals("true")){
+                reports.add(newSemanticReport(node, "Variable " + node.getChildren().get(0).get("name") + " shouldn't be an array but is."));
                 //TODO: Index on non array variable error
                 System.out.println("Index on non array variable error on line " + node.getChildren().get(1).get("line"));
                 return reports;
@@ -556,7 +554,6 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
 
         //Add to class' (global) symbol table
         if(method == null){
-            System.out.println(symbol.getName());
             if(!symbolTable.fieldExists(symbol)) {
                 symbolTable.addField(varType, varName, false);
                 return reports;
@@ -681,7 +678,10 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
             node.put("type", "");
             node.put("is_array", "");
         }
-
         return reports;
+    }
+
+    public List<Report> defaultVisit(JmmNode node, Boolean aBoolean){
+        return new ArrayList<>();
     }
 }
