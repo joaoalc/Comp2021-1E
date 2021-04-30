@@ -632,14 +632,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<List<Report>, Boolean
 
         if(invalid_type || invalid_array) {
             String report_string = "Operator '!' cannot be applied to ";
-            if(child_node.getOptional("type").isEmpty() || child_node.getOptional("is_array").isEmpty()){
-                report_string += "<Empty type>";
-            }
-            else{
-                report_string += child_node.get("type");
-                if(child_node.get("is_array").equals("true"))
-                    report_string += "[]";
-            }
+            report_string += NodeFindingMethods.getTypeStringReport(child_node);
             reps.add(newSemanticReport(node, report_string));
             //TODO: Add wrong type variable report here
             System.out.println(report_string);
