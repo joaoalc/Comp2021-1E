@@ -442,8 +442,8 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
                 }
                 if(symbol != null){
                     if(!symbol.hasValue()){
-                        reports.add(newSemanticReport(node, "Cannot resolve symbol " + node.getChildren().get(1).get("name")));
-                        report_list.add(newSemanticReport(node, "Cannot resolve symbol " + node.getChildren().get(1).get("name")));
+                        reports.add(newSemanticReport(node, "Cannot resolve symbol " + node.getChildren().get(0).get("name")));
+                        report_list.add(newSemanticReport(node, "Cannot resolve symbol " + node.getChildren().get(0).get("name")));
 
                         System.out.println("error: uninitialized variable calling method");
                         return reports;
@@ -651,9 +651,16 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
         ValueSymbol symbol = (ValueSymbol) NodeFindingMethods.getVariable(method, symbolTable, node.get("name"));
 
         if(symbol == null){
+            if(node.getParent().getKind().equals("FCall")){
+                for(String import_name: symbolTable.getImports()){
+                    if(node.get("name").equals(import_name)){
+                        return reports;
+                    }
+                }
+            }
             //In the case of variable declarations where the value isn't in the symbol table yet
-            reports.add(newSemanticReport(node, "Cannot resolve symbol " + node.getOptional("name")));
-            report_list.add(newSemanticReport(node, "Cannot resolve symbol " + node.getOptional("name")));
+            reports.add(newSemanticReport(node, "Cannot resolve symbola " + node.getOptional("name")));
+            report_list.add(newSemanticReport(node, "Cannot resolve symbola " + node.getOptional("name")));
             return reports;
         }
         node.put("type", symbol.getType().getName());

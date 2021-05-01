@@ -31,8 +31,7 @@ public class DeclarationVisitor extends PreorderJmmVisitor<List<Report>, Boolean
     }
 
     private boolean importDeclaration(JmmNode node, List<Report> reports) {
-        // TODO: Probably we will not want a simple string in the future
-        StringBuilder importString = new StringBuilder();
+        /*StringBuilder importString = new StringBuilder();
 
         // Get the first identifier's name
         importString.append(node.get("name"));
@@ -42,9 +41,16 @@ public class DeclarationVisitor extends PreorderJmmVisitor<List<Report>, Boolean
             String importIdentifier = child.get("name");
 
             importString.append(".").append(importIdentifier);
+        }*/
+        String importString;
+        if(node.getChildren().size() == 0){
+            importString = node.get("name");
+        }
+        else{
+            importString = node.getChildren().get(node.getChildren().size() - 1).get("name");
         }
 
-        symbolTable.addImport(importString.toString());
+        symbolTable.addImport(importString);
 
         return true;
     }
