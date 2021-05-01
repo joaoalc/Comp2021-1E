@@ -1,16 +1,6 @@
 import ioPlus;
-class T {
-    public static void main(String[] a) {
-        int[] abc;
-        int b;
-        boolean c;
-        ioPlus.printHelloWorld(a, b, c);
-    }
-
-    public int doStuff(int b){
-        int a;
-        a = 5;
-        a = b + 5;
-        return b;
+class HelloWorld {
+    public static void main(String[] args) {
+        ioPlus.printHelloWorld();
     }
 }
