@@ -3,6 +3,7 @@ package stage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import org.specs.comp.ollir.*;
 
@@ -35,7 +36,7 @@ public class BackendStage implements JasminBackend {
 
             ollirClass.checkMethodLabels();  // Check the use of labels in the OLLIR loaded
             ollirClass.buildCFGs();          // Build the CFG of each method
-            ollirClass.outputCFGs();         // Output to .dot files the CFGs, one per method
+            // ollirClass.outputCFGs();         // Output to .dot files the CFGs, one per method
             ollirClass.buildVarTables();     // Build the table of variables for each method
             ollirClass.show();               // Print to console main information about the input OLLIR
 
@@ -77,10 +78,10 @@ public class BackendStage implements JasminBackend {
                 if (method.isConstructMethod())
                     methodName = "<init>";
 
-                jasminCode += methodName + "(";
+                jasminCode += methodName;
 
                 // Method descriptor
-                jasminCode += generateFunctionDescriptor(method.getParams(), method.getReturnType()) + "\n";
+                jasminCode += generateMethodDescriptor(method.getParams(), method.getReturnType()) + "\n";
 
                 String instructionCode = "";
 
@@ -186,11 +187,21 @@ public class BackendStage implements JasminBackend {
         return "";
     }
 
-    private String generateFunctionDescriptor(List<Element> parameters, Type returnType) {
+    private String generateMethodDescriptor(List<Element> parameters, Type returnType) {
         String descriptor = "(";
 
+        // Iterate over method's parameters
         for (Element parameter : parameters) {
-            descriptor += parameter.toString();
+            descriptor += elementTypeToString(parameter.getType().getTypeOfElement());
+
+            if (parameter.isLiteral())
+                descriptor += ((LiteralElement) parameter).getLiteral();
+
+            else {
+                descriptor += ((Operand) parameter).getName();
+            }
+
+            descriptor += ";";
         }
 
         descriptor += ")" + elementTypeToString(returnType.getTypeOfElement());
@@ -203,27 +214,29 @@ public class BackendStage implements JasminBackend {
         String invocationType = instruction.getInvocationType().toString();
 
         // Class name
-        String className;
+        String className = "java/";
 
         if (instruction.getFirstArg().isLiteral())
-            className = ((LiteralElement) instruction.getFirstArg()).getLiteral();
+            className += ((LiteralElement) instruction.getFirstArg()).getLiteral();
 
         else
-            className = ((Operand) instruction.getFirstArg()).getName();
+            className += ((Operand) instruction.getFirstArg()).getName();
 
         // Method name
-        String methodName;
+        String methodName = "";
 
         if (instruction.getSecondArg().isLiteral())
-            methodName = ((LiteralElement) instruction.getSecondArg()).getLiteral();
+            methodName += ((LiteralElement) instruction.getSecondArg()).getLiteral();
 
         else
-            methodName = ((Operand) instruction.getSecondArg()).getName();
+            methodName += ((Operand) instruction.getSecondArg()).getName();
+
+        methodName = methodName.replaceAll("\"", "");
 
         // Descriptor
-        String descriptor = generateFunctionDescriptor(instruction.getListOfOperands(), instruction.getReturnType());
+        String descriptor = generateMethodDescriptor(instruction.getListOfOperands(), instruction.getReturnType());
 
-        return String.format("\t%s %s %s%s\n", invocationType, className, methodName, descriptor);
+        return String.format("\t%s %s/%s%s\n", invocationType, className, methodName, descriptor);
     }
 
     private String generate(GotoInstruction instruction) {
@@ -231,8 +244,7 @@ public class BackendStage implements JasminBackend {
     }
 
     private String generate(AssignInstruction instruction) {
-        // lstore
-        return null;
+        return "\tlstore";
     }
 
     private String generate(CondBranchInstruction instruction) {
@@ -253,10 +265,40 @@ public class BackendStage implements JasminBackend {
     }
 
     private String generate(UnaryOpInstruction instruction) {
-        return null;
+        String code = "\t";
+        OperationType opType = instruction.getUnaryOperation().getOpType();
+
+        switch (opType) {
+            case ADD:
+            case SUB:
+            case MUL:
+            case DIV:
+                code += "i" + opType.toString().toLowerCase();
+                break;
+            case XOR:
+                break;
+            case AND:
+                break;
+            case OR:
+                break;
+        }
+
+        code += "\n";
+
+        return code;
     }
 
     private String generate(BinaryOpInstruction instruction) {
-        return null;
+        String code = "\t";
+        OperationType opType = instruction.getUnaryOperation().getOpType();
+
+        switch (opType) {
+            case NOT:
+                break;
+        }
+
+        code += "\n";
+
+        return code;
     }
 }

@@ -38,7 +38,7 @@ public class BackendTest {
 
         JasminResult result = TestUtils.backend(ollirResult);
 
-        // String output = result.run();
-        // assertEquals("Hello, World!", output.trim());
+        String output = result.run();
+        assertEquals("Hello, World!", output.trim());
     }
 }
