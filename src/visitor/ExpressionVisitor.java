@@ -395,7 +395,6 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
 
                         //Get function arguments;
                         for (int i = 0; i < node.getChildren().get(1).getChildren().size(); i++){
-
                             arguments.add(new ValueSymbol(new Type(node.getChildren().get(1).getChildren().get(i).get("type"), Boolean.parseBoolean(node.getChildren().get(1).getChildren().get(i).get("is_array"))), "-", false));
 
                         }
