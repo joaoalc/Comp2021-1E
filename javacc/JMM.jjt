@@ -182,8 +182,8 @@ void MethodBody() #void : {} {
 }
 
 void Type() #Type : {Token t;} {
-    ( t=<INT> {jjtThis.put("name", t.image); jjtThis.put("type", "int"); } ((<LEFT_BRACKET> <RIGHT_BRACKET> {jjtThis.put("is_array", "true");} ) | {} {jjtThis.put("is_array", "false"); } ))
-    | t=<BOOLEAN> { jjtThis.put("name", t.image); jjtThis.put("is_array", "false"); jjtThis.put("type", "boolean"); }
+    ( t=<INT> {jjtThis.put("name", t.image); } ((<LEFT_BRACKET> <RIGHT_BRACKET> {jjtThis.put("is_array", "true");} ) | {} {jjtThis.put("is_array", "false"); } ))
+    | t=<BOOLEAN> { jjtThis.put("name", t.image); jjtThis.put("is_array", "false"); }
     | t=<IDENTIFIER> { jjtThis.put("name", t.image); jjtThis.put("is_array", "false");}
 }
 
