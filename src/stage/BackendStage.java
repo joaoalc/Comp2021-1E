@@ -27,6 +27,8 @@ import pt.up.fe.comp.jmm.report.Stage;
  */
 
 public class BackendStage implements JasminBackend {
+    int stackCount = 0;
+
     @Override
     public JasminResult toJasmin(OllirResult ollirResult) {
         ClassUnit ollirClass = ollirResult.getOllirClass();
@@ -83,49 +85,16 @@ public class BackendStage implements JasminBackend {
                 // Method descriptor
                 jasminCode += generateMethodDescriptor(method.getParams(), method.getReturnType()) + "\n";
 
-                String instructionCode = "";
+                jasminCode += "\t.limit stack 99\n"; // TODO: Temporary for Assignment 2
+                jasminCode += "\t.limit locals 99\n"; // TODO: Temporary for Assignment 2
 
                 if (method.isConstructMethod())
-                    instructionCode = "\taload_0\n";
+                    jasminCode += "\taload_0\n";
 
                 // Iterate over method's instructions
-                for (Instruction instruction : method.getInstructions()) {
-                    switch (instruction.getInstType()) {
-                        case CALL:
-                            instructionCode = generate((CallInstruction) instruction);
-                            break;
-                        case GOTO:
-                            instructionCode = generate((GotoInstruction) instruction);
-                            break;
-                        case NOPER:
-                            instructionCode = "";
-                            break;
-                        case ASSIGN:
-                            instructionCode = generate((AssignInstruction) instruction);
-                            break;
-                        case BRANCH:
-                            instructionCode = generate((CondBranchInstruction) instruction);
-                            break;
-                        case RETURN:
-                            instructionCode = generate((ReturnInstruction) instruction);
-                            break;
-                        case GETFIELD:
-                            instructionCode = generate((GetFieldInstruction) instruction);
-                            break;
-                        case PUTFIELD:
-                            instructionCode = generate((PutFieldInstruction) instruction);
-                            break;
-                        case UNARYOPER:
-                            instructionCode = generate((UnaryOpInstruction) instruction);
-                            break;
-                        case BINARYOPER:
-                            instructionCode = generate((BinaryOpInstruction) instruction);
-                            break;
-                    }
-
-                    jasminCode += instructionCode;
-                }
-
+                for (Instruction instruction : method.getInstructions())
+                    jasminCode += generate(instruction);
+                
                 jasminCode += ".end method\n\n";
             }
 
@@ -209,12 +178,39 @@ public class BackendStage implements JasminBackend {
         return descriptor;
     }
 
+    private String generate(Instruction instruction) {
+        switch (instruction.getInstType()) {
+            case CALL:
+                return generate((CallInstruction) instruction);
+            case GOTO:
+                return generate((GotoInstruction) instruction);
+            case NOPER:
+                return "";
+            case ASSIGN:
+                return generate((AssignInstruction) instruction);
+            case BRANCH:
+                return generate((CondBranchInstruction) instruction);
+            case RETURN:
+                return generate((ReturnInstruction) instruction);
+            case GETFIELD:
+                return generate((GetFieldInstruction) instruction);
+            case PUTFIELD:
+                return generate((PutFieldInstruction) instruction);
+            case UNARYOPER:
+                return generate((UnaryOpInstruction) instruction);
+            case BINARYOPER:
+                return generate((BinaryOpInstruction) instruction);
+        }
+
+        return "";
+    }
+
     private String generate(CallInstruction instruction) {
         // Invocation type
         String invocationType = instruction.getInvocationType().toString();
 
         // Class name
-        String className = "java/";
+        String className = "";
 
         if (instruction.getFirstArg().isLiteral())
             className += ((LiteralElement) instruction.getFirstArg()).getLiteral();
@@ -244,12 +240,16 @@ public class BackendStage implements JasminBackend {
     }
 
     private String generate(AssignInstruction instruction) {
-        return "\tlstore";
+        String code = generate(instruction.getRhs()); // Generate RHS
+
+        String variableType = elementTypeToString(instruction.getDest().getType().getTypeOfElement()).toLowerCase();
+        code += "\t" + variableType + "load " + stackCount + "\n";
+
+        return code;
     }
 
     private String generate(CondBranchInstruction instruction) {
-
-        return null;
+        return "";
     }
 
     private String generate(ReturnInstruction instruction) {
@@ -265,37 +265,27 @@ public class BackendStage implements JasminBackend {
     }
 
     private String generate(UnaryOpInstruction instruction) {
-        String code = "\t";
         OperationType opType = instruction.getUnaryOperation().getOpType();
+        String elementType = elementTypeToString(instruction.getRightOperand().getType().getTypeOfElement());
 
-        switch (opType) {
-            case ADD:
-            case SUB:
-            case MUL:
-            case DIV:
-                code += "i" + opType.toString().toLowerCase();
-                break;
-            case XOR:
-                break;
-            case AND:
-                break;
-            case OR:
-                break;
-        }
+        String code = "\t" + elementType;
 
-        code += "\n";
+        code += "\t" + elementType + opType.toString().toLowerCase() + "\n"; // Operation code
 
         return code;
     }
 
     private String generate(BinaryOpInstruction instruction) {
-        String code = "\t";
         OperationType opType = instruction.getUnaryOperation().getOpType();
+        String elementType = elementTypeToString(instruction.getLeftOperand().getType().getTypeOfElement());
 
-        switch (opType) {
-            case NOT:
-                break;
-        }
+        String code = "\t" + elementType + "load " + stackCount + "\n";
+
+        stackCount++;
+
+        code += "\t" + elementType + "load " + stackCount + "\n";
+
+        code += "\t" + elementType + opType.toString().toLowerCase() + "\n"; // Operation code
 
         code += "\n";
 
