@@ -157,7 +157,7 @@ void MethodDeclaration() #MethodDeclaration : {Token t;} {
     <PUBLIC>
     (
         (
-            <STATIC> <VOID> { jjtThis.put("name", "void"); jjtThis.put("is_array", "false");} #Type t=<MAIN> { jjtThis.put("name", t.image); }
+            <STATIC> (<VOID> { jjtThis.put("name", "void"); jjtThis.put("is_array", "false");}) #Type t=<MAIN> { jjtThis.put("name", t.image); }
             <LEFT_PARENTHESES> <STRING> <LEFT_BRACKET> <RIGHT_BRACKET> <IDENTIFIER> <RIGHT_PARENTHESES> <LEFT_BRACE>
             MethodBody() #MethodBody
         ) |

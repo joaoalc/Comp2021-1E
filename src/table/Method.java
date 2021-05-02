@@ -57,9 +57,10 @@ public class Method {
 
     public String getIdentifier() {
 
-        List<String> parameter_types = new ArrayList<String>();
+        List<String> parameter_types = new ArrayList<>();
         for(Symbol i: parameters){
-            parameter_types.add(i.getType().getName());
+            String parameterId = i.getType().getName() + (i.getType().isArray() ? "[]" : "");
+            parameter_types.add(parameterId);
         }
 
         return String.join("-", name, String.join("-", parameter_types));

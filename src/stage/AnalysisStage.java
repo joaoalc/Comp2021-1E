@@ -7,6 +7,7 @@ import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.JmmParserResult;
 import pt.up.fe.comp.jmm.analysis.JmmAnalysis;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
+import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
@@ -42,6 +43,6 @@ public class AnalysisStage implements JmmAnalysis {
         a_s_vis.visit(node, reports);
 
         // No Symbol Table being calculated yet
-        return new JmmSemanticsResult(parserResult, null, reports);
+        return new JmmSemanticsResult(parserResult, symbolTable, reports);
     }
 }

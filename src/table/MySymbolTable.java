@@ -12,7 +12,7 @@ import java.util.Map;
 public class MySymbolTable implements SymbolTable {
     private final List<String> imports = new ArrayList<>();
     private String class_name;
-    private String super_class_name = null;
+    private String super_class_name;
     private final Map<String, ValueSymbol> fields = new HashMap<>();
     private final Map<String, Method> methods = new HashMap<>();
 
@@ -134,7 +134,12 @@ public class MySymbolTable implements SymbolTable {
      */
     @Override
     public List<Symbol> getParameters(String methodName) {
-        return null;//methods.get(methodName).getParameters();
+        //List<Symbol> parameters = (List<Symbol>)methods.get(methodName).getParameters();
+        return new ArrayList<>();
+    }
+
+    public List<ValueSymbol> getParams(String methodName) {
+        return methods.get(methodName).getParameters();
     }
 
     /**
