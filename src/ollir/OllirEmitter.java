@@ -84,6 +84,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         }
         else{
             ollir_code += data.getOllirCode();
+            ollir_code += identifierData.getReturnVar() + " :=." + getVarOllirType(valueNode) + " " + data.getReturnVar() + ";\n";
         }
 
         return new OllirData(return_type, ollir_code);
@@ -336,8 +337,9 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
     private OllirData generateVarCreation(JmmNode node, String methodId){
         String return_type = getVarOllirType(node);
-        String ollir_code = node.getParent().getParent().getChildren().get(0).get("name") + "." + return_type + " :=." + return_type + " new(" + return_type + ")." + return_type + ";\n";
-        return new OllirData(return_type, ollir_code);
+        String aux = "aux_" + localVariableCounter++;
+        String ollir_code = aux + "." + return_type + " :=." + return_type + " new(" + return_type + ")." + return_type + ";\n";
+        return new OllirData(aux + "." + return_type, ollir_code);
     }
 
     private OllirData generateFCall(JmmNode node, String methodId){
@@ -364,11 +366,12 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         }
 
 
-
+        String return_var = "";
         if(identifier_node.getKind().equals("This")){
             //this.function(arguments);
             Method method = symbolTable.getMethod(function_name, types);
-            ollir_code += "invokevirtual(this, \"" + function_name + "\"" +  (!args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")" + getOllirType(method.getReturnType()) + ";";
+            return_var = "aux_" + localVariableCounter++ + "." + getOllirType(method.getReturnType());
+            ollir_code += return_var + ":=." + getOllirType(method.getReturnType()) + " invokevirtual(this, \"" + function_name + "\"" +  (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + getOllirType(method.getReturnType()) + ";";
 
         }
         else {
@@ -377,14 +380,16 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             if (symbol == null) {
                 //Import
                 //ollir_code += "invokestatic(" + identifier_name + "." + symbolTable.getClassName() + "," + function_name + ").V;";
-                ollir_code += "invokestatic(" + identifier_name + ", \"" + function_name + "\"" + (!args.isEmpty() ? "" : ", " + String.join(", ", args)) + ").V;";
+                ollir_code += "invokestatic(" + identifier_name + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ").V;";
 
 
             } else {
                 //Variable
                 if (symbol.getType().getName().equals(symbolTable.getClassName()) && symbolTable.getSuper() == null) {
                     Method method = symbolTable.getMethod(function_name, types);
-                    ollir_code += "invokevirtual(" + identifier_name + ", \"" + function_name + "\"" + (!args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")" + getOllirType(method.getReturnType()) + ";";
+                    ValueSymbol identifier = NodeFindingMethods.getVariable(symbolTable.getMethod(methodId), symbolTable, identifier_name);
+                    return_var = "aux_" + localVariableCounter++ + "." + getOllirType(method.getReturnType());
+                    ollir_code += return_var + ":=." + getOllirType(method.getReturnType()) + " invokevirtual(" + identifier_name + "." + getOllirType(identifier.getType()) + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + getOllirType(method.getReturnType()) + ";";
 
                 }
 
@@ -392,7 +397,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         }
 
         System.out.println("Ollir code here: " + ollir_code);
-        return new OllirData(return_type, ollir_code + "\n");
+        return new OllirData(return_var, ollir_code + "\n");
     }
 
 

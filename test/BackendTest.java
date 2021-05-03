@@ -29,4 +29,13 @@ public class BackendTest {
         var output = result.run();
         assertEquals("Hello, World!", output.trim());
     }
+
+    @Test
+    public void testSimple() {
+        var result = TestUtils.backend(SpecsIo.getResource("fixtures/public/HelloWorld.jmm"));
+        TestUtils.noErrors(result.getReports());
+
+        var output = result.run();
+        assertEquals("30", output.trim());
+    }
 }
