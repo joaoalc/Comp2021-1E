@@ -1,16 +1,6 @@
 import ioPlus;
 class HelloWorld {
     public static void main(String[] args) {
-        int a;
-        int b;
-        int c;
-        int d;
-        int e;
-        Bruh xd;
-        a= b + c * a / e;
-        b = 2;
-        c = b;
-        xd = new Bruh();
         ioPlus.printHelloWorld();
     }
 }

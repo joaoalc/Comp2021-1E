@@ -53,6 +53,8 @@ public class MySymbolTable implements SymbolTable {
         return methods.getOrDefault(method.getIdentifier(), null);
     }
 
+    public Method getMethod(String methodId) { return methods.get(methodId);}
+
     public boolean methodExists(String methodName, List<ValueSymbol> methodArgs){
         Method tmpMethod = new Method(methodName, new Type("", false), methodArgs);
         String methodIdentifier = tmpMethod.getIdentifier();
