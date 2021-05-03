@@ -40,7 +40,7 @@ public class BackendStage implements JasminBackend {
             ollirClass.buildCFGs();          // Build the CFG of each method
             // ollirClass.outputCFGs();         // Output to .dot files the CFGs, one per method
             ollirClass.buildVarTables();     // Build the table of variables for each method
-            // ollirClass.show();               // Print to console main information about the input OLLIR
+//            ollirClass.show();               // Print to console main information about the input OLLIR
 
             // Convert the OLLIR to a String containing the equivalent Jasmin code
             String jasminCode = "";
@@ -147,7 +147,7 @@ public class BackendStage implements JasminBackend {
         code += methodName;
 
         // Method descriptor
-        code += generateMethodDescriptor(method.getParams(), method.getReturnType()) + "\n";
+        code += generateMethodDescriptor(method.getParams(), method.getReturnType(), methodName) + "\n";
 
         code += "\t.limit stack 99\n";    // NOTE: Temporary for Assignment 2
         code += "\t.limit locals 99\n\n"; // NOTE: Temporary for Assignment 2
@@ -164,7 +164,7 @@ public class BackendStage implements JasminBackend {
         return code;
     }
 
-    private String generateMethodDescriptor(List<Element> parameters, Type returnType) {
+    private String generateMethodDescriptor(List<Element> parameters, Type returnType, String methodName) {
         String descriptor = "(";
 
         // Iterate over method's parameters
@@ -172,12 +172,14 @@ public class BackendStage implements JasminBackend {
             // Element type
             descriptor += elementTypeToString(parameter.getType().getTypeOfElement());
 
-            if (parameter.isLiteral())
+            if (methodName.equals("main"))
+                descriptor += "Ljava/lang/String";
+
+            else if (parameter.isLiteral())
                 descriptor += ((LiteralElement) parameter).getLiteral();
 
-            else {
+            else
                 descriptor += ((Operand) parameter).getName();
-            }
 
             descriptor += ";";
         }
@@ -230,11 +232,12 @@ public class BackendStage implements JasminBackend {
         // Method name
         String methodName = "";
 
-        if (instruction.getSecondArg().isLiteral())
-            methodName += ((LiteralElement) instruction.getSecondArg()).getLiteral();
+        if (instruction.getSecondArg() != null)
+            if (instruction.getSecondArg().isLiteral())
+                methodName += ((LiteralElement) instruction.getSecondArg()).getLiteral();
 
-        else
-            methodName += ((Operand) instruction.getSecondArg()).getName();
+            else
+                methodName += ((Operand) instruction.getSecondArg()).getName();
 
         methodName = methodName.replaceAll("\"", "");
 
@@ -242,7 +245,7 @@ public class BackendStage implements JasminBackend {
             className = superClassName;
 
         // Descriptor
-        String descriptor = generateMethodDescriptor(instruction.getListOfOperands(), instruction.getReturnType());
+        String descriptor = generateMethodDescriptor(instruction.getListOfOperands(), instruction.getReturnType(), methodName);
 
         return String.format("\t%s %s/%s%s\n", invocationType, className, methodName, descriptor);
     }
