@@ -166,7 +166,7 @@ void MethodDeclaration() #MethodDeclaration : {Token t; Token type; Token ident;
             [ Argument() ("," Argument()  )* ]
             <RIGHT_PARENTHESES> <LEFT_BRACE>
             MethodBody() #MethodBody
-            <RETURN> Expression() <SEMICOLON> #MethodReturn
+            <RETURN> Expression() #MethodReturn <SEMICOLON>
         )
     )
     <RIGHT_BRACE> #Method
