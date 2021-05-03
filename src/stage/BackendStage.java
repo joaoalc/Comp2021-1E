@@ -41,7 +41,7 @@ public class BackendStage implements JasminBackend {
             ollirClass.buildCFGs();          // Build the CFG of each method
             // ollirClass.outputCFGs();         // Output to .dot files the CFGs, one per method
             ollirClass.buildVarTables();     // Build the table of variables for each method
-            ollirClass.show();               // Print to console main information about the input OLLIR
+//            ollirClass.show();               // Print to console main information about the input OLLIR
 
             // Convert the OLLIR to a String containing the equivalent Jasmin code
             String jasminCode = "";
@@ -177,12 +177,6 @@ public class BackendStage implements JasminBackend {
             if (methodName.equals("main"))
                 descriptor += "Ljava/lang/String";
 
-            else if (parameter.isLiteral())
-                descriptor += ((LiteralElement) parameter).getLiteral();
-
-            else
-                descriptor += ((Operand) parameter).getName();
-
             descriptor += ";";
         }
 
@@ -219,6 +213,15 @@ public class BackendStage implements JasminBackend {
     }
 
     private String generate(CallInstruction instruction) {
+        String code = "";
+
+        for (Element operand : instruction.getListOfOperands())
+            if (operand.isLiteral())
+                code += "\tldc " + ((LiteralElement) operand).getLiteral() + "\n";
+
+            else
+                code += "\tldc " + ((Operand) operand).getName() + "\n";
+
         // Invocation type
         String invocationType = instruction.getInvocationType().toString();
 
@@ -257,7 +260,9 @@ public class BackendStage implements JasminBackend {
 
         String descriptor = generateMethodDescriptor(instruction.getListOfOperands(), returnType, methodName);
 
-        return String.format("\t%s %s/%s%s\n", invocationType, className, methodName, descriptor);
+        code += String.format("\t%s %s/%s%s\n", invocationType, className, methodName, descriptor);
+
+        return code;
     }
 
     private String generate(GotoInstruction instruction) {
@@ -289,7 +294,7 @@ public class BackendStage implements JasminBackend {
 
         code += generate(instruction.getRhs()); // Generate RHS
 
-        String variableType = elementTypeToString(instruction.getDest().getType().getTypeOfElement()).toLowerCase();
+        String variableType = elementTypeToString(instruction.getTypeOfAssign().getTypeOfElement()).toLowerCase();
 
         if (!isObjetRef)
             code += "\t" + variableType + "load " + stackCount + "\n";
