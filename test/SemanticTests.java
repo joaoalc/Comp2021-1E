@@ -114,10 +114,4 @@ public class SemanticTests {
     public void VarUndef() {
         failureTest("var_undef.jmm");
     }
-
-    /* // The test file doesn't exist
-    @Test
-    public void VarNotInit() {
-        failureTest("varNotInit.jmm");
-    }*/
 }

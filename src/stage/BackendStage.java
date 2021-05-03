@@ -292,7 +292,7 @@ public class BackendStage implements JasminBackend {
 
     private String generate(BinaryOpInstruction instruction) {
         OperationType opType = instruction.getUnaryOperation().getOpType();
-        String elementType = elementTypeToString(instruction.getLeftOperand().getType().getTypeOfElement());
+        String elementType = elementTypeToString(instruction.getLeftOperand().getType().getTypeOfElement()).toLowerCase();
 
         String code = "\t" + elementType + "load " + stackCount + "\n";
 

@@ -249,10 +249,6 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         ollirCode += "}";
 
-        System.out.println("Code:\n");
-        System.out.println(ollirCode);
-        System.out.println("End of code.");
-
         return new OllirData(ollirCode);
     }
 
@@ -300,9 +296,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             OllirData childData = visit(child, methodId);
             ollirCode += childData.getOllirCode();
         }
-        //System.out.println("code: " + stringBuilder.toString() + ollirCode + "}\n");
-        //System.out.println("end of code");
-        //stringBuilder.append("}\n");
+
         return new OllirData(stringBuilder.toString() + ollirCode + "}\n");
     }
 
@@ -331,7 +325,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
     private OllirData generateNewExpression(JmmNode node, String methodId){
         OllirData data = visit(node.getChildren().get(0), methodId);
-        System.out.println("New expression data: " + data.getOllirCode() + ".");
+
         return data;
     }
 
@@ -396,7 +390,6 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             }
         }
 
-        System.out.println("Ollir code here: " + ollir_code);
         return new OllirData(return_var, ollir_code + "\n");
     }
 
