@@ -41,7 +41,7 @@ public class BackendStage implements JasminBackend {
             ollirClass.buildCFGs();          // Build the CFG of each method
             // ollirClass.outputCFGs();         // Output to .dot files the CFGs, one per method
             ollirClass.buildVarTables();     // Build the table of variables for each method
-//            ollirClass.show();               // Print to console main information about the input OLLIR
+            ollirClass.show();               // Print to console main information about the input OLLIR
 
             // Convert the OLLIR to a String containing the equivalent Jasmin code
             String jasminCode = "";
@@ -278,10 +278,21 @@ public class BackendStage implements JasminBackend {
     }
 
     private String generate(AssignInstruction instruction) {
-        String code = generate(instruction.getRhs()); // Generate RHS
+        String code = "";
+        boolean isObjetRef = instruction.getRhs().getInstType() == InstructionType.CALL && instruction.getTypeOfAssign().getTypeOfElement() == ElementType.OBJECTREF ;
+
+        if (isObjetRef) {
+            CallInstruction rhsInstruction = (CallInstruction) instruction.getRhs();
+            String className = ((Operand) rhsInstruction.getFirstArg()).getName();
+            code = "\tnew " + className + "\n";
+        }
+
+        code += generate(instruction.getRhs()); // Generate RHS
 
         String variableType = elementTypeToString(instruction.getDest().getType().getTypeOfElement()).toLowerCase();
-        code += "\t" + variableType + "load " + stackCount + "\n";
+
+        if (!isObjetRef)
+            code += "\t" + variableType + "load " + stackCount + "\n";
 
         return code;
     }
