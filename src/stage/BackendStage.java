@@ -245,6 +245,9 @@ public class BackendStage implements JasminBackend {
         if (methodName.equals("<init>"))
             className = superClassName;
 
+        if (methodName.isEmpty())
+            methodName = "<init>";
+
         // Descriptor
         String descriptor = generateMethodDescriptor(instruction.getListOfOperands(), instruction.getReturnType(), methodName);
 
@@ -260,7 +263,7 @@ public class BackendStage implements JasminBackend {
         Element operand = instruction.getSingleOperand();
 
         if (operand.isLiteral()) {
-            code += "bipush " + ((LiteralElement) operand).getLiteral();
+            code += "ldc " + ((LiteralElement) operand).getLiteral();
         }
 
         code += "\n";
