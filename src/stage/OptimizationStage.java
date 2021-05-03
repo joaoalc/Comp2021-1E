@@ -3,12 +3,17 @@ package stage;
 import java.util.ArrayList;
 import java.util.List;
 
+import ollir.OllirData;
+import ollir.OllirEmitter;
 import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.ollir.JmmOptimization;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp.jmm.report.ReportType;
+import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.specs.util.SpecsIo;
+import table.MySymbolTable;
 
 /**
  * Copyright 2021 SPeCS.
@@ -31,10 +36,16 @@ public class OptimizationStage implements JmmOptimization {
         JmmNode node = semanticsResult.getRootNode();
 
         // Convert the AST to a String containing the equivalent OLLIR code
-        String ollirCode = ""; // Convert node ...
+        OllirEmitter ollirEmitter = new OllirEmitter((MySymbolTable)semanticsResult.getSymbolTable());
+
+        OllirData ollirData = ollirEmitter.visit(node, null);
+
+        String ollirCode = ollirData.getOllirCode();
 
         // More reports from this stage
         List<Report> reports = new ArrayList<>();
+        Report report = new Report(ReportType.LOG, Stage.OPTIMIZATION, 0, 0, ollirCode);
+        reports.add(report);
 
         return new OllirResult(semanticsResult, ollirCode, reports);
     }

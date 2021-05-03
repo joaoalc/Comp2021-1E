@@ -23,5 +23,15 @@ public class OptimizeTest {
     public void testHelloWorld() {
         var result = TestUtils.optimize(SpecsIo.getResource("fixtures/public/HelloWorld.jmm"));
         TestUtils.noErrors(result.getReports());
+
+        System.out.println(result.getReports().toString());
+    }
+
+    @Test
+    public void testSimple() {
+        var result = TestUtils.optimize(SpecsIo.getResource("fixtures/public/Simple.jmm"));
+        TestUtils.noErrors(result.getReports());
+
+        System.out.println(result.getReports().toString());
     }
 }

@@ -12,7 +12,7 @@ import java.util.Map;
 public class MySymbolTable implements SymbolTable {
     private final List<String> imports = new ArrayList<>();
     private String class_name;
-    private String super_class_name = null;
+    private String super_class_name;
     private final Map<String, ValueSymbol> fields = new HashMap<>();
     private final Map<String, Method> methods = new HashMap<>();
 
@@ -52,6 +52,8 @@ public class MySymbolTable implements SymbolTable {
     public Method getMethod(Method method){
         return methods.getOrDefault(method.getIdentifier(), null);
     }
+
+    public Method getMethod(String methodId) { return methods.get(methodId);}
 
     public boolean methodExists(String methodName, List<ValueSymbol> methodArgs){
         Method tmpMethod = new Method(methodName, new Type("", false), methodArgs);
@@ -110,7 +112,7 @@ public class MySymbolTable implements SymbolTable {
         return new ArrayList<>(fields.values());
     }
 
-    public Symbol getField(String varName) { return fields.getOrDefault(varName, null);}
+    public ValueSymbol getField(String varName) { return fields.getOrDefault(varName, null);}
 
     /**
      * @return a list with the names of the methods of the class
@@ -134,7 +136,12 @@ public class MySymbolTable implements SymbolTable {
      */
     @Override
     public List<Symbol> getParameters(String methodName) {
-        return null;//methods.get(methodName).getParameters();
+        //List<Symbol> parameters = (List<Symbol>)methods.get(methodName).getParameters();
+        return new ArrayList<>();
+    }
+
+    public List<ValueSymbol> getParams(String methodName) {
+        return methods.get(methodName).getParameters();
     }
 
     /**

@@ -1,5 +1,6 @@
 package table;
 
+import com.sun.jdi.Value;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 

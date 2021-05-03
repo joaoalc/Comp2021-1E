@@ -29,7 +29,7 @@ public class Method {
         local_variables.put(name, new ValueSymbol(type, name, value));
     }
 
-    public boolean localVariableExists(Symbol symbol){
+    public boolean localVariableExists(ValueSymbol symbol){
         if(local_variables.getOrDefault(symbol, null) == null){
             return false;
         }
@@ -52,14 +52,15 @@ public class Method {
         return new ArrayList<>(local_variables.values());
     }
 
-    public Symbol getLocalVariable(String varName) {
+    public ValueSymbol getLocalVariable(String varName) {
         return local_variables.getOrDefault(varName, null);}
 
     public String getIdentifier() {
 
-        List<String> parameter_types = new ArrayList<String>();
+        List<String> parameter_types = new ArrayList<>();
         for(Symbol i: parameters){
-            parameter_types.add(i.getType().getName());
+            String parameterId = i.getType().getName() + (i.getType().isArray() ? "[]" : "");
+            parameter_types.add(parameterId);
         }
 
         return String.join("-", name, String.join("-", parameter_types));

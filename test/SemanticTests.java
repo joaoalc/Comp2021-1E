@@ -18,7 +18,7 @@ public class SemanticTests {
 
     private void failureTest(String filename) {
         String fileContents = SpecsIo.getResource(String.format("fixtures/public/fail/semantic/%s", filename));
-        JmmParserResult result = TestUtils.parse(fileContents);
+        JmmSemanticsResult result = TestUtils.analyse(fileContents);
         List<Report> reports = result.getReports();
         mustFail(reports);
     }
@@ -68,55 +68,56 @@ public class SemanticTests {
         TestTemplate("WhileAndIF.jmm");
     }
 
-    // Failure tests
+     //Failure tests
 
-//    @Test
-//    public void ArrIndexNotInt() {
-//        failureTest("arr_index_not_int.jmm");
-//    }
-//
-//    @Test
-//    public void ArrSizeNotInt() {
-//        failureTest("arr_size_not_int.jmm");
-//    }
-//
-//    @Test
-//    public void BadArguments() {
-//        failureTest("badArguments.jmm");
-//    }
-//
-//    @Test
-//    public void BinopIncomp() {
-//        failureTest("binop_incomp.jmm");
-//    }
-//
-//    @Test
-//    public void FuncNotFound() {
-//        failureTest("funcNotFound.jmm");
-//    }
-//
-//    @Test
-//    public void SimpleLength() {
-//        failureTest("simple_length.jmm");
-//    }
-//
-//    @Test
-//    public void VarExpIncomp() {
-//        failureTest("var_exp_incomp.jmm");
-//    }
-//
-//    @Test
-//    public void VarLitIncomp() {
-//        failureTest("var_lit_incomp.jmm");
-//    }
-//
-//    @Test
-//    public void VarUndef() {
-//        failureTest("var_undef.jmm");
-//    }
-//
-//    @Test
-//    public void VarNotInit() {
-//        failureTest("varNotInit.jmm");
-//    }
+    @Test
+    public void ArrIndexNotInt() {
+        failureTest("arr_index_not_int.jmm");
+    }
+
+    @Test
+    public void ArrSizeNotInt() {
+        failureTest("arr_size_not_int.jmm");
+    }
+
+    @Test
+    public void BadArguments() {
+        failureTest("badArguments.jmm");
+    }
+
+    @Test
+    public void BinopIncomp() {
+        failureTest("binop_incomp.jmm");
+    }
+
+    @Test
+    public void FuncNotFound() {
+        failureTest("funcNotFound.jmm");
+    }
+
+    @Test
+    public void SimpleLength() {
+        failureTest("simple_length.jmm");
+    }
+
+    @Test
+    public void VarExpIncomp() {
+        failureTest("var_exp_incomp.jmm");
+    }
+
+    @Test
+    public void VarLitIncomp() {
+        failureTest("var_lit_incomp.jmm");
+    }
+
+    @Test
+    public void VarUndef() {
+        failureTest("var_undef.jmm");
+    }
+
+    /* // The test file doesn't exist
+    @Test
+    public void VarNotInit() {
+        failureTest("varNotInit.jmm");
+    }*/
 }

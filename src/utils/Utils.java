@@ -53,6 +53,8 @@ public class Utils {
         int line = Integer.parseInt(node.get("line"));
         int column = Integer.parseInt(node.get("col"));
 
-        return Report.newError(Stage.SEMANTIC, line, column, message, new Exception());
+        Report rep = Report.newError(Stage.SEMANTIC, line, column, message, new Exception());
+        System.out.println(rep.getType());
+        return rep;
     }
 }

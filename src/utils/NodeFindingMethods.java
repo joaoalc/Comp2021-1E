@@ -1,5 +1,6 @@
 package utils;
 
+import com.sun.jdi.Value;
 import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
@@ -10,8 +11,10 @@ import table.ValueSymbol;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static utils.Utils.getChildrenOfKind;
+import static utils.Utils.newSemanticReport;
 
 public class NodeFindingMethods {
 
@@ -78,12 +81,12 @@ public class NodeFindingMethods {
         return new Type(type_name, is_array);
     }
 
-    public static Symbol getVariable(MySymbolTable symbolTable, String varName){
+    public static ValueSymbol getVariable(MySymbolTable symbolTable, String varName){
         return symbolTable.getField(varName);
     }
 
-    public static Symbol getVariable(Method method, MySymbolTable symbolTable, String varName){
-        Symbol result;
+    public static ValueSymbol getVariable(Method method, MySymbolTable symbolTable, String varName){
+        ValueSymbol result;
 
         result = method.getLocalVariable(varName);
         if(result == null){
@@ -93,7 +96,7 @@ public class NodeFindingMethods {
         return result;
     }
 
-    public static boolean variableExists(Method method, MySymbolTable symbolTable, Symbol symbol){
+    public static boolean variableExists(Method method, MySymbolTable symbolTable, ValueSymbol symbol){
         if(!method.localVariableExists(symbol)){
             if(!symbolTable.fieldExists(symbol)){
                 return false;
@@ -110,6 +113,55 @@ public class NodeFindingMethods {
         if(type.equals(intended_type))
             return true;
         return false;
+    }
+
+    public static boolean sameType(Optional<String> type, String intended_type){
+        if(type.isEmpty())
+            return false;
+        if((type.get()).equals(""))
+            return true;
+        if(intended_type.equals(""))
+            return true;
+        if((type.get()).equals(intended_type))
+            return true;
+        return false;
+    }
+
+    public static boolean sameType(Optional<String> type, Optional<String> intended_type){
+        if(type.isEmpty() || intended_type.isEmpty())
+            return false;
+        if((type.get()).equals(""))
+            return true;
+        if((intended_type.get()).equals(""))
+            return true;
+        if((type.get()).equals((intended_type.get())))
+            return true;
+        return false;
+    }
+
+    public static boolean sameType(String type, Optional<String> intended_type){
+        if(intended_type.isEmpty())
+            return false;
+        if(type.equals(""))
+            return true;
+        if((intended_type.get()).equals(""))
+            return true;
+        if(type.equals((intended_type.get())))
+            return true;
+        return false;
+    }
+
+    public static String getTypeStringReport(JmmNode node){
+        String report_string = "";
+        if(node.getOptional("type").isEmpty() || node.getOptional("is_array").isEmpty()){
+            report_string += "<Empty type>";
+        }
+        else{
+            report_string += node.get("type");
+            if(node.get("is_array").equals("true"))
+                report_string += "[]";
+        }
+        return report_string;
     }
 
 }
