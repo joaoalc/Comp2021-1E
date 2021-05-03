@@ -1,5 +1,6 @@
 package stage;
 
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -196,7 +197,7 @@ public class BackendStage implements JasminBackend {
             case GOTO:
                 return generate((GotoInstruction) instruction);
             case NOPER:
-                return "";
+                return generate((SingleOpInstruction) instruction);
             case ASSIGN:
                 return generate((AssignInstruction) instruction);
             case BRANCH:
@@ -254,11 +255,23 @@ public class BackendStage implements JasminBackend {
         return String.format("\tgoto %s\n", instruction.getLabel());
     }
 
+    private String generate(SingleOpInstruction instruction) {
+        String code = "\t";
+        Element operand = instruction.getSingleOperand();
+
+        if (operand.isLiteral()) {
+            code += "bipush " + ((LiteralElement) operand).getLiteral();
+        }
+
+        code += "\n";
+
+        return code;
+    }
+
     private String generate(AssignInstruction instruction) {
         String code = generate(instruction.getRhs()); // Generate RHS
 
         String variableType = elementTypeToString(instruction.getDest().getType().getTypeOfElement()).toLowerCase();
-
         code += "\t" + variableType + "load " + stackCount + "\n";
 
         return code;
