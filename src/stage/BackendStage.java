@@ -3,7 +3,6 @@ package stage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 import org.specs.comp.ollir.*;
 
@@ -28,6 +27,7 @@ import pt.up.fe.comp.jmm.report.Stage;
 
 public class BackendStage implements JasminBackend {
     int stackCount = 0;
+    String superClassName;
 
     @Override
     public JasminResult toJasmin(OllirResult ollirResult) {
@@ -40,7 +40,7 @@ public class BackendStage implements JasminBackend {
             ollirClass.buildCFGs();          // Build the CFG of each method
             // ollirClass.outputCFGs();         // Output to .dot files the CFGs, one per method
             ollirClass.buildVarTables();     // Build the table of variables for each method
-            ollirClass.show();               // Print to console main information about the input OLLIR
+            // ollirClass.show();               // Print to console main information about the input OLLIR
 
             // Convert the OLLIR to a String containing the equivalent Jasmin code
             String jasminCode = "";
@@ -54,7 +54,7 @@ public class BackendStage implements JasminBackend {
 
             jasminCode += String.format(".class %s %s\n", classAccessModifier, className);
 
-            String superClassName = ollirClass.getSuperClass();
+            superClassName = ollirClass.getSuperClass();
 
             if (superClassName == null)
                 superClassName = "java/lang/Object";
@@ -63,39 +63,9 @@ public class BackendStage implements JasminBackend {
 
             // Iterate over class methods
             for (Method method : ollirClass.getMethods()) {
-                jasminCode += ".method ";
+                jasminCode += generateMethod(method);
 
-                // Method access modifier
-                String methodAccessModifier = acessModifierToString(method.getMethodAccessModifier());
-
-                if (!methodAccessModifier.isEmpty())
-                    jasminCode += methodAccessModifier + " ";
-
-                if (method.isStaticMethod())
-                    jasminCode += "static ";
-
-                // Method name
-                String methodName = method.getMethodName();
-
-                if (method.isConstructMethod())
-                    methodName = "<init>";
-
-                jasminCode += methodName;
-
-                // Method descriptor
-                jasminCode += generateMethodDescriptor(method.getParams(), method.getReturnType()) + "\n";
-
-                jasminCode += "\t.limit stack 99\n"; // TODO: Temporary for Assignment 2
-                jasminCode += "\t.limit locals 99\n"; // TODO: Temporary for Assignment 2
-
-                if (method.isConstructMethod())
-                    jasminCode += "\taload_0\n";
-
-                // Iterate over method's instructions
-                for (Instruction instruction : method.getInstructions())
-                    jasminCode += generate(instruction);
-                
-                jasminCode += ".end method\n\n";
+                stackCount = 0;
             }
 
             // More reports from this stage
@@ -156,11 +126,50 @@ public class BackendStage implements JasminBackend {
         return "";
     }
 
+    private String generateMethod(Method method) {
+        String code = ".method ";
+
+        // Method access modifier
+        String methodAccessModifier = acessModifierToString(method.getMethodAccessModifier());
+
+        if (!methodAccessModifier.isEmpty())
+            code += methodAccessModifier + " ";
+
+        if (method.isStaticMethod())
+            code += "static ";
+
+        // Method name
+        String methodName = method.getMethodName();
+
+        if (method.isConstructMethod())
+            methodName = "<init>";
+
+        code += methodName;
+
+        // Method descriptor
+        code += generateMethodDescriptor(method.getParams(), method.getReturnType()) + "\n";
+
+        code += "\t.limit stack 99\n";    // NOTE: Temporary for Assignment 2
+        code += "\t.limit locals 99\n\n"; // NOTE: Temporary for Assignment 2
+
+        if (method.isConstructMethod())
+            code += "\taload_0\n";
+
+        // Iterate over method's instructions
+        for (Instruction instruction : method.getInstructions())
+            code += generate(instruction);
+
+        code += ".end method\n\n";
+
+        return code;
+    }
+
     private String generateMethodDescriptor(List<Element> parameters, Type returnType) {
         String descriptor = "(";
 
         // Iterate over method's parameters
         for (Element parameter : parameters) {
+            // Element type
             descriptor += elementTypeToString(parameter.getType().getTypeOfElement());
 
             if (parameter.isLiteral())
@@ -228,6 +237,9 @@ public class BackendStage implements JasminBackend {
             methodName += ((Operand) instruction.getSecondArg()).getName();
 
         methodName = methodName.replaceAll("\"", "");
+
+        if (methodName.equals("<init>"))
+            className = superClassName;
 
         // Descriptor
         String descriptor = generateMethodDescriptor(instruction.getListOfOperands(), instruction.getReturnType());
