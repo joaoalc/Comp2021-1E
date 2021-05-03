@@ -153,12 +153,12 @@ void VarDeclaration() #VarDeclaration : {Token t;} {
     Type() t=<IDENTIFIER> { jjtThis.put("name", t.image); } <SEMICOLON>
 }
 
-void MethodDeclaration() #MethodDeclaration : {Token t;} {
+void MethodDeclaration() #MethodDeclaration : {Token t; Token type; Token ident;} {
     <PUBLIC>
     (
         (
-            <STATIC> (<VOID> { jjtThis.put("name", "void"); jjtThis.put("is_array", "false");}) #Type t=<MAIN> { jjtThis.put("name", t.image); }
-            <LEFT_PARENTHESES> <STRING> <LEFT_BRACKET> <RIGHT_BRACKET> <IDENTIFIER> <RIGHT_PARENTHESES> <LEFT_BRACE>
+            <STATIC> <VOID> { jjtThis.put("name", "void"); jjtThis.put("is_array", "false");} #Type t=<MAIN> { jjtThis.put("name", t.image); }
+            <LEFT_PARENTHESES> StringArrayType() <RIGHT_PARENTHESES> <LEFT_BRACE>
             MethodBody() #MethodBody
         ) |
         (
@@ -182,9 +182,13 @@ void MethodBody() #void : {} {
 }
 
 void Type() #Type : {Token t;} {
-    ( t=<INT> {jjtThis.put("name", t.image); jjtThis.put("type", "int"); } ((<LEFT_BRACKET> <RIGHT_BRACKET> {jjtThis.put("is_array", "true");} ) | {} {jjtThis.put("is_array", "false"); } ))
-    | t=<BOOLEAN> { jjtThis.put("name", t.image); jjtThis.put("is_array", "false"); jjtThis.put("type", "boolean"); }
+    ( t=<INT> {jjtThis.put("name", t.image); } ((<LEFT_BRACKET> <RIGHT_BRACKET> {jjtThis.put("is_array", "true");} ) | {} {jjtThis.put("is_array", "false"); } ))
+    | t=<BOOLEAN> { jjtThis.put("name", t.image); jjtThis.put("is_array", "false"); }
     | t=<IDENTIFIER> { jjtThis.put("name", t.image); jjtThis.put("is_array", "false");}
+}
+
+void StringArrayType() #Argument : {Token t; Token ident;}{
+    t=<STRING> {jjtThis.put("name", "String"); jjtThis.put("type", "String"); jjtThis.put("is_array", "true"); } #Type <LEFT_BRACKET> <RIGHT_BRACKET> ident=<IDENTIFIER> { jjtThis.put("name", ident.image); }
 }
 
 void Statement() #void : {} {

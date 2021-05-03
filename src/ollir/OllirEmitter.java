@@ -26,6 +26,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
     public OllirEmitter(MySymbolTable symbolTable) {
         this.symbolTable = symbolTable;
 
+
         addVisit("ClassDeclaration", this::generateClass);
         addVisit("MethodDeclaration", this::generateMethod);
         addVisit("MethodReturn", this::generateReturn);
@@ -41,17 +42,44 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         addVisit("Assignment", this::generateAssignment);
         //addVisit("NewExpression", this::verifyParentheses);
         //addVisit("VarDeclaration", this::varDeclaration);
-        //addVisit("IntArray", this::verifyArray);
-        //addVisit("Identifier", this::addValueToNodeOptional);*/
+        //addVisit("IntArray", this::verifyArray);*/
         //addVisit("IfStatement", this::verifyIfStatement);
         //addVisit("WhileStatement", this::verifyIfStatement);
 
         //addVisit("Negate", this::verifyNegate);
 
+        addVisit("Identifier", this::generateIdentifier);
+        addVisit("Integer", this::generateInteger);
         setDefaultVisit(this::defaultVisit);
     }
 
+
     private OllirData generateAssignment(JmmNode node, String methodId) {
+        JmmNode identifierNode = node.getChildren().get(0);
+        JmmNode valueNode = node.getChildren().get(1);
+
+        String return_type;
+        String ollir_code = "";
+        OllirData identifierData = visit(identifierNode, methodId);
+        return_type = identifierData.getReturnVar();
+
+
+        OllirData data = visit(valueNode, methodId);
+        if(data.getOllirCode().equals("")){
+            //For things like integers or identifiers (a = 2; a = b)
+            if(valueNode.getOptional("type").isPresent()){
+                ollir_code += identifierData.getReturnVar() + " :=." + getVarOllirType(valueNode) + " " + data.getReturnVar();
+            }
+            else{
+                //???
+            }
+        }
+        else{
+            ollir_code += data.getOllirCode();
+        }
+        System.out.println(ollir_code);
+
+        return new OllirData(return_type, ollir_code);
     }
 
     private OllirData generateLessThan(JmmNode node, String methodId) {
@@ -65,10 +93,10 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         ollirCode += firstOp.getOllirCode() + "\n" + secondOp.getOllirCode() + "\n";
 
-        int aux_index = localVariableCounter++;
-        ollirCode += "aux" + aux_index + ".bool :=.bool " + firstOp.getReturnVar() + " <.i32 " + secondOp.getReturnVar() + ";\n";
+        String name = getVarAssignmentName(node);
+        ollirCode += name + ".bool :=.bool " + firstOp.getReturnVar() + " <.i32 " + secondOp.getReturnVar() + ";\n";
 
-        return new OllirData("aux" + aux_index + ".bool", ollirCode);
+        return new OllirData(name + ".bool", ollirCode);
     }
 
     private OllirData generateDiv(JmmNode node, String methodId) {
@@ -82,10 +110,10 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         ollirCode += firstOp.getOllirCode() + "\n" + secondOp.getOllirCode() + "\n";
 
-        int aux_index = localVariableCounter++;
-        ollirCode += "aux" + aux_index + ".i32 :=.i32 " + firstOp.getReturnVar() + " /.i32 " + secondOp.getReturnVar() + ";\n";
+        String name = getVarAssignmentName(node);
+        ollirCode += name + ".i32 :=.i32 " + firstOp.getReturnVar() + " /.i32 " + secondOp.getReturnVar() + ";\n";
 
-        return new OllirData("aux" + aux_index, ollirCode);
+        return new OllirData(name + ".i32", ollirCode);
     }
 
     private OllirData generateMult(JmmNode node, String methodId) {
@@ -99,10 +127,10 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         ollirCode += firstOp.getOllirCode() + "\n" + secondOp.getOllirCode() + "\n";
 
-        int aux_index = localVariableCounter++;
-        ollirCode += "aux" + aux_index + ".i32 :=.i32 " + firstOp.getReturnVar() + " *.i32 " + secondOp.getReturnVar() + ";\n";
+        String name = getVarAssignmentName(node);
+        ollirCode +=  name + ".i32 :=.i32 " + firstOp.getReturnVar() + " *.i32 " + secondOp.getReturnVar() + ";\n";
 
-        return new OllirData("aux" + aux_index + ".i32", ollirCode);
+        return new OllirData(name + ".i32", ollirCode);
     }
 
     private OllirData generateSub(JmmNode node, String methodId) {
@@ -116,10 +144,10 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         ollirCode += firstOp.getOllirCode() + "\n" + secondOp.getOllirCode() + "\n";
 
-        int aux_index = localVariableCounter++;
-        ollirCode += "aux" + aux_index + ".i32 :=.i32 " + firstOp.getReturnVar() + " -.i32 " + secondOp.getReturnVar() + ";\n";
+        String name = getVarAssignmentName(node);
+        ollirCode += name + ".i32 :=.i32 " + firstOp.getReturnVar() + " -.i32 " + secondOp.getReturnVar() + ";\n";
 
-        return new OllirData("aux" + aux_index + ".i32", ollirCode);
+        return new OllirData(name + ".i32", ollirCode);
     }
 
     private OllirData generateAdd(JmmNode node, String methodId) {
@@ -133,10 +161,10 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         ollirCode += firstOp.getOllirCode() + "\n" + secondOp.getOllirCode() + "\n";
 
-        int aux_index = localVariableCounter++;
-        ollirCode += "aux" + aux_index + ".i32 :=.i32 " + firstOp.getReturnVar() + " +.i32 " + secondOp.getReturnVar() + ";\n";
+        String name = getVarAssignmentName(node);
+        ollirCode +=  name + ".i32" + " :=.i32 " + firstOp.getReturnVar() + " +.i32 " + secondOp.getReturnVar() + ";\n";
 
-        return new OllirData("aux" + aux_index + ".i32", ollirCode);
+        return new OllirData(name + ".i32", ollirCode);
     }
 
     private OllirData generateAnd(JmmNode node, String methodId) {
@@ -150,10 +178,20 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         ollirCode += firstOp.getOllirCode() + "\n" + secondOp.getOllirCode() + "\n";
 
-        int aux_index = localVariableCounter++;
-        ollirCode += "aux" + aux_index + ".bool :=.bool " + firstOp.getReturnVar() + " &&.bool " + secondOp.getReturnVar() + ";\n";
+        String name = getVarAssignmentName(node);
+        ollirCode += name + ".bool :=.bool " + firstOp.getReturnVar() + " &&.bool " + secondOp.getReturnVar() + ";\n";
 
-        return new OllirData("aux" + aux_index + ".i32", ollirCode);
+        return new OllirData(name + ".bool", ollirCode);
+    }
+
+    private OllirData generateInteger(JmmNode jmmNode, String s) {
+        //TODO: (for self) Check if ollirCode is right later
+        return new OllirData(jmmNode.get("value") + ".i32", "");
+    }
+
+    private OllirData generateIdentifier(JmmNode jmmNode, String s){
+        String return_type = getVarOllirType(jmmNode);
+        return new OllirData(jmmNode.get("name") + "." + return_type, "");
     }
 
     public OllirData defaultVisit(JmmNode node, String data) {
@@ -261,6 +299,37 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
     }
 
 
+
+    public String getVarAssignmentName(JmmNode jmmNode){
+        JmmNode parent_node = jmmNode.getParent();
+        String name = "";
+        if(parent_node.getKind().equals("Assignment")){
+            JmmNode identifier_node = parent_node.getChildren().get(0); // TODO: This will probably not work with an indice, in that case we would have to check it's child for the name
+            name = identifier_node.get("name");
+        }
+        else{
+            name = "aux" + localVariableCounter++;
+        }
+
+        return name;
+    }
+
+    private String getVarOllirType(JmmNode jmmNode){
+        String return_type = "";
+        if(jmmNode.get("type").equals("int")){
+            return_type += "i32";
+            if(jmmNode.get("is_array").equals("true")){
+                return_type += ".array";
+            }
+        }
+        else if(jmmNode.get("type").equals("boolean")){
+            return_type += "bool";
+        }
+        else{
+            return_type += jmmNode.get("type");
+        }
+        return return_type;
+    }
 
     private String getOllirType(Type type) {
         String name = type.getName();

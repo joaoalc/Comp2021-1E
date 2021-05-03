@@ -15,6 +15,7 @@ import table.MySymbolTable;
 import visitor.*;
 
 public class AnalysisStage implements JmmAnalysis {
+    public List<Report> report_list = new ArrayList<>();
     @Override
     public JmmSemanticsResult semanticAnalysis(JmmParserResult parserResult) {
         if (TestUtils.getNumReports(parserResult.getReports(), ReportType.ERROR) > 0) {
@@ -31,18 +32,26 @@ public class AnalysisStage implements JmmAnalysis {
 
         JmmNode node = parserResult.getRootNode();
 
-        List<Report> reports = new ArrayList<>();
 
         DeclarationVisitor declarationVerifierVisitor = new DeclarationVisitor();
+        List<Report> reports = new ArrayList<>();
         declarationVerifierVisitor.visit(node, reports);
+
+
 
         MySymbolTable symbolTable = declarationVerifierVisitor.getSymbolTable();
 
+        List<Report> expressionReports;
         // Verify binary operations
-        ExpressionVisitor a_s_vis = new ExpressionVisitor(symbolTable);
-        a_s_vis.visit(node, reports);
+        ExpressionVisitor a_s_vis = new ExpressionVisitor(symbolTable, report_list);
+        expressionReports = a_s_vis.visit(node, true);
 
-        // No Symbol Table being calculated yet
-        return new JmmSemanticsResult(parserResult, symbolTable, reports);
+        System.out.println(report_list.size());
+
+        System.out.println("Reports: ");
+        for(int i = 0; i < report_list.size(); i++){
+            System.out.println(report_list.get(i));
+        }
+        return new JmmSemanticsResult(parserResult, symbolTable, report_list);
     }
 }

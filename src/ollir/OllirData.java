@@ -25,4 +25,5 @@ public class OllirData {
     public String getOllirCode() {
         return ollirCode;
     }
+
 }
