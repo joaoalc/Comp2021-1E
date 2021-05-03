@@ -258,6 +258,7 @@ public class BackendStage implements JasminBackend {
         String code = generate(instruction.getRhs()); // Generate RHS
 
         String variableType = elementTypeToString(instruction.getDest().getType().getTypeOfElement()).toLowerCase();
+
         code += "\t" + variableType + "load " + stackCount + "\n";
 
         return code;
@@ -294,11 +295,11 @@ public class BackendStage implements JasminBackend {
         OperationType opType = instruction.getUnaryOperation().getOpType();
         String elementType = elementTypeToString(instruction.getLeftOperand().getType().getTypeOfElement()).toLowerCase();
 
-        String code = "\t" + elementType + "load " + stackCount + "\n";
+        String code = "\t" + elementType + "store " + stackCount + "\n";
 
         stackCount++;
 
-        code += "\t" + elementType + "load " + stackCount + "\n";
+        code += "\t" + elementType + "store " + stackCount + "\n";
 
         code += "\t" + elementType + opType.toString().toLowerCase() + "\n"; // Operation code
 
