@@ -21,10 +21,10 @@ public class SimpleNode implements Node, JmmNode {
 
     // added
     public int val;
-    public Operator op = null;
 
     public SimpleNode(int i) {
         id = i;
+        this.put("id", String.valueOf(i));
     }
 
     public SimpleNode(JMM p, int i) {

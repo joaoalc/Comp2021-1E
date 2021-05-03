@@ -10,8 +10,9 @@ import java.util.ArrayList;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
+
 public class JMM {
-    private List<Report> reports = new ArrayList<Report>();
+    private List<Report> reports = new ArrayList();
 
     public static void main(String[] args) throws ParseException {
         System.out.println("Write a Java-- program:");
@@ -123,60 +124,67 @@ TOKEN: {
 }
 
 SimpleNode Program(): {} {
-    ImportDeclaration()
+    (ImportDeclaration())*
     ClassDeclaration()
     <EOF>
     { return jjtThis; }
 }
 
-void ImportDeclaration() #ImportDeclaration: {} {
-    (<IMPORT> <IDENTIFIER> (<DOT> <IDENTIFIER>)* <SEMICOLON> )*
+void ImportDeclaration() #ImportDeclaration: {Token t;} {
+    <IMPORT> t=<IDENTIFIER> { jjtThis.put("name", t.image); } (ImportDot())* <SEMICOLON>
 }
 
-void ClassDeclaration() #ClassDeclaration : {Token t;} {
-    <CLASS> t=<IDENTIFIER> { jjtThis.put("name", t.image); } [ "extends" <IDENTIFIER> ]
+void ImportDot() : {Token t;} {
+    <DOT> t=<IDENTIFIER> { jjtThis.put("name", t.image); }
+}
+
+void ClassDeclaration() #ClassDeclaration : {Token t1; Token t2;} {
+    <CLASS> t1=<IDENTIFIER> { jjtThis.put("name", t1.image); } [ "extends" t2=<IDENTIFIER> { jjtThis.put("super_name", t2.image); } ]
     <LEFT_BRACE>
         ClassBody()
     <RIGHT_BRACE>
 }
 
-void ClassBody(): {} {
+void ClassBody() : {} {
     ( VarDeclaration() )* ( MethodDeclaration() )*
 }
 
-void VarDeclaration(): {Token t;} {
-    Type() t=<IDENTIFIER> <SEMICOLON>
-    { jjtThis.put("name", t.image); }
+void VarDeclaration() #VarDeclaration : {Token t;} {
+    Type() t=<IDENTIFIER> { jjtThis.put("name", t.image); } <SEMICOLON>
 }
 
-void MethodDeclaration(): {} {
+void MethodDeclaration() #MethodDeclaration : {Token t;} {
     <PUBLIC>
     (
         (
-            <STATIC> <VOID> <MAIN>
+            <STATIC> <VOID> { jjtThis.put("name", "void"); jjtThis.put("is_array", "false");} #Type t=<MAIN> { jjtThis.put("name", t.image); }
             <LEFT_PARENTHESES> <STRING> <LEFT_BRACKET> <RIGHT_BRACKET> <IDENTIFIER> <RIGHT_PARENTHESES> <LEFT_BRACE>
-            MethodBody()
+            MethodBody() #MethodBody
         ) |
         (
-            Type() <IDENTIFIER> <LEFT_PARENTHESES>
-            [ Type() <IDENTIFIER> ("," Type() <IDENTIFIER>)* ]
+            Type() t=<IDENTIFIER> { jjtThis.put("name", t.image); } <LEFT_PARENTHESES>
+            [ Argument() ("," Argument()  )* ]
             <RIGHT_PARENTHESES> <LEFT_BRACE>
-            MethodBody()
-            <RETURN> Expression() <SEMICOLON>
+            MethodBody() #MethodBody
+            <RETURN> Expression() <SEMICOLON> #MethodReturn
         )
     )
-    <RIGHT_BRACE>
+    <RIGHT_BRACE> #Method
 }
 
-void MethodBody(): {} {
+void Argument() #Argument : {Token t;} {
+    Type() t=<IDENTIFIER> { jjtThis.put("name", t.image); }
+}
+
+void MethodBody() #void : {} {
     ( LOOKAHEAD(2) VarDeclaration() )*
     ( Statement() )*
 }
 
-void Type() #void : {} {
-    ( <INT> [<LEFT_BRACKET> <RIGHT_BRACKET>] )
-    | <BOOLEAN>
-    | <IDENTIFIER>
+void Type() #Type : {Token t;} {
+    ( t=<INT> {jjtThis.put("name", t.image); jjtThis.put("type", "int"); } ((<LEFT_BRACKET> <RIGHT_BRACKET> {jjtThis.put("is_array", "true");} ) | {} {jjtThis.put("is_array", "false"); } ))
+    | t=<BOOLEAN> { jjtThis.put("name", t.image); jjtThis.put("is_array", "false"); jjtThis.put("type", "boolean"); }
+    | t=<IDENTIFIER> { jjtThis.put("name", t.image); jjtThis.put("is_array", "false");}
 }
 
 void Statement() #void : {} {
@@ -194,15 +202,15 @@ void IfStatement() #IfStatement : {} {
         Statement()
 }
 
-void Assignment() #Assignment : {} {
-    <IDENTIFIER> [ <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ] <ASSIGN> Expression() <SEMICOLON>
+void Assignment() #Assignment : { Token t; } {
+    t=<IDENTIFIER> { jjtThis.put("name", t.image); } #Identifier [ <LEFT_BRACKET> Expression() #Index <RIGHT_BRACKET> ] <ASSIGN> Expression() <SEMICOLON>
 }
 
 void WhileStatement() #WhileStatement : {} {
     <WHILE> (
         <LEFT_PARENTHESES>
-        | recover_error(
-              new int[]{LEFT_BRACE, INTEGER, TRUE, FALSE, IDENTIFIER, THIS, NEW, NOT, LEFT_PARENTHESES},
+        | recoverError(
+              new int[] { LEFT_BRACE, INTEGER, TRUE, FALSE, IDENTIFIER, THIS, NEW, NOT, LEFT_PARENTHESES },
               "Got '" + getToken(1).toString() + "' expected '(' token"
           )
     )
@@ -212,7 +220,7 @@ void WhileStatement() #WhileStatement : {} {
     }
 
     catch (ParseException e) {
-        recover_error(
+        recoverError(
             new int[] {LEFT_BRACE, INTEGER, TRUE, FALSE, IDENTIFIER, THIS, NEW, NOT, LEFT_PARENTHESES},
             "Found invalid expression '" + e.currentToken + "'"
         );
@@ -220,7 +228,7 @@ void WhileStatement() #WhileStatement : {} {
 
     (
         <RIGHT_PARENTHESES>
-        | recover_error(
+        | recoverError(
               new int[] {LEFT_BRACE, IF, WHILE, INTEGER, TRUE, FALSE, IDENTIFIER, THIS, NEW, NOT, LEFT_PARENTHESES},
               "Got '" + getToken(1).toString() + "' expected ')' token"
           )
@@ -231,16 +239,13 @@ void WhileStatement() #WhileStatement : {} {
     }
 
     catch (ParseException e) {
-        recover_error(new int[]{RIGHT_BRACE}, "Found invalid statement '" + e.currentToken + "'");
+        recoverError(new int[]{RIGHT_BRACE}, "Found invalid statement '" + e.currentToken + "'");
     }
 }
 
 JAVACODE
-void recover_error(int[] skipTo, String msg) {
+void recoverError(int[] skipTo, String msg) {
      ParseException e = generateParseException();
-
-     /* System.err.println("Found error on line " + e.currentToken.beginLine + ", column " + e.currentToken.beginColumn);
-     System.err.println("\t" + msg);*/
 
      Report report_error = Report.newError(Stage.SYNTATIC, e.currentToken.beginLine, e.currentToken.beginColumn, msg, e);
 
@@ -265,65 +270,71 @@ void recover_error(int[] skipTo, String msg) {
              t = getToken(1);
          }
      }
-
-     // System.err.println("Tokens skipped " + skipped_tokens);
 }
 
-void Expression() #void: {} {
-    LT() (<AND> LT() #And(2))*
+void Expression() #void : {} {
+    LessThan() (<AND> LessThan() #And(2) )*
 }
 
-void LT() #void: {} {
-    AddSub() (<LT> AddSub() #Less_Than(2))*
+void LessThan() #void: {} {
+    AddSub() (<LT> AddSub() #LessThan(2) )*
 }
 
-void AddSub() #void: {} {
+void AddSub() #void : {} {
     MultDiv() (<ADD> MultDiv() #Add(2) | <SUB> MultDiv() #Sub(2) )*
 }
 
-void MultDiv() #void: {} {
-    Negate() (<MUL> Negate() #Mul(2) | <DIV> Negate() #Div(2) )*
+void MultDiv() #void : {} {
+    Negate() (<MUL> Negate() #Mult(2) | <DIV> Negate() #Div(2) )*
 }
 
-void Negate() #void: {}  {
-    (<NOT>)* Length() #Negate
+void Negate() #void : {}  {
+    (<NOT> #Negate)*  Length()
 }
 
 void Length() #void: {} {
-    Parentheses() (<DOT> Call() )*
+    Parentheses() (<DOT> Call() #FCall(2) )*
 }
 
 void Parentheses() #void: {} {
-    ( <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> ) |
-    ( <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ) |
+    ( <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES> ) #Parentheses |
+    ( <LEFT_BRACKET> Expression() <RIGHT_BRACKET> ) #Index |
     _Expression()
 }
 
-void Call(): {} {
-    "length" |
-    (<IDENTIFIER> <LEFT_PARENTHESES> [ Expression() ( <COMMA> Expression() )* ] <RIGHT_PARENTHESES> )
+void Call() #void : {Token t;} {
+    t="length" { jjtThis.put("name", t.image); } #Length |
+    (t=<IDENTIFIER> { jjtThis.put("name", t.image); }  <LEFT_PARENTHESES> [ Expression() ( <COMMA> Expression() )* ] <RIGHT_PARENTHESES> ) #Call
 }
 
-void _Expression() #void: {} {
+void _Expression() #void: { Token t; } {
     (
-        <INTEGER> #Int
-        | <TRUE> #True
-        | <FALSE> #False
-        | <IDENTIFIER> #Identifier
+        Integer()
+        | t=<TRUE> { jjtThis.put("type", "boolean"); jjtThis.put("is_array", "false"); } #True
+        | t=<FALSE> { jjtThis.put("type", "boolean"); jjtThis.put("is_array", "false"); } #False
+        | t=<IDENTIFIER> { jjtThis.put("name", t.image); } #Identifier
         | <THIS> #This
-        | NewExpression() #NewExpression
+        | NewExpression()
     )
     __Expression()
 }
 
-void NewExpression(): {} {
+void NewExpression(): { Token t; } {
     <NEW>
     (
         <INT> <LEFT_BRACKET> Expression() #IntArray <RIGHT_BRACKET> |
-        <IDENTIFIER> #VarCreation <LEFT_PARENTHESES> <RIGHT_PARENTHESES>
+        t=<IDENTIFIER> { jjtThis.put("type", t.image); jjtThis.put("is_array", "false"); } #VarCreation <LEFT_PARENTHESES> <RIGHT_PARENTHESES>
     )
 }
 
-void __Expression() #Index: {} {
-     [ <LEFT_BRACKET> Expression() <RIGHT_BRACKET> __Expression() ]
+void __Expression() #void: {} {
+     [ <LEFT_BRACKET> Expression() #Index <RIGHT_BRACKET> __Expression() ]
 }
+
+void Integer(): {Token t;} {
+    t=<INTEGER> { jjtThis.put("value", t.image); jjtThis.put("type", "int"); jjtThis.put("is_array", "false"); }
+}
+
+/*void Bool(): {Token value;}{
+    value=<TRUE> { jjtThis.put("value", value.image); }| value=<FALSE> #Bool { jjtThis.put("value", value.image); }
+}*/

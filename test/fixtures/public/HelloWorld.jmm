@@ -1,6 +1,14 @@
 import ioPlus;
-class HelloWorld {
+class HelloWorld{
+    HelloWorld c;
+    int a;
 	public static void main(String[] args) {
-		ioPlus.printHelloWorld();
+
+        c = new HelloWorld();
+        c.doStuff(a);
+	}
+
+	public int doStuff(int a){
+	    return 3;
 	}
 }
