@@ -115,6 +115,7 @@ public class BackendStage implements JasminBackend {
     private String elementTypeToString(ElementType elementType) {
         switch (elementType) {
             case VOID:
+            case OBJECTREF:
                 return "V";
 
             case INT32:
@@ -221,6 +222,9 @@ public class BackendStage implements JasminBackend {
         // Invocation type
         String invocationType = instruction.getInvocationType().toString();
 
+        if (invocationType.equals("NEW"))
+            invocationType = "invokespecial";
+
         // Class name
         String className = "";
 
@@ -249,7 +253,9 @@ public class BackendStage implements JasminBackend {
             methodName = "<init>";
 
         // Descriptor
-        String descriptor = generateMethodDescriptor(instruction.getListOfOperands(), instruction.getReturnType(), methodName);
+        Type returnType = instruction.getReturnType();
+
+        String descriptor = generateMethodDescriptor(instruction.getListOfOperands(), returnType, methodName);
 
         return String.format("\t%s %s/%s%s\n", invocationType, className, methodName, descriptor);
     }
