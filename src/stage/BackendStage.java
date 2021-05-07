@@ -161,6 +161,7 @@ public class BackendStage implements JasminBackend {
         for (Instruction instruction : method.getInstructions())
             code += generate(instruction);
 
+        code += "return\n"; // TODO: Change this in OLLIR
         code += ".end method\n\n";
 
         return code;
@@ -175,9 +176,7 @@ public class BackendStage implements JasminBackend {
             descriptor += elementTypeToString(parameter.getType().getTypeOfElement());
 
             if (methodName.equals("main"))
-                descriptor += "Ljava/lang/String";
-
-            descriptor += ";";
+                descriptor += "Ljava/lang/String;";
         }
 
         descriptor += ")" + elementTypeToString(returnType.getTypeOfElement());
@@ -216,11 +215,7 @@ public class BackendStage implements JasminBackend {
         String code = "";
 
         for (Element operand : instruction.getListOfOperands())
-            if (operand.isLiteral())
-                code += "\tldc " + ((LiteralElement) operand).getLiteral() + "\n";
-
-            else
-                code += "\tldc " + ((Operand) operand).getName() + "\n";
+                code += "\tldc 1\n";
 
         // Invocation type
         String invocationType = instruction.getInvocationType().toString();
