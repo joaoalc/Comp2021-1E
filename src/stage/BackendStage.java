@@ -1,6 +1,5 @@
 package stage;
 
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -41,7 +40,7 @@ public class BackendStage implements JasminBackend {
             ollirClass.buildCFGs();          // Build the CFG of each method
             // ollirClass.outputCFGs();         // Output to .dot files the CFGs, one per method
             ollirClass.buildVarTables();     // Build the table of variables for each method
-//            ollirClass.show();               // Print to console main information about the input OLLIR
+            // ollirClass.show();               // Print to console main information about the input OLLIR
 
             // Convert the OLLIR to a String containing the equivalent Jasmin code
             String jasminCode = "";
@@ -161,7 +160,9 @@ public class BackendStage implements JasminBackend {
         for (Instruction instruction : method.getInstructions())
             code += generate(instruction);
 
-        code += "return\n"; // TODO: Change this in OLLIR
+        if (method.getReturnType().getTypeOfElement() == ElementType.VOID)
+            code += "\treturn\n";
+
         code += ".end method\n\n";
 
         return code;
@@ -214,8 +215,10 @@ public class BackendStage implements JasminBackend {
     private String generate(CallInstruction instruction) {
         String code = "";
 
-        for (Element operand : instruction.getListOfOperands())
-                code += "\tldc 1\n";
+        for (Element operand : instruction.getListOfOperands()) {
+            if (operand.isLiteral())
+                code += "\tldc" + ((LiteralElement) operand).getLiteral() + "\n";
+        }
 
         // Invocation type
         String invocationType = instruction.getInvocationType().toString();
@@ -229,8 +232,15 @@ public class BackendStage implements JasminBackend {
         if (instruction.getFirstArg().isLiteral())
             className += ((LiteralElement) instruction.getFirstArg()).getLiteral();
 
-        else
-            className += ((Operand) instruction.getFirstArg()).getName();
+        else {
+            Operand firstArg = ((Operand) instruction.getFirstArg());
+
+            if (firstArg.getType().getTypeOfElement() == ElementType.OBJECTREF)
+                className += ((ClassType) firstArg.getType()).getName();
+
+            else
+                className += firstArg.getName();
+        }
 
         // Method name
         String methodName = "";
@@ -279,7 +289,7 @@ public class BackendStage implements JasminBackend {
 
     private String generate(AssignInstruction instruction) {
         String code = "";
-        boolean isObjetRef = instruction.getRhs().getInstType() == InstructionType.CALL && instruction.getTypeOfAssign().getTypeOfElement() == ElementType.OBJECTREF ;
+        boolean isObjetRef = instruction.getRhs().getInstType() == InstructionType.CALL && instruction.getTypeOfAssign().getTypeOfElement() == ElementType.OBJECTREF;
 
         if (isObjetRef) {
             CallInstruction rhsInstruction = (CallInstruction) instruction.getRhs();
@@ -291,8 +301,10 @@ public class BackendStage implements JasminBackend {
 
         String variableType = elementTypeToString(instruction.getTypeOfAssign().getTypeOfElement()).toLowerCase();
 
-        if (!isObjetRef)
+        if (!isObjetRef) {
             code += "\t" + variableType + "load " + stackCount + "\n";
+            stackCount++;
+        }
 
         return code;
     }
@@ -333,9 +345,7 @@ public class BackendStage implements JasminBackend {
         stackCount++;
 
         code += "\t" + elementType + "store " + stackCount + "\n";
-
         code += "\t" + elementType + opType.toString().toLowerCase() + "\n"; // Operation code
-
         code += "\n";
 
         return code;
