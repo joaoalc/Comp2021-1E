@@ -411,13 +411,13 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
 
 
                         if(node.getChildren().get(1).getOptional("name").isEmpty()){
-                            reports.add(newSemanticReport(node, "Cannot resolve method"));
-                            report_list.add(newSemanticReport(node, "Cannot resolve method"));
+                            reports.add(newSemanticReport(node, "Cannot resolve methoda"));
+                            report_list.add(newSemanticReport(node, "Cannot resolve methoda"));
                         }
                         if (!symbolTable.methodExists(node.getChildren().get(1).get("name"), arguments)) {
                             //TODO: Exception
-                            reports.add(newSemanticReport(node, "Cannot resolve method " + node.getChildren().get(1).get("name")));
-                            report_list.add(newSemanticReport(node, "Cannot resolve method " + node.getChildren().get(1).get("name")));
+                            reports.add(newSemanticReport(node, "Cannot resolve methodb " + node.getChildren().get(1).get("name")));
+                            report_list.add(newSemanticReport(node, "Cannot resolve methodb " + node.getChildren().get(1).get("name")));
 
                             System.out.println("Method does not exist. Line " + node.getChildren().get(1).get("line"));
                         }
@@ -468,10 +468,12 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
                     }
                 }
                 else{
+                    //Assumed as a static import
+                    /*
                     reports.add(newSemanticReport(node, "Cannot resolve method " + node.getChildren().get(1).get("name")));
                     report_list.add(newSemanticReport(node, "Cannot resolve method " + node.getChildren().get(1).get("name")));
 
-                    System.out.println("error: uninitialized variable calling method");
+                    System.out.println("error: uninitialized variable calling method");*/
                     return reports;
                 }
                 if(!ownFunction) {
@@ -666,10 +668,12 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
                         return reports;
                     }
                 }
+                //Assume it's a static method call otherwise
+                return reports;
             }
             //In the case of variable declarations where the value isn't in the symbol table yet
-            reports.add(newSemanticReport(node, "Cannot resolve symbola " + node.getOptional("name")));
-            report_list.add(newSemanticReport(node, "Cannot resolve symbola " + node.getOptional("name")));
+            reports.add(newSemanticReport(node, "Cannot resolve symbol " + node.getOptional("name")));
+            report_list.add(newSemanticReport(node, "Cannot resolve symbol " + node.getOptional("name")));
             return reports;
         }
         node.put("type", symbol.getType().getName());
