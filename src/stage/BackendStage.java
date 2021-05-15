@@ -221,10 +221,7 @@ public class BackendStage implements JasminBackend {
         }
 
         // Invocation type
-        String invocationType = instruction.getInvocationType().toString();
-
-        if (invocationType.equals("NEW"))
-            invocationType = "invokespecial";
+        String invocationType = instruction.getInvocationType().toString().toLowerCase();
 
         // Class name
         String className = "";
@@ -254,18 +251,18 @@ public class BackendStage implements JasminBackend {
 
         methodName = methodName.replaceAll("\"", "");
 
-        if (methodName.equals("<init>"))
-            className = superClassName;
-
         if (methodName.isEmpty())
-            methodName = "<init>";
+            code += String.format("\t%s %s\n", invocationType, className);
 
-        // Descriptor
-        Type returnType = instruction.getReturnType();
+        else {
+            // Descriptor
+            Type returnType = instruction.getReturnType();
 
-        String descriptor = generateMethodDescriptor(instruction.getListOfOperands(), returnType, methodName);
+            String descriptor = generateMethodDescriptor(instruction.getListOfOperands(), returnType, methodName);
 
-        code += String.format("\t%s %s/%s%s\n", invocationType, className, methodName, descriptor);
+            code += String.format("\t%s %s/%s%s\n", invocationType, className, methodName, descriptor);
+        }
+
 
         return code;
     }
@@ -278,9 +275,8 @@ public class BackendStage implements JasminBackend {
         String code = "\t";
         Element operand = instruction.getSingleOperand();
 
-        if (operand.isLiteral()) {
+        if (operand.isLiteral())
             code += "ldc " + ((LiteralElement) operand).getLiteral();
-        }
 
         code += "\n";
 
@@ -291,18 +287,12 @@ public class BackendStage implements JasminBackend {
         String code = "";
         boolean isObjetRef = instruction.getRhs().getInstType() == InstructionType.CALL && instruction.getTypeOfAssign().getTypeOfElement() == ElementType.OBJECTREF;
 
-        if (isObjetRef) {
-            CallInstruction rhsInstruction = (CallInstruction) instruction.getRhs();
-            String className = ((Operand) rhsInstruction.getFirstArg()).getName();
-            code = "\tnew " + className + "\n";
-        }
-
         code += generate(instruction.getRhs()); // Generate RHS
 
         String variableType = elementTypeToString(instruction.getTypeOfAssign().getTypeOfElement()).toLowerCase();
 
         if (!isObjetRef) {
-            code += "\t" + variableType + "load " + stackCount + "\n";
+            code += "\t" + variableType + "store " + stackCount + "\n";
             stackCount++;
         }
 
@@ -340,11 +330,11 @@ public class BackendStage implements JasminBackend {
         OperationType opType = instruction.getUnaryOperation().getOpType();
         String elementType = elementTypeToString(instruction.getLeftOperand().getType().getTypeOfElement()).toLowerCase();
 
-        String code = "\t" + elementType + "store " + stackCount + "\n";
+        String code = "\t" + elementType + "load " + stackCount + "\n";
 
         stackCount++;
 
-        code += "\t" + elementType + "store " + stackCount + "\n";
+        code += "\t" + elementType + "load " + stackCount + "\n";
         code += "\t" + elementType + opType.toString().toLowerCase() + "\n"; // Operation code
         code += "\n";
 
