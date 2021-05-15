@@ -114,7 +114,6 @@ public class BackendStage implements JasminBackend {
     private String elementTypeToString(ElementType elementType) {
         switch (elementType) {
             case VOID:
-            case OBJECTREF:
                 return "V";
 
             case INT32:
@@ -122,6 +121,9 @@ public class BackendStage implements JasminBackend {
 
             case ARRAYREF:
                 return "[";
+
+            case OBJECTREF:
+                return "A";
         }
 
         return "";
@@ -251,8 +253,14 @@ public class BackendStage implements JasminBackend {
 
         methodName = methodName.replaceAll("\"", "");
 
-        if (methodName.isEmpty())
+        if (methodName.equals("<init>"))
+            className = superClassName;
+
+        // If is constructor
+        if (invocationType.equals("new")) {
             code += String.format("\t%s %s\n", invocationType, className);
+            code += "\tdup\n";
+        }
 
         else {
             // Descriptor
@@ -304,7 +312,12 @@ public class BackendStage implements JasminBackend {
     }
 
     private String generate(ReturnInstruction instruction) {
-        return "\treturn\n";
+        String returnType = "";
+
+        if (instruction.hasReturnValue())
+            returnType = elementTypeToString(instruction.getOperand().getType().getTypeOfElement()).toLowerCase();
+
+        return String.format("\t%sreturn\n", returnType);
     }
 
     private String generate(GetFieldInstruction instruction) {
