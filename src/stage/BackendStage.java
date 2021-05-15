@@ -26,7 +26,7 @@ import pt.up.fe.comp.jmm.report.Stage;
  */
 
 public class BackendStage implements JasminBackend {
-    int stackCount = 0;
+    int registCount = 0;
     String superClassName;
 
     @Override
@@ -65,7 +65,7 @@ public class BackendStage implements JasminBackend {
             for (Method method : ollirClass.getMethods()) {
                 jasminCode += generateMethod(method);
 
-                stackCount = 0;
+                registCount = 0;
             }
 
             // More reports from this stage
@@ -218,8 +218,9 @@ public class BackendStage implements JasminBackend {
         String code = "";
 
         for (Element operand : instruction.getListOfOperands()) {
-            if (operand.isLiteral())
-                code += "\tldc" + ((LiteralElement) operand).getLiteral() + "\n";
+            SingleOpInstruction opInstruction = new SingleOpInstruction(operand);
+
+            code += generate(opInstruction);
         }
 
         // Invocation type
@@ -282,9 +283,13 @@ public class BackendStage implements JasminBackend {
     private String generate(SingleOpInstruction instruction) {
         String code = "\t";
         Element operand = instruction.getSingleOperand();
+        ElementType operandType = operand.getType().getTypeOfElement();
 
         if (operand.isLiteral())
             code += "ldc " + ((LiteralElement) operand).getLiteral();
+
+        else
+            code += elementTypeToString(operandType).toLowerCase() + "load " + ((Operand) operand).getParamId();
 
         code += "\n";
 
@@ -293,16 +298,15 @@ public class BackendStage implements JasminBackend {
 
     private String generate(AssignInstruction instruction) {
         String code = "";
-        boolean isObjetRef = instruction.getRhs().getInstType() == InstructionType.CALL && instruction.getTypeOfAssign().getTypeOfElement() == ElementType.OBJECTREF;
 
         code += generate(instruction.getRhs()); // Generate RHS
 
         String variableType = elementTypeToString(instruction.getTypeOfAssign().getTypeOfElement()).toLowerCase();
+        code += "\t" + variableType + "store " + registCount + "\n";
 
-        if (!isObjetRef) {
-            code += "\t" + variableType + "store " + stackCount + "\n";
-            stackCount++;
-        }
+        ((Operand) instruction.getDest()).setParamId(registCount);
+
+        registCount++;
 
         return code;
     }
@@ -343,11 +347,11 @@ public class BackendStage implements JasminBackend {
         OperationType opType = instruction.getUnaryOperation().getOpType();
         String elementType = elementTypeToString(instruction.getLeftOperand().getType().getTypeOfElement()).toLowerCase();
 
-        String code = "\t" + elementType + "load " + stackCount + "\n";
+        String code = "\t" + elementType + "load " + registCount + "\n";
 
-        stackCount++;
+        registCount++;
 
-        code += "\t" + elementType + "load " + stackCount + "\n";
+        code += "\t" + elementType + "load " + registCount + "\n";
         code += "\t" + elementType + opType.toString().toLowerCase() + "\n"; // Operation code
         code += "\n";
 
