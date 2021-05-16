@@ -34,4 +34,12 @@ public class OptimizeTest {
 
         System.out.println(result.getReports().toString());
     }
+
+    @Test
+    public void IfTest() {
+        var result = TestUtils.optimize(SpecsIo.getResource("fixtures/public/If.jmm"));
+        TestUtils.noErrors(result.getReports());
+
+        System.out.println(result.getReports().toString());
+    }
 }

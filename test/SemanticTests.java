@@ -68,7 +68,12 @@ public class SemanticTests {
         TestTemplate("WhileAndIF.jmm");
     }
 
-     //Failure tests
+    @Test
+    public void IfTest() {
+        TestTemplate("If.jmm");
+    }
+
+    //Failure tests
 
     @Test
     public void ArrIndexNotInt() {
