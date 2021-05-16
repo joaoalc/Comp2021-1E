@@ -12,7 +12,14 @@ public class OllirUtils {
                     return false;
                 }
                 return true;
-                //otherwise. Example: a<b has to be end of line because it's not inside the condition
+            case "Add":
+            case "Sub":
+            case "Mult":
+            case "Div":
+            case "And":
+            case "LessThan":
+                return false;
+            //otherwise. Example: a<b has to be end of line because it's not inside the condition
                 /*
                 if(true){
                     a < b;
