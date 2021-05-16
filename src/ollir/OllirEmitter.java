@@ -84,22 +84,22 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         String ollir_code = "";
 
         JmmNode conditionNode = node.getChildren().get(0);
-        String conditionString = visit(conditionNode, s).getOllirCode();
         JmmNode trueNode = node.getChildren().get(1);
         String trueString = visit(trueNode, s).getOllirCode();
         JmmNode elseNode = node.getChildren().get(2);
         String elseString = visit(elseNode, s).getOllirCode();
 
+        String conditionString = "";
         switch (conditionNode.getKind()){
             case "LessThan":
-                generateGreaterOrEqualAuxiliar(conditionNode, s);
+                conditionString = generateGreaterOrEqualAuxiliar(conditionNode, s).getOllirCode();
                 break;
             default:
                 System.out.println("This condition of the if statement isn't done yet.");
                 break;
         }
 
-        ollir_code += "if(" + conditionString + ")" + "goto else" + labelCounter + "\n"  + trueString + "\ngoto endif" + labelCounter + ";\n" + "else" + labelCounter + ":\n" + elseString + "endif" + labelCounter + ":\n";
+        ollir_code += "if(" + conditionString + ")" + "goto else" + labelCounter + ";\n"  + trueString + "\ngoto endif" + labelCounter + ";\n" + "else" + labelCounter + ":\n" + elseString + "endif" + labelCounter + ":\n";
 
         labelCounter++;
         return new OllirData(return_type, ollir_code);
@@ -142,12 +142,9 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         String ollirCode = "";
 
-        ollirCode += firstOp.getOllirCode() + secondOp.getOllirCode();
+        ollirCode += firstOp.getReturnVar() + " >=.i32 " + secondOp.getReturnVar();
 
-        String name = getVarAssignmentName(node);
-        ollirCode += name + ".bool :=.bool " + firstOp.getReturnVar() + " >=.i32 " + secondOp.getReturnVar() + ";\n";
-
-        return new OllirData(name + ".bool", ollirCode);
+        return new OllirData(".bool", ollirCode);
     }
 
     private OllirData generateLessThan(JmmNode node, String methodId) {
@@ -444,8 +441,16 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             OllirData childData = visit(child, methodId);
             //ollirCode += childData.getOllirCode();
             args.add(childData.getReturnVar());
-            //TODO: Add value or operation possibility to this
-            types.add(NodeFindingMethods.getVariable(symbolTable.getMethod(methodId), symbolTable, child.get("name")));
+            if(child.getKind().equals("Integer")){
+                types.add(new ValueSymbol(new Type("int", false), "", true));
+            }
+            else if(child.getKind().equals("True") || child.getKind().equals("False")){
+                types.add(new ValueSymbol(new Type("boolean", false), "", true));
+            }
+            else {
+                //TODO: Add value or operation possibility to this
+                types.add(NodeFindingMethods.getVariable(symbolTable.getMethod(methodId), symbolTable, child.get("name")));
+            }
         }
 
 

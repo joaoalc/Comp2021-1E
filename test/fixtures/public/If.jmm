@@ -1,18 +1,12 @@
-import io;
-class IF {
+class Fac {
 
-    public static void main(String[] args){
-        int a;
-        int b;
-        int c;
-        a = 20;
-        b = 10;
-        if( a < b + c){
-            c  = a-1;
+    public int compFac(int num){
+        int num_aux;
+        if(num < 1){
+            num_aux = 1;
         }else{
-            c = b-1;
+            num_aux = 2;
         }
-
+        return num_aux;
     }
-
 }
