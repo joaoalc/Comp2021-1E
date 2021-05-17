@@ -2,6 +2,7 @@ package stage;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import org.specs.comp.ollir.*;
@@ -28,6 +29,7 @@ import pt.up.fe.comp.jmm.report.Stage;
 public class BackendStage implements JasminBackend {
     int registCount = 0;
     String superClassName;
+    HashMap<String, Integer> variablesRegists = new HashMap<>();
 
     @Override
     public JasminResult toJasmin(OllirResult ollirResult) {
@@ -289,7 +291,7 @@ public class BackendStage implements JasminBackend {
             code += "ldc " + ((LiteralElement) operand).getLiteral();
 
         else
-            code += elementTypeToString(operandType).toLowerCase() + "load " + ((Operand) operand).getParamId();
+            code += elementTypeToString(operandType).toLowerCase() + "load " + variablesRegists.get(((Operand) operand).getName());
 
         code += "\n";
 
@@ -304,7 +306,7 @@ public class BackendStage implements JasminBackend {
         String variableType = elementTypeToString(instruction.getTypeOfAssign().getTypeOfElement()).toLowerCase();
         code += "\t" + variableType + "store " + registCount + "\n";
 
-        ((Operand) instruction.getDest()).setParamId(registCount);
+        variablesRegists.put(((Operand) instruction.getDest()).getName(), registCount);
 
         registCount++;
 
@@ -316,12 +318,17 @@ public class BackendStage implements JasminBackend {
     }
 
     private String generate(ReturnInstruction instruction) {
-        String returnType = "";
+        String code = "";
 
-        if (instruction.hasReturnValue())
-            returnType = elementTypeToString(instruction.getOperand().getType().getTypeOfElement()).toLowerCase();
+        if (instruction.hasReturnValue()) {
+            Operand operand = ((Operand) instruction.getOperand());
+            SingleOpInstruction opInstruction = new SingleOpInstruction(operand);
 
-        return String.format("\t%sreturn\n", returnType);
+            code += generate(opInstruction);
+            code += String.format("\t%sreturn\n", elementTypeToString(operand.getType().getTypeOfElement()).toLowerCase());
+        }
+
+        return code;
     }
 
     private String generate(GetFieldInstruction instruction) {
