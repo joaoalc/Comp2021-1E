@@ -27,7 +27,8 @@ import pt.up.fe.comp.jmm.report.Stage;
  */
 
 public class BackendStage implements JasminBackend {
-    int registCount = 0;
+    int registCount = 1;
+    String className;
     String superClassName;
     HashMap<String, Integer> variablesRegists = new HashMap<>();
 
@@ -52,7 +53,7 @@ public class BackendStage implements JasminBackend {
             if (classAccessModifier.isEmpty())
                 classAccessModifier = "public";
 
-            String className = ollirClass.getClassName();
+            className = ollirClass.getClassName();
 
             jasminCode += String.format(".class %s %s\n", classAccessModifier, className);
 
@@ -67,7 +68,7 @@ public class BackendStage implements JasminBackend {
             for (Method method : ollirClass.getMethods()) {
                 jasminCode += generateMethod(method);
 
-                registCount = 0;
+                registCount = 1;
             }
 
             // More reports from this stage
@@ -132,7 +133,6 @@ public class BackendStage implements JasminBackend {
     }
 
     private String generateMethod(Method method) {
-        registCount = method.getParams().size();
         variablesRegists = new HashMap<>();
         String code = ".method ";
 
@@ -155,6 +155,10 @@ public class BackendStage implements JasminBackend {
 
         // Method descriptor
         code += generateMethodDescriptor(method.getParams(), method.getReturnType(), methodName) + "\n";
+
+        // Map method's parameters to regists
+        for (Element operand : method.getParams())
+            variablesRegists.put(((Operand) operand).getName(), registCount++);
 
         code += "\t.limit stack 99\n";    // NOTE: Temporary for Assignment 2
         code += "\t.limit locals 99\n\n"; // NOTE: Temporary for Assignment 2
@@ -220,6 +224,13 @@ public class BackendStage implements JasminBackend {
 
     private String generate(CallInstruction instruction) {
         String code = "";
+        Operand firstArg = ((Operand) instruction.getFirstArg());
+
+        if (instruction.getInvocationType() == CallType.invokevirtual) {
+            int regist = variablesRegists.getOrDefault(firstArg.getName(), 0);
+
+            code += String.format("\taload %d\n", regist);
+        }
 
         for (Element operand : instruction.getListOfOperands()) {
             SingleOpInstruction opInstruction = new SingleOpInstruction(operand);
@@ -233,18 +244,11 @@ public class BackendStage implements JasminBackend {
         // Class name
         String className = "";
 
-        if (instruction.getFirstArg().isLiteral())
-            className += ((LiteralElement) instruction.getFirstArg()).getLiteral();
+        if (firstArg.getType().getTypeOfElement() == ElementType.OBJECTREF)
+            className += ((ClassType) firstArg.getType()).getName();
 
-        else {
-            Operand firstArg = ((Operand) instruction.getFirstArg());
-
-            if (firstArg.getType().getTypeOfElement() == ElementType.OBJECTREF)
-                className += ((ClassType) firstArg.getType()).getName();
-
-            else
-                className += firstArg.getName();
-        }
+        else
+            className += firstArg.getName();
 
         // Method name
         String methodName = "";
@@ -261,6 +265,9 @@ public class BackendStage implements JasminBackend {
         if (methodName.equals("<init>") && className.equals("this"))
             className = superClassName;
 
+        else if (className.equals("this"))
+            className = this.className;
+
         // If is constructor
         if (invocationType.equals("new")) {
             code += String.format("\t%s %s\n", invocationType, className);
@@ -275,7 +282,6 @@ public class BackendStage implements JasminBackend {
 
             code += String.format("\t%s %s/%s%s\n", invocationType, className, methodName, descriptor);
         }
-
 
         return code;
     }
@@ -292,8 +298,11 @@ public class BackendStage implements JasminBackend {
         if (operand.isLiteral())
             code += "ldc " + ((LiteralElement) operand).getLiteral();
 
-        else
-            code += elementTypeToString(operandType).toLowerCase() + "load " + variablesRegists.get(((Operand) operand).getName());
+        else {
+            int regist = variablesRegists.get(((Operand) operand).getName());
+
+            code += elementTypeToString(operandType).toLowerCase() + "load " + regist;
+        }
 
         code += "\n";
 
@@ -306,11 +315,12 @@ public class BackendStage implements JasminBackend {
         code += generate(instruction.getRhs()); // Generate RHS
 
         String variableType = elementTypeToString(instruction.getTypeOfAssign().getTypeOfElement()).toLowerCase();
-        code += "\t" + variableType + "store " + registCount + "\n";
 
-        variablesRegists.put(((Operand) instruction.getDest()).getName(), registCount);
+        int regist = variablesRegists.getOrDefault(((Operand) instruction.getDest()).getName(), registCount++);
 
-        registCount++;
+        code += "\t" + variableType + "store " + regist + "\n";
+
+        variablesRegists.put(((Operand) instruction.getDest()).getName(), regist);
 
         return code;
     }
@@ -323,7 +333,7 @@ public class BackendStage implements JasminBackend {
         String code = "";
 
         if (instruction.hasReturnValue()) {
-            Operand operand = ((Operand) instruction.getOperand());
+            Element operand = instruction.getOperand();
             SingleOpInstruction opInstruction = new SingleOpInstruction(operand);
 
             code += generate(opInstruction);
@@ -353,14 +363,16 @@ public class BackendStage implements JasminBackend {
     }
 
     private String generate(BinaryOpInstruction instruction) {
+        String code = "";
+
         OperationType opType = instruction.getUnaryOperation().getOpType();
-        String elementType = elementTypeToString(instruction.getLeftOperand().getType().getTypeOfElement()).toLowerCase();
+        Element leftOperand = instruction.getLeftOperand();
+        Element rightOperand = instruction.getRightOperand();
+        String elementType = elementTypeToString(leftOperand.getType().getTypeOfElement()).toLowerCase();
 
-        String code = "\t" + elementType + "load " + registCount + "\n";
+        code += generate(new SingleOpInstruction(leftOperand));
+        code += generate(new SingleOpInstruction(rightOperand));
 
-        registCount++;
-
-        code += "\t" + elementType + "load " + registCount + "\n";
         code += "\t" + elementType + opType.toString().toLowerCase() + "\n"; // Operation code
         code += "\n";
 

@@ -33,10 +33,10 @@ public class BackendTest {
 
     @Test
     public void SimpleTest() {
-        var result = TestUtils.backend(SpecsIo.getResource("fixtures/public/Simple.jmm"));
+        JasminResult result = TestUtils.backend(SpecsIo.getResource("fixtures/public/Simple.jmm"));
         TestUtils.noErrors(result.getReports());
 
-        var output = result.run();
+        String output = result.run();
         assertEquals("30", output.trim());
     }
 }
