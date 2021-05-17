@@ -60,7 +60,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
 
 
-        //addVisit("Parentheses", this::verifyParentheses);
+        addVisit("Parentheses", this::verifyParentheses);
         //addVisit("Index", this::verifyIndex);
         //addVisit("FCall", this::verifyCall);
         addVisit("Assignment", this::generateAssignment);
@@ -77,6 +77,10 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         addVisit("VarCreation", this::generateVarCreation);
         addVisit("FCall", this::generateFCall);
         setDefaultVisit(this::defaultVisit);
+    }
+
+    private OllirData verifyParentheses(JmmNode node, String s) {
+        return visit(node.getChildren().get(0), s);
     }
 
     private OllirData generateIf(JmmNode node, String s) {
@@ -166,6 +170,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         JmmNode firstOpNode = node.getChildren().get(0);
         JmmNode secondOpNode = node.getChildren().get(1);
 
+
         OllirData firstOp = visit(firstOpNode, methodId);
         OllirData secondOp = visit(secondOpNode, methodId);
 
@@ -173,6 +178,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         ollirCode += firstOp.getOllirCode() + secondOp.getOllirCode();
 
+        System.out.println("Before: " + firstOp.getReturnVar());
         String name = getVarAssignmentName(node);
         ollirCode += name + ".bool :=.bool " + firstOp.getReturnVar() + " <.i32 " + secondOp.getReturnVar();
 
