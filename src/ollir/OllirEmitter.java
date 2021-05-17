@@ -116,6 +116,12 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             case "False":
                 conditionString += "0.bool"  + " !.bool " + generateTrue(conditionNode, s).getReturnVar();
                 break;
+            case "Negate":
+                OllirData nodeNegate = visit(conditionNode.getChildren().get(0), s);
+                ollir_code += nodeNegate.getOllirCode();
+
+                conditionString += "0.bool" + " !.bool " + nodeNegate.getReturnVar();
+                break;
             default:
                 System.out.println("This condition of the if statement isn't done yet.");
                 break;

@@ -2,7 +2,11 @@ class Fac {
 
     public int compFac(int num){
         int num_aux;
-        if(true){
+        boolean a;
+        boolean b;
+        a = true;
+        b = false;
+        if(!true){
             num_aux = 1;
         }else{
             num_aux = 2;
