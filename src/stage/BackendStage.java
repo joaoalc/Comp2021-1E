@@ -349,7 +349,37 @@ public class BackendStage implements JasminBackend {
     }
 
     private String generate(CondBranchInstruction instruction) {
-        String code = "NOT IMPLEMENTED";
+        String code = "";
+
+        code += generate(new SingleOpInstruction(instruction.getLeftOperand()));
+        code += generate(new SingleOpInstruction(instruction.getRightOperand()));
+
+        String opType;
+
+        switch (instruction.getCondOperation().getOpType()) {
+            case EQ:
+                opType = "eq";
+                break;
+            case NEQ:
+                opType = "ne";
+                break;
+            case LTH:
+                opType = "lt";
+                break;
+            case LTE:
+                opType = "le";
+                break;
+            case GTH:
+                opType = "gt";
+                break;
+            case GTE:
+                opType = "ge";
+                break;
+            default:
+                opType = instruction.getCondOperation().getOpType().toString().toLowerCase();
+        }
+
+        code += String.format("\tif_cmp%s %s\n", opType, instruction.getLabel());
 
         return code;
     }
@@ -370,10 +400,6 @@ public class BackendStage implements JasminBackend {
 
     private String generate(GetFieldInstruction instruction) {
         String className = elementToString(instruction.getFirstOperand());
-
-        if (className.equals("this"))
-            className = this.className;
-
         String methodName = elementToString(instruction.getSecondOperand());
 
         String fieldType = elementTypeToString(instruction.getSecondOperand().getType().getTypeOfElement());
@@ -382,13 +408,9 @@ public class BackendStage implements JasminBackend {
     }
 
     private String generate(PutFieldInstruction instruction) {
-        String code = generate(new SingleOpInstruction(instruction.getThirdOperand()));;
+        String code = generate(new SingleOpInstruction(instruction.getThirdOperand()));
 
         String className = elementToString(instruction.getFirstOperand());
-
-        if (className.equals("this"))
-            className = this.className;
-
         String methodName = elementToString(instruction.getSecondOperand());
         String fieldType = elementTypeToString(instruction.getSecondOperand().getType().getTypeOfElement());
 

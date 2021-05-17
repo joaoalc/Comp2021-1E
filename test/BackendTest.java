@@ -45,6 +45,21 @@ public class BackendTest {
     }
 
     @Test
+    public void Fac() {
+        OllirResult ollirResult = new OllirResult(
+            OllirUtils.parse(SpecsIo.getResource("fixtures/public/ollir/Fac.ollir")),
+            null,
+            new ArrayList<>()
+        );
+
+        JasminResult result = TestUtils.backend(ollirResult);
+        TestUtils.noErrors(result.getReports());
+
+        String output = result.run();
+        assertEquals("", output.trim());
+    }
+
+    @Test
     public void MyClass3() {
         OllirResult ollirResult = new OllirResult(
             OllirUtils.parse(SpecsIo.getResource("fixtures/public/ollir/myclass3.ollir")),
