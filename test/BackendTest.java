@@ -56,5 +56,6 @@ public class BackendTest {
         TestUtils.noErrors(result.getReports());
 
         String output = result.run();
+        assertEquals("val = 2\nval = ?\nval = ?\n", output.trim());
     }
 }

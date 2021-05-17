@@ -126,6 +126,8 @@ public class BackendStage implements JasminBackend {
                 return "[";
 
             case STRING:
+                return "Ljava/lang/String;";
+
             case OBJECTREF:
                 return "A";
         }
@@ -314,8 +316,12 @@ public class BackendStage implements JasminBackend {
 
         else {
             int regist = variablesRegists.get(((Operand) operand).getName());
+            String loadType = elementTypeToString(operandType).toLowerCase();
 
-            code += elementTypeToString(operandType).toLowerCase() + "load " + regist;
+            if (operandType == ElementType.STRING)
+                loadType = "a";
+
+            code += loadType + "load " + regist;
         }
 
         code += "\n";
@@ -329,6 +335,10 @@ public class BackendStage implements JasminBackend {
         code += generate(instruction.getRhs()); // Generate RHS
 
         String variableType = elementTypeToString(instruction.getTypeOfAssign().getTypeOfElement()).toLowerCase();
+
+        if (instruction.getTypeOfAssign().getTypeOfElement() == ElementType.STRING)
+            variableType = "a";
+
         int regist = variablesRegists.getOrDefault(((Operand) instruction.getDest()).getName(), registCount++);
 
         code += "\t" + variableType + "store " + regist + "\n";
@@ -340,6 +350,7 @@ public class BackendStage implements JasminBackend {
 
     private String generate(CondBranchInstruction instruction) {
         String code = "NOT IMPLEMENTED";
+
         return code;
     }
 
@@ -371,16 +382,19 @@ public class BackendStage implements JasminBackend {
     }
 
     private String generate(PutFieldInstruction instruction) {
+        String code = generate(new SingleOpInstruction(instruction.getThirdOperand()));;
+
         String className = elementToString(instruction.getFirstOperand());
 
         if (className.equals("this"))
             className = this.className;
 
         String methodName = elementToString(instruction.getSecondOperand());
-
         String fieldType = elementTypeToString(instruction.getSecondOperand().getType().getTypeOfElement());
 
-        return String.format("\tputfield %s/%s %s\n", className, methodName, fieldType);
+        code += String.format("\tputfield %s/%s %s\n", className, methodName, fieldType);
+
+        return code;
     }
 
     private String generate(UnaryOpInstruction instruction) {
