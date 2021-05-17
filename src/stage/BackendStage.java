@@ -43,7 +43,7 @@ public class BackendStage implements JasminBackend {
             ollirClass.buildCFGs();          // Build the CFG of each method
             // ollirClass.outputCFGs();         // Output to .dot files the CFGs, one per method
             ollirClass.buildVarTables();     // Build the table of variables for each method
-            // ollirClass.show();               // Print to console main information about the input OLLIR
+            ollirClass.show();               // Print to console main information about the input OLLIR
 
             // Convert the OLLIR to a String containing the equivalent Jasmin code
             String jasminCode = "";
@@ -223,23 +223,12 @@ public class BackendStage implements JasminBackend {
     }
 
     private String generate(CallInstruction instruction) {
+        if (instruction.getInvocationType() == CallType.ldc)
+            return String.format("\tldc %s\n", ((LiteralElement) instruction.getFirstArg()).getLiteral());
+
         String code = "";
+
         Operand firstArg = ((Operand) instruction.getFirstArg());
-
-        if (instruction.getInvocationType() == CallType.invokevirtual) {
-            int regist = variablesRegists.getOrDefault(firstArg.getName(), 0);
-
-            code += String.format("\taload %d\n", regist);
-        }
-
-        for (Element operand : instruction.getListOfOperands()) {
-            SingleOpInstruction opInstruction = new SingleOpInstruction(operand);
-
-            code += generate(opInstruction);
-        }
-
-        // Invocation type
-        String invocationType = instruction.getInvocationType().toString().toLowerCase();
 
         // Class name
         String className = "";
@@ -249,6 +238,12 @@ public class BackendStage implements JasminBackend {
 
         else
             className += firstArg.getName();
+
+        if (instruction.getInvocationType() == CallType.invokevirtual) {
+            int regist = variablesRegists.getOrDefault(firstArg.getName(), 0);
+
+            code += String.format("\taload %d\n", regist);
+        }
 
         // Method name
         String methodName = "";
@@ -267,6 +262,16 @@ public class BackendStage implements JasminBackend {
 
         else if (className.equals("this"))
             className = this.className;
+
+        // Invocation type
+        String invocationType = instruction.getInvocationType().toString().toLowerCase();
+
+        // Load operands
+        for (Element operand : instruction.getListOfOperands()) {
+            SingleOpInstruction opInstruction = new SingleOpInstruction(operand);
+
+            code += generate(opInstruction);
+        }
 
         // If is constructor
         if (invocationType.equals("new")) {
@@ -311,6 +316,7 @@ public class BackendStage implements JasminBackend {
 
     private String generate(AssignInstruction instruction) {
         String code = "";
+        System.out.println(((Operand) instruction.getDest()).getName());
 
         code += generate(instruction.getRhs()); // Generate RHS
 
@@ -322,11 +328,13 @@ public class BackendStage implements JasminBackend {
 
         variablesRegists.put(((Operand) instruction.getDest()).getName(), regist);
 
+
         return code;
     }
 
     private String generate(CondBranchInstruction instruction) {
-        return "";
+        String code = "NOT IMPLEMENTED";
+        return code;
     }
 
     private String generate(ReturnInstruction instruction) {
@@ -344,11 +352,14 @@ public class BackendStage implements JasminBackend {
     }
 
     private String generate(GetFieldInstruction instruction) {
-        return null;
+        String code = "NOT IMPLEMENTED";
+        return code;
     }
 
     private String generate(PutFieldInstruction instruction) {
-        return null;
+        String code = "NOT IMPLEMENTED";
+
+        return code;
     }
 
     private String generate(UnaryOpInstruction instruction) {

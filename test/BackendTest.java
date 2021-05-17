@@ -18,7 +18,11 @@ import org.junit.Test;
 
 import pt.up.fe.comp.TestUtils;
 import pt.up.fe.comp.jmm.jasmin.JasminResult;
+import pt.up.fe.comp.jmm.ollir.OllirResult;
+import pt.up.fe.comp.jmm.ollir.OllirUtils;
 import pt.up.fe.specs.util.SpecsIo;
+
+import java.util.ArrayList;
 
 
 public class BackendTest {
@@ -38,5 +42,19 @@ public class BackendTest {
 
         String output = result.run();
         assertEquals("30", output.trim());
+    }
+
+    @Test
+    public void MyClass3() {
+        OllirResult ollirResult = new OllirResult(
+            OllirUtils.parse(SpecsIo.getResource("fixtures/public/ollir/myclass3.ollir")),
+            null,
+            new ArrayList<>()
+        );
+
+        JasminResult result = TestUtils.backend(ollirResult);
+        TestUtils.noErrors(result.getReports());
+
+        String output = result.run();
     }
 }
