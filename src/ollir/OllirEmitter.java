@@ -109,23 +109,12 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                 ollir_code += firstNegated.getOllirCode() + secondNegated.getOllirCode();
 
                 conditionString = generateOrAuxiliar(conditionNode, s, firstNegated.getReturnVar(), secondNegated.getReturnVar()).getOllirCode();
-
-
-                /*JmmNode OpNode = node.getChildren().get(0);
-
-                OllirData Op = visit(OpNode, methodId);
-
-                String ollirCode = "";
-
-                ollirCode += Op.getOllirCode();
-
-                String name = getVarAssignmentName(node);
-                ollirCode += name + ".bool :=.bool " + "0.bool" + " !.bool " + Op.getReturnVar();
-
-                if(OllirUtils.IsEndOfLine(node)){
-                    ollirCode +=  ";\n";
-                }
-                return new OllirData(name + ".bool", ollirCode);*/
+                break;
+            case "True":
+                conditionString += "0.bool"  + " !.bool " + generateFalse(conditionNode, s).getReturnVar();
+                break;
+            case "False":
+                conditionString += "0.bool"  + " !.bool " + generateTrue(conditionNode, s).getReturnVar();
                 break;
             default:
                 System.out.println("This condition of the if statement isn't done yet.");
@@ -200,24 +189,6 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         if(OllirUtils.IsEndOfLine(node)){
             ollirCode +=  ";\n";
         }
-
-        /*JmmNode firstOpNode = node.getChildren().get(0);
-        JmmNode secondOpNode = node.getChildren().get(1);
-
-        OllirData firstOp = visit(firstOpNode, methodId);
-        OllirData secondOp = visit(secondOpNode, methodId);
-
-        String ollirCode = "";
-
-        ollirCode += firstOp.getOllirCode() + secondOp.getOllirCode();
-
-        String name = getVarAssignmentName(node);
-        ollirCode += name + ".bool :=.bool " + firstOp.getReturnVar() + " &&.bool " + secondOp.getReturnVar();
-
-        if(OllirUtils.IsEndOfLine(node)){
-            ollirCode +=  ";\n";
-        }
-        return new OllirData(name + ".bool", ollirCode);*/
 
         return new OllirData(name + ".bool", ollirCode);
 
