@@ -132,6 +132,8 @@ public class BackendStage implements JasminBackend {
     }
 
     private String generateMethod(Method method) {
+        registCount = method.getParams().size();
+        variablesRegists = new HashMap<>();
         String code = ".method ";
 
         // Method access modifier
@@ -256,7 +258,7 @@ public class BackendStage implements JasminBackend {
 
         methodName = methodName.replaceAll("\"", "");
 
-        if (methodName.equals("<init>"))
+        if (methodName.equals("<init>") && className.equals("this"))
             className = superClassName;
 
         // If is constructor
