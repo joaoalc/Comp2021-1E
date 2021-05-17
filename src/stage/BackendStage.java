@@ -43,7 +43,7 @@ public class BackendStage implements JasminBackend {
             ollirClass.buildCFGs();          // Build the CFG of each method
             // ollirClass.outputCFGs();         // Output to .dot files the CFGs, one per method
             ollirClass.buildVarTables();     // Build the table of variables for each method
-            ollirClass.show();               // Print to console main information about the input OLLIR
+            // ollirClass.show();               // Print to console main information about the input OLLIR
 
             // Convert the OLLIR to a String containing the equivalent Jasmin code
             String jasminCode = "";
@@ -125,11 +125,20 @@ public class BackendStage implements JasminBackend {
             case ARRAYREF:
                 return "[";
 
+            case STRING:
             case OBJECTREF:
                 return "A";
         }
 
         return "";
+    }
+
+    private String elementToString(Element element) {
+        if (element.isLiteral())
+            return ((LiteralElement) element).getLiteral();
+
+        else
+            return ((Operand) element).getName();
     }
 
     private String generateMethod(Method method) {
@@ -316,18 +325,15 @@ public class BackendStage implements JasminBackend {
 
     private String generate(AssignInstruction instruction) {
         String code = "";
-        System.out.println(((Operand) instruction.getDest()).getName());
 
         code += generate(instruction.getRhs()); // Generate RHS
 
         String variableType = elementTypeToString(instruction.getTypeOfAssign().getTypeOfElement()).toLowerCase();
-
         int regist = variablesRegists.getOrDefault(((Operand) instruction.getDest()).getName(), registCount++);
 
         code += "\t" + variableType + "store " + regist + "\n";
 
         variablesRegists.put(((Operand) instruction.getDest()).getName(), regist);
-
 
         return code;
     }
@@ -352,14 +358,29 @@ public class BackendStage implements JasminBackend {
     }
 
     private String generate(GetFieldInstruction instruction) {
-        String code = "NOT IMPLEMENTED";
-        return code;
+        String className = elementToString(instruction.getFirstOperand());
+
+        if (className.equals("this"))
+            className = this.className;
+
+        String methodName = elementToString(instruction.getSecondOperand());
+
+        String fieldType = elementTypeToString(instruction.getSecondOperand().getType().getTypeOfElement());
+
+        return String.format("\tgetfield %s/%s %s\n", className, methodName, fieldType);
     }
 
     private String generate(PutFieldInstruction instruction) {
-        String code = "NOT IMPLEMENTED";
+        String className = elementToString(instruction.getFirstOperand());
 
-        return code;
+        if (className.equals("this"))
+            className = this.className;
+
+        String methodName = elementToString(instruction.getSecondOperand());
+
+        String fieldType = elementTypeToString(instruction.getSecondOperand().getType().getTypeOfElement());
+
+        return String.format("\tputfield %s/%s %s\n", className, methodName, fieldType);
     }
 
     private String generate(UnaryOpInstruction instruction) {
