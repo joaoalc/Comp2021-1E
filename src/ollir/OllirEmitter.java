@@ -92,7 +92,10 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         String conditionString = "";
         switch (conditionNode.getKind()){
             case "LessThan":
-                conditionString = generateGreaterOrEqualAuxiliar(conditionNode, s).getOllirCode();
+                OllirData firstNode = visit(conditionNode.getChildren().get(0), s);
+                OllirData secondNode = visit(conditionNode.getChildren().get(1), s);
+                ollir_code += firstNode.getOllirCode() + secondNode.getOllirCode();
+                conditionString = generateGreaterOrEqualAuxiliar(conditionNode, s, firstNode, secondNode).getOllirCode();
                 break;
             default:
                 System.out.println("This condition of the if statement isn't done yet.");
@@ -133,16 +136,28 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         return new OllirData(return_type, ollir_code);
     }
 
-    private OllirData generateGreaterOrEqualAuxiliar(JmmNode node, String methodId) {
+    private OllirData generateGreaterOrEqualAuxiliar(JmmNode node, String methodId, OllirData firstOpReturnVar, OllirData secondOpReturnVar) {
         JmmNode firstOpNode = node.getChildren().get(0);
         JmmNode secondOpNode = node.getChildren().get(1);
 
+        /*
         OllirData firstOp = visit(firstOpNode, methodId);
         OllirData secondOp = visit(secondOpNode, methodId);
 
         String ollirCode = "";
 
-        ollirCode += firstOp.getReturnVar() + " >=.i32 " + secondOp.getReturnVar();
+        ollirCode += firstOp.getOllirCode() + secondOp.getOllirCode();
+
+        String name = getVarAssignmentName(node);
+        ollirCode += name + ".bool :=.bool " + firstOp.getReturnVar() + " <.i32 " + secondOp.getReturnVar();
+
+        if(OllirUtils.IsEndOfLine(node)){
+            ollirCode +=  ";\n";
+        }*/
+
+        String ollirCode = "";
+
+        ollirCode += firstOpReturnVar.getReturnVar() + " >=.i32 " + secondOpReturnVar.getReturnVar();
 
         return new OllirData(".bool", ollirCode);
     }
