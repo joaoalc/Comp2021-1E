@@ -53,10 +53,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         addVisit("LessThan", this::generateLessThan);
         //boolean, boolean returns boolean
         addVisit("And", this::generateAnd);
-
-        //Unary operators
-        //boolean, returns boolean
-        //addVisit("Negate", this::verifyNegate);
+        addVisit("Negate", this::generateNegate); //! is a binary operator in ollir for some reason
 
 
 
@@ -73,6 +70,8 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         addVisit("Identifier", this::generateIdentifier);
         addVisit("Integer", this::generateInteger);
+        addVisit("True", this::generateTrue);
+        addVisit("False", this::generateFalse);
         addVisit("NewExpression", this::generateNewExpression);
         addVisit("VarCreation", this::generateVarCreation);
         addVisit("FCall", this::generateFCall);
@@ -96,10 +95,37 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         String conditionString = "";
         switch (conditionNode.getKind()){
             case "LessThan":
-                OllirData firstNode = visit(conditionNode.getChildren().get(0), s);
-                OllirData secondNode = visit(conditionNode.getChildren().get(1), s);
-                ollir_code += firstNode.getOllirCode() + secondNode.getOllirCode();
-                conditionString = generateGreaterOrEqualAuxiliar(conditionNode, s, firstNode, secondNode).getOllirCode();
+                OllirData firstNodeLT = visit(conditionNode.getChildren().get(0), s);
+                OllirData secondNodeLT = visit(conditionNode.getChildren().get(1), s);
+                ollir_code += firstNodeLT.getOllirCode() + secondNodeLT.getOllirCode();
+                conditionString = generateGreaterOrEqualAuxiliar(conditionNode, s, firstNodeLT, secondNodeLT).getOllirCode();
+                break;
+            case "And":
+                //OllirData firstNodeAnd = visit(conditionNode.getChildren().get(0), s);
+                //OllirData secondNodeAnd = visit(conditionNode.getChildren().get(1), s);
+
+                OllirData firstNegated = generateNegateAuxVar(node.getChildren().get(0).getChildren().get(0), s);
+                OllirData secondNegated = generateNegateAuxVar(node.getChildren().get(0).getChildren().get(1), s);
+                ollir_code += firstNegated.getOllirCode() + secondNegated.getOllirCode();
+
+                conditionString = generateOrAuxiliar(conditionNode, s, firstNegated.getReturnVar(), secondNegated.getReturnVar()).getOllirCode();
+
+
+                /*JmmNode OpNode = node.getChildren().get(0);
+
+                OllirData Op = visit(OpNode, methodId);
+
+                String ollirCode = "";
+
+                ollirCode += Op.getOllirCode();
+
+                String name = getVarAssignmentName(node);
+                ollirCode += name + ".bool :=.bool " + "0.bool" + " !.bool " + Op.getReturnVar();
+
+                if(OllirUtils.IsEndOfLine(node)){
+                    ollirCode +=  ";\n";
+                }
+                return new OllirData(name + ".bool", ollirCode);*/
                 break;
             default:
                 System.out.println("This condition of the if statement isn't done yet.");
@@ -141,10 +167,43 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
     }
 
     private OllirData generateGreaterOrEqualAuxiliar(JmmNode node, String methodId, OllirData firstOpReturnVar, OllirData secondOpReturnVar) {
-        JmmNode firstOpNode = node.getChildren().get(0);
+        String ollirCode = "";
+
+        ollirCode += firstOpReturnVar.getReturnVar() + " >=.i32 " + secondOpReturnVar.getReturnVar();
+
+        return new OllirData(".bool", ollirCode);
+    }
+
+    private OllirData generateOrAuxiliar(JmmNode node, String methodId, String firstOpReturnVar, String secondOpReturnVar) {
+        String ollirCode = "";
+
+        ollirCode += firstOpReturnVar + " ||.bool " + secondOpReturnVar;
+
+        return new OllirData(".bool", ollirCode);
+    }
+
+    //Generates negate var and all vars under it
+    private OllirData generateNegateAuxVar(JmmNode node, String methodId) {
+
+        //
+        JmmNode OpNode = node/*.getChildren().get(0)*/;
+
+        OllirData Op = visit(OpNode, methodId);
+
+        String ollirCode = "";
+
+        ollirCode += Op.getOllirCode();
+
+        String name = getVarAssignmentName(node);
+        ollirCode += name + ".bool :=.bool " + "0.bool" + " !.bool " + Op.getReturnVar();
+
+        if(OllirUtils.IsEndOfLine(node)){
+            ollirCode +=  ";\n";
+        }
+
+        /*JmmNode firstOpNode = node.getChildren().get(0);
         JmmNode secondOpNode = node.getChildren().get(1);
 
-        /*
         OllirData firstOp = visit(firstOpNode, methodId);
         OllirData secondOp = visit(secondOpNode, methodId);
 
@@ -153,17 +212,15 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         ollirCode += firstOp.getOllirCode() + secondOp.getOllirCode();
 
         String name = getVarAssignmentName(node);
-        ollirCode += name + ".bool :=.bool " + firstOp.getReturnVar() + " <.i32 " + secondOp.getReturnVar();
+        ollirCode += name + ".bool :=.bool " + firstOp.getReturnVar() + " &&.bool " + secondOp.getReturnVar();
 
         if(OllirUtils.IsEndOfLine(node)){
             ollirCode +=  ";\n";
-        }*/
+        }
+        return new OllirData(name + ".bool", ollirCode);*/
 
-        String ollirCode = "";
+        return new OllirData(name + ".bool", ollirCode);
 
-        ollirCode += firstOpReturnVar.getReturnVar() + " >=.i32 " + secondOpReturnVar.getReturnVar();
-
-        return new OllirData(".bool", ollirCode);
     }
 
     private OllirData generateLessThan(JmmNode node, String methodId) {
@@ -178,7 +235,6 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         ollirCode += firstOp.getOllirCode() + secondOp.getOllirCode();
 
-        System.out.println("Before: " + firstOp.getReturnVar());
         String name = getVarAssignmentName(node);
         ollirCode += name + ".bool :=.bool " + firstOp.getReturnVar() + " <.i32 " + secondOp.getReturnVar();
 
@@ -293,9 +349,38 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         return new OllirData(name + ".bool", ollirCode);
     }
 
+    private OllirData generateNegate(JmmNode node, String methodId) {
+        JmmNode OpNode = node.getChildren().get(0);
+
+        OllirData Op = visit(OpNode, methodId);
+
+        String ollirCode = "";
+
+        ollirCode += Op.getOllirCode();
+
+        String name = getVarAssignmentName(node);
+        ollirCode += name + ".bool :=.bool " + "0.bool" + " !.bool " + Op.getReturnVar();
+
+        if(OllirUtils.IsEndOfLine(node)){
+            ollirCode +=  ";\n";
+        }
+        return new OllirData(name + ".bool", ollirCode);
+    }
+
+
     private OllirData generateInteger(JmmNode jmmNode, String s) {
         //TODO: (for self) Check if ollirCode is right later
         return new OllirData(jmmNode.get("value") + ".i32", "");
+    }
+
+    private OllirData generateTrue(JmmNode jmmNode, String s) {
+        //TODO: (for self) Check if ollirCode is right later
+        return new OllirData(1 + ".bool", "");
+    }
+
+    private OllirData generateFalse(JmmNode jmmNode, String s) {
+        //TODO: (for self) Check if ollirCode is right later
+        return new OllirData(0 + ".bool", "");
     }
 
     private OllirData generateIdentifier(JmmNode jmmNode, String s){

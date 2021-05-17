@@ -2,9 +2,7 @@ class Fac {
 
     public int compFac(int num){
         int num_aux;
-        boolean a;
-        //a = (25 * num) < 1 + 3 / 25;
-        if((25 * num) < 1 + 3 / 25){
+        if(true && false){
             num_aux = 1;
         }else{
             num_aux = 2;
