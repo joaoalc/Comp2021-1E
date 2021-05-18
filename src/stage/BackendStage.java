@@ -178,8 +178,13 @@ public class BackendStage implements JasminBackend {
             code += "\taload_0\n";
 
         // Iterate over method's instructions
-        for (Instruction instruction : method.getInstructions())
+        for (Instruction instruction : method.getInstructions()) {
+            // Iterate over instruction's labels
+            for (String label : method.getLabels(instruction))
+                code += String.format("\t%s:\n", label);
+
             code += generate(instruction);
+        }
 
         if (method.getReturnType().getTypeOfElement() == ElementType.VOID)
             code += "\treturn\n";
