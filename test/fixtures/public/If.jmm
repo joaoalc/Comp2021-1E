@@ -2,17 +2,9 @@ class Fac {
 
     public int compFac(int num){
         int num_aux;
-        int c;
-        int d;
-        boolean a;
-        boolean b;
-        c = 5;
-        d = 6;
-        a = true;
-        b = false;
-        while(!a && b && true){
-            num_aux = 1;
-        }
+        int[] c;
+        num_aux = 1;
+        c = new int[num_aux + 3];
         return num_aux;
     }
 }

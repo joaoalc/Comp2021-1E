@@ -63,7 +63,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         addVisit("Assignment", this::generateAssignment);
         //addVisit("NewExpression", this::verifyParentheses);
         //addVisit("VarDeclaration", this::varDeclaration);
-        //addVisit("IntArray", this::verifyArray);*/
+        addVisit("IntArray", this::generateArray);
         addVisit("IfStatement", this::generateIf);
         addVisit("WhileStatement", this::generateWhile);
 
@@ -76,6 +76,18 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         addVisit("VarCreation", this::generateVarCreation);
         addVisit("FCall", this::generateFCall);
         setDefaultVisit(this::defaultVisit);
+    }
+
+    private OllirData generateArray(JmmNode node, String s) {
+        String return_type = "";
+        String ollir_code = "";
+        JmmNode childNode = node.getChildren().get(0);
+        OllirData childData = visit(childNode, s);
+
+        ollir_code += childData.getOllirCode();
+        return_type += "new(array, " + childData.getReturnVar() + ")" + ".array.i32";
+
+        return new OllirData(return_type, ollir_code);
     }
 
     private OllirData verifyParentheses(JmmNode node, String s) {
