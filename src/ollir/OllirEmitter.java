@@ -58,7 +58,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
 
         addVisit("Parentheses", this::verifyParentheses);
-        //addVisit("Index", this::verifyIndex);
+        addVisit("Index", this::generateIndex);
         //addVisit("FCall", this::verifyCall);
         addVisit("Assignment", this::generateAssignment);
         //addVisit("NewExpression", this::verifyParentheses);
@@ -76,6 +76,32 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         addVisit("VarCreation", this::generateVarCreation);
         addVisit("FCall", this::generateFCall);
         setDefaultVisit(this::defaultVisit);
+    }
+
+    private OllirData generateIndex(JmmNode node, String s) {
+        String return_type = "";
+        String ollir_code = "";
+        JmmNode arrayNode = node.getChildren().get(0);
+        OllirData arrayData = visit(arrayNode, s);
+        JmmNode indexNode = node.getChildren().get(1);
+        OllirData indexData = visit(indexNode, s);
+        ollir_code += arrayData.getOllirCode();
+        ollir_code += indexData.getOllirCode();
+/*
+        ollir_code += "aux" + localVariableCounter + "." + getOllirType(new Type(arrayNode.get("type"), false)) + " :=." + getOllirType(new Type(arrayNode.get("type"), false)) + " " + arrayNode.get("name") + "[" + indexData.getReturnVar() + "]" + "." + getOllirType(new Type(arrayNode.get("type"), false)) + ";\n";
+
+        return_type = "aux" + localVariableCounter + "." + getOllirType(new Type(arrayNode.get("type"), false));
+        localVariableCounter++;*/
+        System.out.println(node.toJson());
+        JmmNode parent_node = node.getParent();
+        if(parent_node.getKind().equals("Assignment")){
+            return_type = node.get("name") + "[" + indexData.getReturnVar() + "]." + getOllirType(new Type(arrayNode.get("type"), false));
+        }
+        else{
+            return_type = "aux" + localVariableCounter++;
+        }
+
+        return new OllirData(return_type, ollir_code);
     }
 
     private OllirData generateArray(JmmNode node, String s) {

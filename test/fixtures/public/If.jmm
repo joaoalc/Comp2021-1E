@@ -3,10 +3,11 @@ class Fac {
     public int compFac(int num){
         int num_aux;
         int[] c;
+        int a;
         num_aux = 1;
         c = new int[num_aux + 3];
 
-        num_aux = c[3] + 5;
+        num_aux = c[3 + 3];
         return num_aux;
     }
 }
