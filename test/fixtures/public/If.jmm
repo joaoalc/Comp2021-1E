@@ -2,14 +2,16 @@ class Fac {
 
     public int compFac(int num){
         int num_aux;
+        int c;
+        int d;
         boolean a;
         boolean b;
+        c = 5;
+        d = 6;
         a = true;
         b = false;
-        if(!true){
+        while(!a && b && true){
             num_aux = 1;
-        }else{
-            num_aux = 2;
         }
         return num_aux;
     }

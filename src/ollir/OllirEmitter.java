@@ -65,7 +65,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         //addVisit("VarDeclaration", this::varDeclaration);
         //addVisit("IntArray", this::verifyArray);*/
         addVisit("IfStatement", this::generateIf);
-        //addVisit("WhileStatement", this::verifyIfStatement);
+        addVisit("WhileStatement", this::generateWhile);
 
 
         addVisit("Identifier", this::generateIdentifier);
@@ -111,6 +111,57 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                 conditionString = generateOrAuxiliar(conditionNode, s, firstNegated.getReturnVar(), secondNegated.getReturnVar()).getOllirCode();
                 break;
             case "True":
+                conditionString += "0.bool"  + " !.bool " + generateTrue(conditionNode, s).getReturnVar();
+                break;
+            case "False":
+                conditionString += "0.bool"  + " !.bool " + generateFalse(conditionNode, s).getReturnVar();
+                break;
+            case "Negate":
+                OllirData nodeNegate = visit(conditionNode.getChildren().get(0), s);
+                ollir_code += nodeNegate.getOllirCode();
+
+                conditionString += "1.bool" + " &&.bool " + nodeNegate.getReturnVar();
+                break;
+            default:
+                System.out.println("This condition of the if statement isn't done yet.");
+                break;
+        }
+
+        ollir_code += "if(" + conditionString + ")" + "goto else" + labelCounter + ";\n"  + trueString + "\ngoto endif" + labelCounter + ";\n" + "else" + labelCounter + ":\n" + elseString + "endif" + labelCounter + ":\n";
+
+        labelCounter++;
+        return new OllirData(return_type, ollir_code);
+    }
+
+    private OllirData generateWhile(JmmNode node, String s) {
+        String return_type = "";
+        String ollir_code = "";
+
+        ollir_code += "Loop" + labelCounter + ":\n";
+
+        JmmNode conditionNode = node.getChildren().get(0);
+        JmmNode trueNode = node.getChildren().get(1);
+        String trueString = visit(trueNode, s).getOllirCode();
+
+        String conditionString = "";
+        switch (conditionNode.getKind()){
+            case "LessThan":
+                OllirData firstNodeLT = visit(conditionNode.getChildren().get(0), s);
+                OllirData secondNodeLT = visit(conditionNode.getChildren().get(1), s);
+                ollir_code += firstNodeLT.getOllirCode() + secondNodeLT.getOllirCode();
+                conditionString = generateLessAuxiliar(conditionNode, s, firstNodeLT, secondNodeLT).getOllirCode();
+                break;
+            case "And":
+                //OllirData firstNodeAnd = visit(conditionNode.getChildren().get(0), s);
+                //OllirData secondNodeAnd = visit(conditionNode.getChildren().get(1), s);
+
+                OllirData firstNegated = visit(node.getChildren().get(0).getChildren().get(0), s);
+                OllirData secondNegated = visit(node.getChildren().get(0).getChildren().get(1), s);
+                ollir_code += firstNegated.getOllirCode() + secondNegated.getOllirCode();
+
+                conditionString = generateAndAuxiliar(conditionNode, s, firstNegated.getReturnVar(), secondNegated.getReturnVar()).getOllirCode();
+                break;
+            case "True":
                 conditionString += "0.bool"  + " !.bool " + generateFalse(conditionNode, s).getReturnVar();
                 break;
             case "False":
@@ -127,8 +178,11 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                 break;
         }
 
-        ollir_code += "if(" + conditionString + ")" + "goto else" + labelCounter + ";\n"  + trueString + "\ngoto endif" + labelCounter + ";\n" + "else" + labelCounter + ":\n" + elseString + "endif" + labelCounter + ":\n";
-
+        ollir_code += "if(" + conditionString + ")" + "goto Body"+ labelCounter + ";\n";
+        ollir_code += "goto EndLoop" + labelCounter + ";\n";
+        ollir_code += "Body" + labelCounter + ": " + trueString;
+        ollir_code += "goto Loop" + labelCounter + ";\n";
+        //   trueString + "\nif(" + conditionString + ")" + "goto Loop" + labelCounter + ";\n" + "else" + labelCounter + ":\n"
         labelCounter++;
         return new OllirData(return_type, ollir_code);
     }
@@ -169,10 +223,26 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         return new OllirData(".bool", ollirCode);
     }
 
+    private OllirData generateLessAuxiliar(JmmNode node, String methodId, OllirData firstOpReturnVar, OllirData secondOpReturnVar) {
+        String ollirCode = "";
+
+        ollirCode += firstOpReturnVar.getReturnVar() + " <.i32 " + secondOpReturnVar.getReturnVar();
+
+        return new OllirData(".bool", ollirCode);
+    }
+
     private OllirData generateOrAuxiliar(JmmNode node, String methodId, String firstOpReturnVar, String secondOpReturnVar) {
         String ollirCode = "";
 
         ollirCode += firstOpReturnVar + " ||.bool " + secondOpReturnVar;
+
+        return new OllirData(".bool", ollirCode);
+    }
+
+    private OllirData generateAndAuxiliar(JmmNode node, String methodId, String firstOpReturnVar, String secondOpReturnVar) {
+        String ollirCode = "";
+
+        ollirCode += firstOpReturnVar + " &&.bool " + secondOpReturnVar;
 
         return new OllirData(".bool", ollirCode);
     }
