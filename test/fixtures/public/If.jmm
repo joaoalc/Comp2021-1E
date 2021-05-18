@@ -5,6 +5,8 @@ class Fac {
         int[] c;
         num_aux = 1;
         c = new int[num_aux + 3];
+
+        num_aux = c[3] + 5;
         return num_aux;
     }
 }

@@ -140,7 +140,6 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
         //We assumed that sums are EXCLUSIVELY between integers and result in another integer
         node.put("type", "int");
         node.put("is_array", "false");
-
         List<Report> reports = new ArrayList<>();
 
 
@@ -159,8 +158,12 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
                     report_list.add(newSemanticReport(node, "Undeclared variable"));
                     return reports;
                 }
-                firstChild.put("type", var.getType().getName());
-                firstChild.put("is_array", String.valueOf(var.getType().isArray()));
+                if(!firstChild.getOptional("type").isPresent()) {
+                    firstChild.put("type", var.getType().getName());
+                }
+                if(!firstChild.getOptional("is_array").isPresent()) {
+                    firstChild.put("is_array", String.valueOf(var.getType().isArray()));
+                }
             }
             if(secondChild.getOptional("name").isPresent()){
                 method = NodeFindingMethods.FindParentMethod(secondChild, symbolTable);
@@ -170,8 +173,10 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
                     report_list.add(newSemanticReport(node, "Undeclared variable"));
                     return reports;
                 }
-                secondChild.put("type", var.getType().getName());
-                secondChild.put("is_array", String.valueOf(var.getType().isArray()));
+                if(!secondChild.getOptional("type").isPresent())
+                    secondChild.put("type", var.getType().getName());
+                if(!secondChild.getOptional("is_array").isPresent())
+                    secondChild.put("is_array", String.valueOf(var.getType().isArray()));
             }
 
             if ((!NodeFindingMethods.sameType(firstChild.get("type"), "int")) || (!NodeFindingMethods.sameType(firstChild.get("is_array"), "false"))) {
@@ -334,7 +339,6 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
         node.put("type", array.get("type"));
         node.put("is_array", "false");
         node.put("name", array.get("name"));
-
         return reports;
     }
 
