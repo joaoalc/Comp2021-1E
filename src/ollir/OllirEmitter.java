@@ -179,8 +179,14 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
                 conditionString += "1.bool" + " &&.bool " + nodeNegate.getReturnVar();
                 break;
+            case "Identifier":
+                OllirData nodeIdentifier = visit(conditionNode, s);
+                ollir_code += nodeIdentifier.getOllirCode();
+                conditionString += "0.bool"  + " !.bool " + nodeIdentifier.getReturnVar();
+                break;
             default:
                 System.out.println("This condition of the if statement isn't done yet.");
+                System.out.println(conditionNode.getKind());
                 break;
         }
 
@@ -252,7 +258,6 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         String ollir_code = "";
         OllirData identifierData = visit(identifierNode, methodId);
         return_type = identifierData.getReturnVar();
-
 
         OllirData data = visit(valueNode, methodId);
         if(data.getOllirCode().equals("")){
@@ -659,9 +664,6 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                     types.add(new ValueSymbol(new Type("boolean", false), "", true));
                 } else if (child.getOptional("name").isPresent()){
                     //TODO: Add value or operation possibility to this
-                    System.out.println("name: " + child.get("name"));
-                    System.out.println("Method id: " + (methodId));
-                    System.out.println("function: " + symbolTable.getMethod(methodId));
                     types.add(NodeFindingMethods.getVariable(symbolTable.getMethod(methodId), symbolTable, child.get("name")));
                 }
                 else{
@@ -673,16 +675,24 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
             if (identifier_node.getKind().equals("This")) {
                 //this.function(arguments);
-                System.out.println("Name: ");
-                System.out.println(function_name);
-                System.out.println("Types: ");
                 for(int i = 0; i < types.size(); i++){
 
                     System.out.println(types.get(i));
                 }
                 Method method = symbolTable.getMethod(function_name, types);
-                return_var = "aux_" + localVariableCounter++ + "." + getOllirType(method.getReturnType());
-                ollir_code += return_var + ":=." + getOllirType(method.getReturnType()) + " invokevirtual(this, \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + getOllirType(method.getReturnType()) + ";";
+                if(method != null) {
+                    return_var = "aux_" + localVariableCounter++ + "." + getOllirType(method.getReturnType());
+                    ollir_code += return_var + ":=." + getOllirType(method.getReturnType()) + " invokevirtual(this, \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + getOllirType(method.getReturnType()) + ";";
+                }
+                else{
+                    //TODO: Check how to do this better
+                    //Calling a superclass' method (arguments' ollir code is already written)
+                    System.out.println("among us sus");
+                    String type = getFunctionTypeIfNonExistant(node);
+                    ollir_code += "";
+                    return_var = type + " invokevirtual(this, \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type;
+                }
+
 
             } else {
                 String identifier_name = identifier_node.get("name");
@@ -740,6 +750,27 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         return name;
     }
 
+    private String getFunctionTypeIfNonExistant(JmmNode node){
+        JmmNode parent_node = node.getParent();
+        String type = "";
+        if(parent_node.getKind().equals("Assignment")){
+            //TODO: Implement for indices
+            type = getOllirTypeNotVoid(new Type(parent_node.getChildren().get(0).get("type"), Boolean.parseBoolean(parent_node.getChildren().get(0).get("is_array"))));
+            System.out.println("type: " + type);
+        }
+        else if(parent_node.getKind().equals("Add") || parent_node.getKind().equals("Sub") || parent_node.getKind().equals("Mult") || parent_node.getKind().equals("Div") || parent_node.getKind().equals("LessThan")){
+            type = "i32";
+        }
+        else if(parent_node.getKind().equals("And") || parent_node.getKind().equals("Negate")){
+            type = "bool";
+        }
+        else{
+            System.out.println("TODO: Determine type");
+            type = "i32";
+        }
+        return type;
+    }
+
     private String getVarOllirType(JmmNode jmmNode){
         String return_type = "";
         if(jmmNode.get("type").equals("int")){
@@ -755,6 +786,22 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             return_type += jmmNode.get("type");
         }
         return return_type;
+    }
+
+    //In case someone creates a void class instance (?)
+    private String getOllirTypeNotVoid(Type type) {
+        String name = type.getName();
+
+        String ollirType;
+        if (name.equals("int")) {
+            ollirType = "i32";
+        } else if (name.equals("boolean")) {
+            ollirType = "bool";
+        } else {
+            ollirType = name;
+        }
+
+        return (type.isArray() ? "array." : "") + ollirType;
     }
 
     private String getOllirType(Type type) {
