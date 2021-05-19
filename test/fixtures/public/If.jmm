@@ -1,21 +1,11 @@
-class Fac {
+import io;
+class WhileAndIF {
 
-    public int compFac(int num){
-        int num_aux;
-        int[] c;
-        int a;
-        a = 5;
-        num_aux = 1;
-        c = new int[a];
-
-        num_aux = c[3];
-        if(c[3] < 5)
-        {
-            num_aux = 5;
-        }
-        else{
-            num_aux = 3;
-        }
-        return num_aux;
+    public static void main(String[] args){
+        int b;
+        int[] d;
+        d = new int[10];
+        b = d.length;
     }
+
 }
