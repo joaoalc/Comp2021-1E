@@ -41,10 +41,51 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
         addVisit("IfStatement", this::verifyIfStatement);
         addVisit("WhileStatement", this::verifyIfStatement);
         addVisit("Negate", this::verifyNegate);
+
+        addVisit("Statement1", this::verifyStatement1);
+        addVisit("Statement2", this::verifyStatement2);
         setDefaultVisit(this::defaultVisit);
 
         this.symbolTable = symbolTable;
         this.report_list = report_list;
+    }
+
+    private List<Report> verifyStatement1(JmmNode node, Boolean aBoolean) {
+        if(node.getChildren().size() > 0) {
+            JmmNode childNode = node.getChildren().get(0);
+            if (childNode.getOptional("type").isPresent()) {
+                node.put("type", childNode.get("type"));
+            }
+            if (childNode.getOptional("is_array").isPresent()) {
+                node.put("is_array", childNode.get("is_array"));
+            }
+            if (childNode.getOptional("value").isPresent()) {
+                node.put("value", childNode.get("value"));
+            }
+            if (childNode.getOptional("name").isPresent()) {
+                node.put("name", childNode.get("name"));
+            }
+        }
+        return new ArrayList<Report>();
+    }
+
+    private List<Report> verifyStatement2(JmmNode node, Boolean aBoolean) {
+        if(node.getChildren().size() > 0) {
+            JmmNode childNode = node.getChildren().get(0);
+            if (childNode.getOptional("type").isPresent()) {
+                node.put("type", childNode.get("type"));
+            }
+            if (childNode.getOptional("is_array").isPresent()) {
+                node.put("is_array", childNode.get("is_array"));
+            }
+            if (childNode.getOptional("value").isPresent()) {
+                node.put("value", childNode.get("value"));
+            }
+            if (childNode.getOptional("name").isPresent()) {
+                node.put("name", childNode.get("name"));
+            }
+        }
+        return new ArrayList<Report>();
     }
 
     public List<Report> verifyAnd(JmmNode node, Boolean aBoolean) {
@@ -687,7 +728,6 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
 
     public List<Report> verifyIfStatement(JmmNode node, Boolean aBoolean){
         List<Report> reports = new ArrayList<>();
-
         if((! NodeFindingMethods.sameType(node.getChildren().get(0).get("type"), "boolean")) || NodeFindingMethods.sameType(node.getChildren().get(0).get("is_array"), "true")){
             //TODO: Wrong variable type in if statement error
             System.out.println("Wrong type inside of if.");
