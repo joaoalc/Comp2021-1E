@@ -87,17 +87,11 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         OllirData indexData = visit(indexNode, s);
         ollir_code += arrayData.getOllirCode();
         ollir_code += indexData.getOllirCode();
-/*
-        ollir_code += "aux" + localVariableCounter + "." + getOllirType(new Type(arrayNode.get("type"), false)) + " :=." + getOllirType(new Type(arrayNode.get("type"), false)) + " " + arrayNode.get("name") + "[" + indexData.getReturnVar() + "]" + "." + getOllirType(new Type(arrayNode.get("type"), false)) + ";\n";
-
-        return_type = "aux" + localVariableCounter + "." + getOllirType(new Type(arrayNode.get("type"), false));
-        localVariableCounter++;*/
-        System.out.println(node.toJson());
+        
         JmmNode parent_node = node.getParent();
         if(parent_node.getKind().equals("Assignment")){
             if(indexNode.getKind().equals("Integer")){
                 ollir_code += "aux" + localVariableCounter + ".i32 :=.i32 " + indexData.getReturnVar() + ";\n";
-                System.out.println("code: " + ollir_code);
                 return_type = "aux" + localVariableCounter++ + ".i32";
             }
             else {
