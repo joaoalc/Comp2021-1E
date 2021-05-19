@@ -48,6 +48,7 @@ public class BackendStage implements JasminBackend {
             // Convert the OLLIR to a String containing the equivalent Jasmin code
             String jasminCode = "";
 
+            // Class name
             String classAccessModifier = acessModifierToString(ollirClass.getClassAccessModifier());
 
             if (classAccessModifier.isEmpty())
@@ -57,6 +58,7 @@ public class BackendStage implements JasminBackend {
 
             jasminCode += String.format(".class %s %s\n", classAccessModifier, className);
 
+            // Superclass name
             superClassName = ollirClass.getSuperClass();
 
             if (superClassName == null)
@@ -64,11 +66,17 @@ public class BackendStage implements JasminBackend {
 
             jasminCode += String.format(".super %s\n\n", superClassName);
 
+            // Iterate over class fields
+            for (Field field : ollirClass.getFields())
+                jasminCode += generateField(field);
+
+            jasminCode += "\n";
+
             // Iterate over class methods
             for (Method method : ollirClass.getMethods()) {
                 jasminCode += generateMethod(method);
 
-                registCount = 1;
+                registCount = 1; // Reset regist count
             }
 
             // More reports from this stage
@@ -143,6 +151,23 @@ public class BackendStage implements JasminBackend {
             return ((Operand) element).getName();
     }
 
+    private String generateField(Field field) {
+        String code = ".field ";
+
+        code += acessModifierToString(field.getFieldAccessModifier()) + " ";
+
+        if (field.isStaticField())
+            code += "static ";
+
+        if (field.isFinalField())
+            code += "final ";
+
+        code += field.getFieldName() + " ";
+        code += elementTypeToString(field.getFieldType().getTypeOfElement());
+
+        return code + "\n";
+    }
+
     private String generateMethod(Method method) {
         variablesRegists = new HashMap<>();
         String code = ".method ";
@@ -204,6 +229,9 @@ public class BackendStage implements JasminBackend {
 
             if (methodName.equals("main"))
                 descriptor += "Ljava/lang/String;";
+
+            else if (parameter.getType().getTypeOfElement() == ElementType.ARRAYREF)
+                descriptor += "I";
         }
 
         descriptor += ")" + elementTypeToString(returnType.getTypeOfElement());
@@ -282,6 +310,14 @@ public class BackendStage implements JasminBackend {
         // Invocation type
         String invocationType = instruction.getInvocationType().toString().toLowerCase();
 
+        // Call to arraylength
+        if (instruction.getInvocationType() == CallType.arraylength) {
+            code += generate(new SingleOpInstruction(instruction.getFirstArg()));
+            code += String.format("\t%s\n", invocationType);
+
+            return code;
+        }
+
         // Load operands
         for (Element operand : instruction.getListOfOperands()) {
             SingleOpInstruction opInstruction = new SingleOpInstruction(operand);
@@ -323,7 +359,7 @@ public class BackendStage implements JasminBackend {
             int regist = variablesRegists.get(((Operand) operand).getName());
             String loadType = elementTypeToString(operandType).toLowerCase();
 
-            if (operandType == ElementType.STRING)
+            if (operandType == ElementType.STRING || operandType == ElementType.ARRAYREF)
                 loadType = "a";
 
             code += loadType + "load " + regist;
@@ -384,7 +420,7 @@ public class BackendStage implements JasminBackend {
                 opType = instruction.getCondOperation().getOpType().toString().toLowerCase();
         }
 
-        code += String.format("\tif_cmp%s %s\n", opType, instruction.getLabel());
+        code += String.format("\tif_icmp%s %s\n", opType, instruction.getLabel());
 
         return code;
     }
@@ -404,22 +440,36 @@ public class BackendStage implements JasminBackend {
     }
 
     private String generate(GetFieldInstruction instruction) {
-        String className = elementToString(instruction.getFirstOperand());
-        String methodName = elementToString(instruction.getSecondOperand());
+        String code = "\taload_0\n";
 
+        String className = elementToString(instruction.getFirstOperand());
+
+        if (className.equals("this"))
+            className = this.className;
+
+        String fieldName = elementToString(instruction.getSecondOperand());
         String fieldType = elementTypeToString(instruction.getSecondOperand().getType().getTypeOfElement());
 
-        return String.format("\tgetfield %s/%s %s\n", className, methodName, fieldType);
+        code += String.format("\tgetfield %s/%s %s\n", className, fieldName, fieldType);
+
+        return code;
     }
 
     private String generate(PutFieldInstruction instruction) {
-        String code = generate(new SingleOpInstruction(instruction.getThirdOperand()));
+        String code = "\taload_0\n";
+
+        code += generate(new SingleOpInstruction(instruction.getThirdOperand()));
 
         String className = elementToString(instruction.getFirstOperand());
-        String methodName = elementToString(instruction.getSecondOperand());
+
+        if (className.equals("this"))
+            className = this.className;
+
+        String fieldName = elementToString(instruction.getSecondOperand());
+
         String fieldType = elementTypeToString(instruction.getSecondOperand().getType().getTypeOfElement());
 
-        code += String.format("\tputfield %s/%s %s\n", className, methodName, fieldType);
+        code += String.format("\tputfield %s/%s %s\n", className, fieldName, fieldType);
 
         return code;
     }

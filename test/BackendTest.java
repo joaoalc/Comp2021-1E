@@ -21,6 +21,7 @@ import pt.up.fe.comp.jmm.jasmin.JasminResult;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.ollir.OllirUtils;
 import pt.up.fe.specs.util.SpecsIo;
+import pt.up.fe.specs.util.SpecsStrings;
 
 import java.util.ArrayList;
 
@@ -56,13 +57,58 @@ public class BackendTest {
         TestUtils.noErrors(result.getReports());
 
         String output = result.run();
-        assertEquals("", output.trim());
+        assertEquals("3628800", output.trim());
+    }
+
+    @Test
+    public void MyClass1() {
+        OllirResult ollirResult = new OllirResult(
+            OllirUtils.parse(SpecsIo.getResource("fixtures/public/ollir/myclass1.ollir")),
+            null,
+            new ArrayList<>()
+        );
+
+        JasminResult result = TestUtils.backend(ollirResult);
+        TestUtils.noErrors(result.getReports());
+
+        String output = result.run();
+        assertEquals("val = 2\nval = ?\nval = ?\n", output.trim());
+    }
+
+    @Test
+    public void MyClass2() {
+        OllirResult ollirResult = new OllirResult(
+            OllirUtils.parse(SpecsIo.getResource("fixtures/public/ollir/myclass2.ollir")),
+            null,
+            new ArrayList<>()
+        );
+
+        JasminResult result = TestUtils.backend(ollirResult);
+        TestUtils.noErrors(result.getReports());
+
+        String output = result.run();
+        assertEquals("val = 2\nval = ?\nval = ?\n", output.trim());
     }
 
     @Test
     public void MyClass3() {
         OllirResult ollirResult = new OllirResult(
             OllirUtils.parse(SpecsIo.getResource("fixtures/public/ollir/myclass3.ollir")),
+            null,
+            new ArrayList<>()
+        );
+
+        JasminResult result = TestUtils.backend(ollirResult);
+        TestUtils.noErrors(result.getReports());
+
+        String output = SpecsStrings.normalizeFileContents(result.run());
+        assertEquals(SpecsStrings.normalizeFileContents("val = 2\nval = 0\nval = 2"), output.trim());
+    }
+
+    @Test
+    public void MyClass4() {
+        OllirResult ollirResult = new OllirResult(
+            OllirUtils.parse(SpecsIo.getResource("fixtures/public/ollir/myclass4.ollir")),
             null,
             new ArrayList<>()
         );

@@ -338,7 +338,3 @@ void __Expression() #void: {} {
 void Integer(): {Token t;} {
     t=<INTEGER> { jjtThis.put("value", t.image); jjtThis.put("type", "int"); jjtThis.put("is_array", "false"); }
 }
-
-/*void Bool(): {Token value;}{
-    value=<TRUE> { jjtThis.put("value", value.image); }| value=<FALSE> #Bool { jjtThis.put("value", value.image); }
-}*/
