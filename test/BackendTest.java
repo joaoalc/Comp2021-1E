@@ -27,22 +27,24 @@ import java.util.ArrayList;
 
 
 public class BackendTest {
-    @Test
-    public void HelloWorldTest() {
-        JasminResult result = TestUtils.backend(SpecsIo.getResource("fixtures/public/HelloWorld.jmm"));
+    private void runTest(String filename, String expected) {
+        JasminResult result = TestUtils.backend(SpecsIo.getResource("fixtures/" + filename));
         TestUtils.noErrors(result.getReports());
 
-        String output = result.run();
-        assertEquals("Hello, World!", output.trim());
+        String output = SpecsStrings.normalizeFileContents(result.run().trim());
+        expected = SpecsStrings.normalizeFileContents(expected);
+
+        assertEquals(output, expected);
+    }
+
+    @Test
+    public void HelloWorldTest() {
+        runTest("public/HelloWorld.jmm", "Hello, World!");
     }
 
     @Test
     public void SimpleTest() {
-        JasminResult result = TestUtils.backend(SpecsIo.getResource("fixtures/public/Simple.jmm"));
-        TestUtils.noErrors(result.getReports());
-
-        String output = result.run();
-        assertEquals("30", output.trim());
+        runTest("public/Simple.jmm", "30");
     }
 
     @Test
@@ -71,8 +73,7 @@ public class BackendTest {
         JasminResult result = TestUtils.backend(ollirResult);
         TestUtils.noErrors(result.getReports());
 
-        String output = result.run();
-        assertEquals("val = 2\nval = ?\nval = ?\n", output.trim());
+        result.run();
     }
 
     @Test
@@ -86,8 +87,7 @@ public class BackendTest {
         JasminResult result = TestUtils.backend(ollirResult);
         TestUtils.noErrors(result.getReports());
 
-        String output = result.run();
-        assertEquals("val = 2\nval = ?\nval = ?\n", output.trim());
+        result.run();
     }
 
     @Test
@@ -116,7 +116,6 @@ public class BackendTest {
         JasminResult result = TestUtils.backend(ollirResult);
         TestUtils.noErrors(result.getReports());
 
-        String output = result.run();
-        assertEquals("val = 2\nval = ?\nval = ?\n", output.trim());
+        result.run();
     }
 }

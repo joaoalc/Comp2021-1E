@@ -70,7 +70,8 @@ public class BackendStage implements JasminBackend {
             for (Field field : ollirClass.getFields())
                 jasminCode += generateField(field);
 
-            jasminCode += "\n";
+            if (ollirClass.getFields().size() > 0)
+                jasminCode += "\n";
 
             // Iterate over class methods
             for (Method method : ollirClass.getMethods()) {
@@ -206,7 +207,7 @@ public class BackendStage implements JasminBackend {
         for (Instruction instruction : method.getInstructions()) {
             // Iterate over instruction's labels
             for (String label : method.getLabels(instruction))
-                code += String.format("\t%s:\n", label);
+                code += String.format("%s:\n", label);
 
             code += generate(instruction);
         }
@@ -235,6 +236,9 @@ public class BackendStage implements JasminBackend {
         }
 
         descriptor += ")" + elementTypeToString(returnType.getTypeOfElement());
+
+        if (returnType.getTypeOfElement() == ElementType.ARRAYREF)
+            descriptor += "I";
 
         return descriptor;
     }
@@ -327,8 +331,16 @@ public class BackendStage implements JasminBackend {
 
         // If is constructor
         if (invocationType.equals("new")) {
-            code += String.format("\t%s %s\n", invocationType, className);
-            code += "\tdup\n";
+            if (className.equals("array")) {
+                code += String.format("\t%s%s int\n", invocationType, className);
+            }
+
+            else {
+                code += String.format("\t%s %s\n", invocationType, className);
+                code += "\tdup\n";
+            }
+
+
         }
 
         else {
@@ -352,9 +364,26 @@ public class BackendStage implements JasminBackend {
         Element operand = instruction.getSingleOperand();
         ElementType operandType = operand.getType().getTypeOfElement();
 
+        // Literal
         if (operand.isLiteral())
             code += "ldc " + ((LiteralElement) operand).getLiteral();
 
+        // Array
+        else if (operand instanceof ArrayOperand) {
+            ArrayOperand arrayOperand = (ArrayOperand) operand;
+            int regist = variablesRegists.get(arrayOperand.getName());
+
+            // Load array reference
+            code += String.format("aload %s\n", regist);
+
+            // Iterate over index operands
+            for (Element indexOperand : arrayOperand.getIndexOperands())
+                code += generate(new SingleOpInstruction(indexOperand));
+
+            code += "iaload";
+        }
+
+        // Operand
         else {
             int regist = variablesRegists.get(((Operand) operand).getName());
             String loadType = elementTypeToString(operandType).toLowerCase();
@@ -371,19 +400,22 @@ public class BackendStage implements JasminBackend {
     }
 
     private String generate(AssignInstruction instruction) {
-        String code = "";
+        String code = generate(instruction.getRhs()); // Generate RHS
 
-        code += generate(instruction.getRhs()); // Generate RHS
+        // Assignment type
+        ElementType assignType = instruction.getTypeOfAssign().getTypeOfElement();
+        String assignTypeString = elementTypeToString(assignType).toLowerCase();
 
-        String variableType = elementTypeToString(instruction.getTypeOfAssign().getTypeOfElement()).toLowerCase();
+        if (assignType == ElementType.STRING || assignType == ElementType.ARRAYREF)
+            assignTypeString = "a";
 
-        if (instruction.getTypeOfAssign().getTypeOfElement() == ElementType.STRING)
-            variableType = "a";
-
+        // Get variable's correspondent regist number
         int regist = variablesRegists.getOrDefault(((Operand) instruction.getDest()).getName(), registCount++);
 
-        code += "\t" + variableType + "store " + regist + "\n";
+        // Store instruction
+        code += "\t" + assignTypeString + "store " + regist + "\n";
 
+        // Update variable table with correspondent regist
         variablesRegists.put(((Operand) instruction.getDest()).getName(), regist);
 
         return code;
@@ -430,10 +462,15 @@ public class BackendStage implements JasminBackend {
 
         if (instruction.hasReturnValue()) {
             Element operand = instruction.getOperand();
+            ElementType returnType = operand.getType().getTypeOfElement();
             SingleOpInstruction opInstruction = new SingleOpInstruction(operand);
+            String returnTypeString = elementTypeToString(returnType).toLowerCase();
+
+            if (returnType == ElementType.STRING || returnType == ElementType.ARRAYREF)
+                returnTypeString = "a";
 
             code += generate(opInstruction);
-            code += String.format("\t%sreturn\n", elementTypeToString(operand.getType().getTypeOfElement()).toLowerCase());
+            code += String.format("\t%sreturn\n", returnTypeString);
         }
 
         return code;
