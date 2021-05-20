@@ -40,12 +40,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         addVisit("Div", this::generateDiv);
         addVisit("LessThan", this::generateLessThan);
         addVisit("And", this::generateAnd);
-        //addVisit("Parentheses", this::verifyParentheses);
-        //addVisit("Index", this::verifyIndex);
-        //addVisit("FCall", this::verifyCall);
         addVisit("Assignment", this::generateAssignment);
-        //addVisit("NewExpression", this::verifyParentheses);
-        //addVisit("VarDeclaration", this::varDeclaration);
         //addVisit("IntArray", this::verifyArray);*/
         //addVisit("IfStatement", this::verifyIfStatement);
         //addVisit("WhileStatement", this::verifyIfStatement);

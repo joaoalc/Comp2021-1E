@@ -2,6 +2,7 @@ package utils;
 
 import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
 
 import java.io.ByteArrayInputStream;
@@ -49,12 +50,10 @@ public class Utils {
         return true;
     }
 
-    public static Report newSemanticReport(JmmNode node, String message) {
+    public static Report newSemanticReport(JmmNode node, ReportType type, String message) {
         int line = Integer.parseInt(node.get("line"));
         int column = Integer.parseInt(node.get("col"));
 
-        Report rep = Report.newError(Stage.SEMANTIC, line, column, message, new Exception());
-        System.out.println(rep.getType());
-        return rep;
+        return new Report(type, Stage.SEMANTIC, line, column, message);
     }
 }
