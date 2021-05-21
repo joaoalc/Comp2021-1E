@@ -112,13 +112,14 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         if (parent_node.getKind().equals("Assignment")) {
             if (indexNode.getKind().equals("Integer")) {
                 ollir_code += "aux" + localVariableCounter + ".i32 :=.i32 " + indexData.getReturnVar() + ";\n";
-                return_type = "aux" + localVariableCounter++ + ".i32";
+                return_type = node.get("name") + "[" + "aux" + localVariableCounter++ + ".i32" + "]." + getOllirType(new Type(arrayNode.get("type"), false));
             }
             else {
                 return_type = node.get("name") + "[" + indexData.getReturnVar() + "]." + getOllirType(new Type(arrayNode.get("type"), false));
             }
         }
         else {
+
             return_type = "aux" + localVariableCounter++ + ".i32";
         }
 
@@ -203,6 +204,10 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         labelCounter++;
 
+        if(isLastThingInMain(node)){
+            ollir_code += "auxvar.i32 :=.i32 auxvar.i32;\n";
+        }
+
         return new OllirData(return_type, ollir_code);
     }
 
@@ -269,6 +274,10 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         ollir_code += "goto Loop" + labelCounter + ";\n";
         ollir_code += "EndLoop" + labelCounter + ":\n";
 
+
+        if(isLastThingInMain(node)){
+            ollir_code += "auxvar.i32 :=.i32 auxvar.i32;\n";
+        }
         //   trueString + "\nif(" + conditionString + ")" + "goto Loop" + labelCounter + ";\n" + "else" + labelCounter + ":\n"
         labelCounter++;
         return new OllirData(return_type, ollir_code);
@@ -283,14 +292,22 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         OllirData identifierData = visit(identifierNode, methodId);
         return_type = identifierData.getReturnVar();
 
+        ollir_code += identifierData.getOllirCode();
+
         OllirData data = visit(valueNode, methodId);
         if (data.getOllirCode().equals("")) {
             //For things like integers or identifiers (a = 2; a = b)
             if (valueNode.getOptional("type").isPresent()) {
+                //TODO: Is this a class field?
+                /*if(identifierNode.getOptional("putfield_required").isPresent()){
+                    if(identifierNode.get("putfield_required").equals("true")){
+                        ollir_code += "putfield(this, " + identifierNode.get("name") + "." + getVarOllirType(valueNode) + ", " + data.getReturnVar() + ")." + getVarOllirType(valueNode) + ";\n";
+                    }
+                }*/
                 ollir_code += identifierData.getReturnVar() + " :=." + getVarOllirType(valueNode) + " " + data.getReturnVar() + ";\n";
             }
-            else {
-                //???
+            else{
+                // ????
             }
         }
         else {
@@ -523,7 +540,20 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
     private OllirData generateIdentifier(JmmNode jmmNode, String s) {
         String return_type = getVarOllirType(jmmNode);
-        return new OllirData(jmmNode.get("name") + "." + return_type, "");
+        OllirData fieldData = getOrPutFieldCode(jmmNode, s, return_type);
+
+        //Not a class field
+        if(fieldData == null){
+            return new OllirData(jmmNode.get("name") + "." + return_type, "");
+        }
+        else if(fieldData.getOllirCode().equals("")){
+            //putfield
+            jmmNode.put("putfield_required", "true");
+            return new OllirData(jmmNode.get("name") + "." + return_type, "");
+        }
+        else{
+            return fieldData;
+        }
     }
 
     public OllirData defaultVisit(JmmNode node, String data) {
@@ -886,6 +916,9 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         else if (name.equals("void")) {
             ollirType = "V";
         }
+        else if (name.equals("boolean")) {
+            ollirType = "bool";
+        }
         else {
             ollirType = name;
         }
@@ -893,5 +926,55 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         return (type.isArray() ? "array." : "") + ollirType;
     }
 
+    private OllirData getOrPutFieldCode(JmmNode identifierNode, String methodId, String varType){
+        String varName = identifierNode.get("name");
+        String getOrPutFieldString = "";
+        String return_var = "";
+
+        //Is it a class field?
+        if(NodeFindingMethods.isClassField(symbolTable.getMethod(methodId), symbolTable, varName)){
+            if(isSet(identifierNode)){
+                //putfield can't be done here since it requires things to be placed after operations
+                // eg: a = 2 + 2            aux1 = 2 + 2; putfield(a)
+                return new OllirData("", "");
+            }
+            else{
+                //getfield
+                String auxVarName = "aux" + localVariableCounter++ + "." + varType;
+                getOrPutFieldString = auxVarName + " :=." + varType + " getfield(this, " + varName + "." + varType + ")." + varType + ";\n";
+                return_var = auxVarName;
+                return new OllirData(return_var, getOrPutFieldString);
+            }
+        }
+
+        return null;
+    }
+
+    private boolean isSet(JmmNode node){
+        if(node.getParent().getKind().equals("Assignment")){
+            if(node == node.getParent().getChildren().get(0)) {
+                return true;
+            }
+        }
+        else if(node.getParent().getKind().equals("Index")){
+            if(node.getParent() == node.getParent().getParent().getChildren().get(0)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isLastThingInMain(JmmNode ifNode){
+        if(ifNode.getParent().getKind().equals("MethodBody")){
+            if(ifNode.getParent().getParent().getOptional("name").isPresent()) {
+                if (ifNode.getParent().getParent().get("name").equals("main")) {
+                    if (ifNode.getParent().getChildren().get(ifNode.getParent().getChildren().size() - 1) == ifNode) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
 }
