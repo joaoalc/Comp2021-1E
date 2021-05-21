@@ -157,12 +157,12 @@ void MethodDeclaration() #MethodDeclaration : {Token t; Token type; Token ident;
     <PUBLIC>
     (
         (
-            <STATIC> <VOID> { jjtThis.put("name", "void"); jjtThis.put("is_array", "false");} #Type t=<MAIN> { jjtThis.put("name", t.image); }
+            <STATIC> {jjtThis.put("is_static", "true");} <VOID> { jjtThis.put("type", "void"); jjtThis.put("is_array", "false"); jjtThis.put("name", "void"); } #Type t=<MAIN> { jjtThis.put("name", t.image); }
             <LEFT_PARENTHESES> StringArrayType() <RIGHT_PARENTHESES> <LEFT_BRACE>
             MethodBody() #MethodBody
         ) |
         (
-            Type() t=<IDENTIFIER> { jjtThis.put("name", t.image); } <LEFT_PARENTHESES>
+            {jjtThis.put("is_static", "false");} Type() t=<IDENTIFIER> { jjtThis.put("name", t.image); } <LEFT_PARENTHESES>
             [ Argument() ("," Argument()  )* ]
             <RIGHT_PARENTHESES> <LEFT_BRACE>
             MethodBody() #MethodBody
@@ -188,7 +188,7 @@ void Type() #Type : {Token t;} {
 }
 
 void StringArrayType() #Argument : {Token t; Token ident;}{
-    t=<STRING> {jjtThis.put("name", "String"); jjtThis.put("type", "String"); jjtThis.put("is_array", "true"); } #Type <LEFT_BRACKET> <RIGHT_BRACKET> ident=<IDENTIFIER> { jjtThis.put("name", ident.image); }
+    t=<STRING> {jjtThis.put("name", "String"); jjtThis.put("is_array", "true"); } #Type <LEFT_BRACKET> <RIGHT_BRACKET> ident=<IDENTIFIER> { jjtThis.put("name", ident.image); }
 }
 
 void Statement() #void : {} {
@@ -201,9 +201,9 @@ void Statement() #void : {} {
 
 void IfStatement() #IfStatement : {} {
     <IF> <LEFT_PARENTHESES> Expression() <RIGHT_PARENTHESES>
-        Statement()
+        Statement() #Statement1
     <ELSE>
-        Statement()
+        Statement() #Statement2
 }
 
 void Assignment() #Assignment : { Token t; } {
