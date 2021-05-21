@@ -710,8 +710,13 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                 else{
                     //Calling a superclass' method (arguments' ollir code is already written)
                     String type = getFunctionTypeIfNonExistant(node);
-                    return_var = "aux_" + localVariableCounter++ + "." + type;
-                    ollir_code += return_var + " :=." + type + " invokevirtual(this, \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
+                    if(!type.equals("V")) {
+                        return_var = getVarAssignmentName(node) + "." + type;
+                        ollir_code += return_var + " :=." + type + " invokevirtual(this, \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
+                    }
+                    else{
+                        ollir_code += "invokevirtual(this, \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
+                    }
                 }
 
 
@@ -807,12 +812,13 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         else if(parent_node.getKind().equals("Add") || parent_node.getKind().equals("Sub") || parent_node.getKind().equals("Mult") || parent_node.getKind().equals("Div") || parent_node.getKind().equals("LessThan")){
             type = "i32";
         }
-        else if(parent_node.getKind().equals("And") || parent_node.getKind().equals("Negate") || parent_node.getKind().equals("IfStatements")){
+        else if(parent_node.getKind().equals("And") || parent_node.getKind().equals("Negate") || parent_node.getKind().equals("IfStatement")){
             type = "bool";
         }
         else {
             System.out.println("TODO: Determine type");
-            type = "i32";
+            System.out.println(parent_node.getKind());
+            type = "V";
         }
         return type;
     }
