@@ -27,8 +27,7 @@ import pt.up.fe.comp.jmm.report.Stage;
  */
 
 public class BackendStage implements JasminBackend {
-    int registCount = 1;
-    int labelCount = 1;
+    private int registCount = 1, labelCount = 1, stackCount = 0, maxStackCount = 0;
     String className;
     String superClassName;
     HashMap<String, Integer> variablesRegists = new HashMap<>();
@@ -78,7 +77,10 @@ public class BackendStage implements JasminBackend {
             for (Method method : ollirClass.getMethods()) {
                 jasminCode += generateMethod(method);
 
-                registCount = 1; // Reset regist count
+                // Reset counts
+                registCount = 1;
+                stackCount = 0;
+                maxStackCount = 0;
             }
 
             // More reports from this stage
@@ -104,6 +106,21 @@ public class BackendStage implements JasminBackend {
                 )
             );
         }
+    }
+
+    private void incrementStack() {
+        stackCount++;
+
+        if (stackCount > maxStackCount)
+            maxStackCount = stackCount;
+    }
+
+    private void decrementStack() {
+        stackCount--;
+    }
+
+    private void decrementStack(int value) {
+        stackCount -= value;
     }
 
     private String acessModifierToString(AccessModifiers accessModifier) {
@@ -228,8 +245,10 @@ public class BackendStage implements JasminBackend {
         for (Element operand : method.getParams())
             variablesRegists.put(((Operand) operand).getName(), registCount++);
 
-        if (method.isConstructMethod())
+        if (method.isConstructMethod()) {
             code += "\taload_0\n";
+            incrementStack();
+        }
 
         // Iterate over method's instructions
         for (Instruction instruction : method.getInstructions()) {
@@ -245,7 +264,7 @@ public class BackendStage implements JasminBackend {
 
         code += ".end method\n\n";
 
-        String stackLimit = String.format("\t.limit stack 99\n");
+        String stackLimit = String.format("\t.limit stack %d\n", maxStackCount);
         String localsLimit = String.format("\t.limit locals %d\n\n", registCount);
 
         code = header + stackLimit + localsLimit + code;
@@ -304,8 +323,11 @@ public class BackendStage implements JasminBackend {
     }
 
     private String generate(CallInstruction instruction) {
-        if (instruction.getInvocationType() == CallType.ldc)
+        if (instruction.getInvocationType() == CallType.ldc) {
+            incrementStack();
+
             return String.format("\tldc %s\n", ((LiteralElement) instruction.getFirstArg()).getLiteral());
+        }
 
         String code = "";
 
@@ -324,6 +346,7 @@ public class BackendStage implements JasminBackend {
             int regist = variablesRegists.getOrDefault(firstArg.getName(), 0);
 
             code += String.format("\taload %d\n", regist);
+            incrementStack();
         }
 
         // Method name
@@ -364,16 +387,16 @@ public class BackendStage implements JasminBackend {
 
         // If is constructor
         if (invocationType.equals("new")) {
-            if (className.equals("array")) {
+            if (className.equals("array"))
                 code += String.format("\t%s%s int\n", invocationType, className);
-            }
 
             else {
                 code += String.format("\t%s %s\n", invocationType, className);
                 code += "\tdup\n";
+                incrementStack();
             }
 
-
+            incrementStack();
         }
 
         else {
@@ -383,6 +406,9 @@ public class BackendStage implements JasminBackend {
             String descriptor = generateMethodDescriptor(instruction.getListOfOperands(), returnType, methodName);
 
             code += String.format("\t%s %s/%s%s\n", invocationType, className, methodName, descriptor);
+
+            if (returnType.getTypeOfElement() == ElementType.VOID)
+                decrementStack();
         }
 
         return code;
@@ -398,8 +424,10 @@ public class BackendStage implements JasminBackend {
         ElementType operandType = operand.getType().getTypeOfElement();
 
         // Literal
-        if (operand.isLiteral())
+        if (operand.isLiteral()) {
             code += "ldc " + ((LiteralElement) operand).getLiteral();
+            incrementStack();
+        }
 
         // Array
         else if (operand instanceof ArrayOperand) {
@@ -408,12 +436,14 @@ public class BackendStage implements JasminBackend {
 
             // Load array reference
             code += String.format("aload %s\n", regist);
+            incrementStack();
 
             // Iterate over index operands
             for (Element indexOperand : arrayOperand.getIndexOperands())
                 code += generate(new SingleOpInstruction(indexOperand));
 
             code += "\tiaload";
+            incrementStack();
         }
 
         // Operand
@@ -425,6 +455,7 @@ public class BackendStage implements JasminBackend {
                 loadType = "a";
 
             code += loadType + "load " + regist;
+            incrementStack();
         }
 
         code += "\n";
@@ -467,24 +498,33 @@ public class BackendStage implements JasminBackend {
 
         // Store instruction
         if (instruction.getDest() instanceof ArrayOperand) {
+            int stackSize = 2;
+
             ArrayOperand arrayOperand = (ArrayOperand) instruction.getDest();
 
             // Load array reference
             code = String.format("\taload %s\n", regist);
+            incrementStack();
 
             // Iterate over index operands
-            for (Element indexOperand : arrayOperand.getIndexOperands())
+            for (Element indexOperand : arrayOperand.getIndexOperands()) {
                 code += generate(new SingleOpInstruction(indexOperand));
+                stackSize++;
+            }
 
             // Load value
             code += generate(instruction.getRhs());
 
             // Store value in array
             code += "\tiastore\n";
+
+            decrementStack(stackSize);
         }
 
-        else
+        else {
             code += "\t" + assignTypeString + "store " + regist + "\n";
+            decrementStack();
+        }
 
         // Update variable table with correspondent regist
         variablesRegists.put(((Operand) instruction.getDest()).getName(), regist);
@@ -531,6 +571,7 @@ public class BackendStage implements JasminBackend {
 
     private String generate(GetFieldInstruction instruction) {
         String code = "\taload_0\n";
+        incrementStack();
 
         String className = elementToString(instruction.getFirstOperand());
 
@@ -547,6 +588,7 @@ public class BackendStage implements JasminBackend {
 
     private String generate(PutFieldInstruction instruction) {
         String code = "\taload_0\n";
+        incrementStack();
 
         code += generate(new SingleOpInstruction(instruction.getThirdOperand()));
 
@@ -587,6 +629,8 @@ public class BackendStage implements JasminBackend {
 
         code += "\t" + opType + "\n"; // Operation code
         code += "\n";
+
+        decrementStack();
 
         return code;
     }
