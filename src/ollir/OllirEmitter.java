@@ -848,8 +848,11 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
     public String getVarAssignmentName(JmmNode jmmNode) {
         JmmNode parent_node = jmmNode.getParent();
         String name = "";
-        if (parent_node.getKind().equals("Assignment")) {
-            JmmNode identifier_node = parent_node.getChildren().get(0); // TODO: This will probably not work with an indice, in that case we would have to check it's child for the name
+        if(parent_node.getChildren().get(0).getKind().equals("Index")){
+            name = "aux" + localVariableCounter++;
+        }
+        else if (parent_node.getKind().equals("Assignment")) {
+            JmmNode identifier_node = parent_node.getChildren().get(0);
             name = identifier_node.get("name");
         }
         else {
