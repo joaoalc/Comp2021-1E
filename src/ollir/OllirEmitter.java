@@ -721,7 +721,6 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                     ValueSymbol symbol = NodeFindingMethods.getVariable(symbolTable.getMethod(methodId), symbolTable, identifier_name);
                     if (symbol == null) {
                         //Import
-                        //ollir_code += "invokestatic(" + identifier_name + "." + symbolTable.getClassName() + "," + function_name + ").V;";
                         String type = getFunctionTypeIfNonExistant(node);
                         return_var = "aux_" + localVariableCounter++ + "." + type;
                         ollir_code += return_var + " :=." + type + " invokestatic(" + identifier_name + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ").V;";
