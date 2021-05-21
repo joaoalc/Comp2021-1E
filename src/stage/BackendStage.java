@@ -28,6 +28,7 @@ import pt.up.fe.comp.jmm.report.Stage;
 
 public class BackendStage implements JasminBackend {
     int registCount = 1;
+    int labelCount = 1;
     String className;
     String superClassName;
     HashMap<String, Integer> variablesRegists = new HashMap<>();
@@ -128,6 +129,7 @@ public class BackendStage implements JasminBackend {
             case VOID:
                 return "V";
 
+            case BOOLEAN:
             case INT32:
                 return "I";
 
@@ -150,6 +152,33 @@ public class BackendStage implements JasminBackend {
 
         else
             return ((Operand) element).getName();
+    }
+
+    private String opTypeToString(OperationType opType) {
+        switch (opType) {
+            case EQ:
+                return "if_icmpeq";
+            case EQI32:
+                return "ifeq";
+            case NEQ:
+                return "if_icmpne";
+            case NEQI32:
+                return "ifneq";
+            case LTH:
+                return "if_icmplt";
+            case LTE:
+                return "if_icmple";
+            case GTH:
+                return "if_icmpgt";
+            case GTE:
+                return "if_icmpge";
+            case ANDB:
+                return "iand";
+            case ORB:
+                return "ior";
+            default:
+                return "i" + opType.toString().toLowerCase();
+        }
     }
 
     private String generateField(Field field) {
@@ -238,7 +267,7 @@ public class BackendStage implements JasminBackend {
         descriptor += ")" + elementTypeToString(returnType.getTypeOfElement());
 
         if (returnType.getTypeOfElement() == ElementType.ARRAYREF)
-            descriptor += "I";
+            descriptor += "I"; // Only integer arrays are allowed
 
         return descriptor;
     }
@@ -368,7 +397,7 @@ public class BackendStage implements JasminBackend {
         if (operand.isLiteral())
             code += "ldc " + ((LiteralElement) operand).getLiteral();
 
-        // Array
+            // Array
         else if (operand instanceof ArrayOperand) {
             ArrayOperand arrayOperand = (ArrayOperand) operand;
             int regist = variablesRegists.get(arrayOperand.getName());
@@ -380,7 +409,7 @@ public class BackendStage implements JasminBackend {
             for (Element indexOperand : arrayOperand.getIndexOperands())
                 code += generate(new SingleOpInstruction(indexOperand));
 
-            code += "iaload";
+            code += "\tiaload";
         }
 
         // Operand
@@ -409,6 +438,26 @@ public class BackendStage implements JasminBackend {
         if (assignType == ElementType.STRING || assignType == ElementType.ARRAYREF)
             assignTypeString = "a";
 
+            // Boolean assignment using binary logic operation
+        else if (assignType == ElementType.BOOLEAN && instruction.getRhs().getInstType() == InstructionType.BINARYOPER) {
+            BinaryOpInstruction rhs = (BinaryOpInstruction) instruction.getRhs();
+
+            code = generate(new CondBranchInstruction(
+                rhs.getLeftOperand(),
+                rhs.getRightOperand(),
+                rhs.getUnaryOperation(),
+                String.format(" Comparison_%d", labelCount)
+            ));
+
+            code += "\ticonst_1\n"; // True
+            code += String.format("\tgoto Assign_%d\n", labelCount);
+            code += String.format("Comparison_%d:\n", labelCount);
+            code += "\ticonst_0\n"; // False
+            code += String.format("Assign_%d:\n", labelCount);
+
+            labelCount++;
+        }
+
         // Get variable's correspondent regist number
         int regist = variablesRegists.getOrDefault(((Operand) instruction.getDest()).getName(), registCount++);
 
@@ -427,32 +476,14 @@ public class BackendStage implements JasminBackend {
         code += generate(new SingleOpInstruction(instruction.getLeftOperand()));
         code += generate(new SingleOpInstruction(instruction.getRightOperand()));
 
-        String opType;
+        OperationType opType = instruction.getCondOperation().getOpType();
 
-        switch (instruction.getCondOperation().getOpType()) {
-            case EQ:
-                opType = "eq";
-                break;
-            case NEQ:
-                opType = "ne";
-                break;
-            case LTH:
-                opType = "lt";
-                break;
-            case LTE:
-                opType = "le";
-                break;
-            case GTH:
-                opType = "gt";
-                break;
-            case GTE:
-                opType = "ge";
-                break;
-            default:
-                opType = instruction.getCondOperation().getOpType().toString().toLowerCase();
+        if (opType == OperationType.ANDB || opType == OperationType.ORB) {
+            code += String.format("\t%s\n", opTypeToString(opType));
+            opType = OperationType.EQI32;
         }
 
-        code += String.format("\tif_icmp%s %s\n", opType, instruction.getLabel());
+        code += String.format("\t%s %s\n", opTypeToString(opType), instruction.getLabel());
 
         return code;
     }
@@ -512,12 +543,12 @@ public class BackendStage implements JasminBackend {
     }
 
     private String generate(UnaryOpInstruction instruction) {
-        OperationType opType = instruction.getUnaryOperation().getOpType();
+        String opType = opTypeToString(instruction.getUnaryOperation().getOpType());
         String elementType = elementTypeToString(instruction.getRightOperand().getType().getTypeOfElement());
 
         String code = "\t" + elementType;
 
-        code += "\t" + elementType + opType.toString().toLowerCase() + "\n"; // Operation code
+        code += "\t" + elementType + opType + "\n"; // Operation code
 
         return code;
     }
@@ -525,15 +556,14 @@ public class BackendStage implements JasminBackend {
     private String generate(BinaryOpInstruction instruction) {
         String code = "";
 
-        OperationType opType = instruction.getUnaryOperation().getOpType();
+        String opType = opTypeToString(instruction.getUnaryOperation().getOpType());
         Element leftOperand = instruction.getLeftOperand();
         Element rightOperand = instruction.getRightOperand();
-        String elementType = elementTypeToString(leftOperand.getType().getTypeOfElement()).toLowerCase();
 
         code += generate(new SingleOpInstruction(leftOperand));
         code += generate(new SingleOpInstruction(rightOperand));
 
-        code += "\t" + elementType + opType.toString().toLowerCase() + "\n"; // Operation code
+        code += "\t" + opType + "\n"; // Operation code
         code += "\n";
 
         return code;
