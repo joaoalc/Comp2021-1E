@@ -218,8 +218,8 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         ollir_code += "Loop" + labelCounter + ":\n";
 
         JmmNode conditionNode = node.getChildren().get(0);
-        JmmNode trueNode = node.getChildren().get(1);
-        String trueString = visit(trueNode, s).getOllirCode();
+        //JmmNode trueNode = node.getChildren().get(1);
+        //String trueString = visit(trueNode, s).getOllirCode();
 
         String conditionString = "";
 
@@ -270,7 +270,15 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         ollir_code += "if(" + conditionString + ")" + "goto Body" + labelCounter + ";\n";
         ollir_code += "goto EndLoop" + labelCounter + ";\n";
-        ollir_code += "Body" + labelCounter + ": " + trueString;
+        ollir_code += "Body" + labelCounter + ": "; //+ trueString;
+        for(int i = 1; i < node.getChildren().size(); i++){
+            JmmNode trueNode = node.getChildren().get(i);
+            String trueString = visit(trueNode, s).getOllirCode();
+            ollir_code += trueString;
+        }
+        //JmmNode trueNode = node.getChildren().get(1);
+        //String trueString = visit(trueNode, s).getOllirCode();
+
         ollir_code += "goto Loop" + labelCounter + ";\n";
         ollir_code += "EndLoop" + labelCounter + ":\n";
 
@@ -723,13 +731,13 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                 else if (child.getKind().equals("True") || child.getKind().equals("False")) {
                     types.add(new ValueSymbol(new Type("boolean", false), "", true));
                 }
+                else if(child.getOptional("type").isPresent()){
+                    ollir_code += childData.getOllirCode();
+                    types.add(new ValueSymbol(new Type(child.get("type"), Boolean.parseBoolean(child.get("is_array"))), "", true));
+                }
                 else if (child.getOptional("name").isPresent()) {
                     //TODO: Add value or operation possibility to this
                     types.add(NodeFindingMethods.getVariable(symbolTable.getMethod(methodId), symbolTable, child.get("name")));
-                }
-                else {
-                    ollir_code += childData.getOllirCode();
-                    types.add(new ValueSymbol(new Type(child.get("type"), Boolean.parseBoolean(child.get("is_array"))), "", true));
                 }
             }
 
