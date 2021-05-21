@@ -157,12 +157,12 @@ void MethodDeclaration() #MethodDeclaration : {Token t; Token type; Token ident;
     <PUBLIC>
     (
         (
-            <STATIC> {jjtThis.put("is_static", true);} <VOID> { jjtThis.put("type", "void"); jjtThis.put("is_array", "false");} #Type t=<MAIN> { jjtThis.put("name", t.image); }
+            <STATIC> {jjtThis.put("is_static", "true");} <VOID> { jjtThis.put("type", "void"); jjtThis.put("is_array", "false"); jjtThis.put("name", "void"); } #Type t=<MAIN> { jjtThis.put("name", t.image); }
             <LEFT_PARENTHESES> StringArrayType() <RIGHT_PARENTHESES> <LEFT_BRACE>
             MethodBody() #MethodBody
         ) |
         (
-            {jjtThis.put("is_static", false);} Type() t=<IDENTIFIER> { jjtThis.put("name", t.image); } <LEFT_PARENTHESES>
+            {jjtThis.put("is_static", "false");} Type() t=<IDENTIFIER> { jjtThis.put("name", t.image); } <LEFT_PARENTHESES>
             [ Argument() ("," Argument()  )* ]
             <RIGHT_PARENTHESES> <LEFT_BRACE>
             MethodBody() #MethodBody
