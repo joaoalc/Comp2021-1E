@@ -68,6 +68,12 @@ public class ParserTests {
         sucessfullTest("WhileAndIF.jmm");
     }
 
+    @Test
+    public void IFTest() {
+        sucessfullTest("If.jmm");
+    }
+
+
     // Fail Tests
 
     @Test

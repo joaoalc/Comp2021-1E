@@ -1,0 +1,13 @@
+class HelloWorld {
+    public static void main(String[] args) {
+        boolean a;
+        a = true;
+        if(a){
+            a = false;
+        }
+        else{
+            a = true;
+        }
+        a = true;
+    }
+}
