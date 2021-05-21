@@ -345,7 +345,12 @@ public class BackendStage implements JasminBackend {
         if (instruction.getInvocationType() == CallType.invokevirtual) {
             int regist = variablesRegists.getOrDefault(firstArg.getName(), 0);
 
-            code += String.format("\taload %d\n", regist);
+            if (regist < 4)
+                code += String.format("\taload_%d\n", regist);
+
+            else
+                code += String.format("\taload %d\n", regist);
+
             incrementStack();
         }
 
@@ -425,7 +430,30 @@ public class BackendStage implements JasminBackend {
 
         // Literal
         if (operand.isLiteral()) {
-            code += "ldc " + ((LiteralElement) operand).getLiteral();
+            String value = ((LiteralElement) operand).getLiteral();
+
+            if (value.matches("-?\\d+")) {
+                int integerValue = Integer.parseInt(value);
+
+                if (integerValue == -1)
+                    code += "iconst_m1";
+
+                else if (integerValue >= 0 && integerValue <= 5)
+                    code += "iconst_" + value;
+
+                else if (integerValue >= -128 && integerValue <= 127)
+                    code += "bipush " + value;
+
+                else if (integerValue >= -32768 && integerValue <= 32767)
+                    code += "sipush " + value;
+
+                else
+                    code += "ldc " + value;
+            }
+
+            else
+                code += "ldc " + value;
+
             incrementStack();
         }
 
@@ -435,7 +463,12 @@ public class BackendStage implements JasminBackend {
             int regist = variablesRegists.get(arrayOperand.getName());
 
             // Load array reference
-            code += String.format("aload %s\n", regist);
+            if (regist < 4)
+                code += String.format("aload_%s\n", regist);
+
+            else
+                code += String.format("aload %s\n", regist);
+
             incrementStack();
 
             // Iterate over index operands
@@ -454,7 +487,12 @@ public class BackendStage implements JasminBackend {
             if (operandType == ElementType.STRING || operandType == ElementType.ARRAYREF)
                 loadType = "a";
 
-            code += loadType + "load " + regist;
+            if (regist < 4)
+                code += loadType + "load_" + regist;
+
+            else
+                code += loadType + "load " + regist;
+
             incrementStack();
         }
 
@@ -503,7 +541,12 @@ public class BackendStage implements JasminBackend {
             ArrayOperand arrayOperand = (ArrayOperand) instruction.getDest();
 
             // Load array reference
-            code = String.format("\taload %s\n", regist);
+            if (regist < 4)
+                code = String.format("\taload_%s\n", regist);
+
+            else
+                code = String.format("\taload %s\n", regist);
+
             incrementStack();
 
             // Iterate over index operands
@@ -522,7 +565,12 @@ public class BackendStage implements JasminBackend {
         }
 
         else {
-            code += "\t" + assignTypeString + "store " + regist + "\n";
+            if (regist < 4)
+                code += "\t" + assignTypeString + "store_" + regist + "\n";
+
+            else
+                code += "\t" + assignTypeString + "store " + regist + "\n";
+
             decrementStack();
         }
 
