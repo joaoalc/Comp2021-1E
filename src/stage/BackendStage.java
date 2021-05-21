@@ -397,7 +397,7 @@ public class BackendStage implements JasminBackend {
         if (operand.isLiteral())
             code += "ldc " + ((LiteralElement) operand).getLiteral();
 
-            // Array
+        // Array
         else if (operand instanceof ArrayOperand) {
             ArrayOperand arrayOperand = (ArrayOperand) operand;
             int regist = variablesRegists.get(arrayOperand.getName());
@@ -462,7 +462,25 @@ public class BackendStage implements JasminBackend {
         int regist = variablesRegists.getOrDefault(((Operand) instruction.getDest()).getName(), registCount++);
 
         // Store instruction
-        code += "\t" + assignTypeString + "store " + regist + "\n";
+        if (instruction.getDest() instanceof ArrayOperand) {
+            ArrayOperand arrayOperand = (ArrayOperand) instruction.getDest();
+
+            // Load array reference
+            code = String.format("\taload %s\n", regist);
+
+            // Iterate over index operands
+            for (Element indexOperand : arrayOperand.getIndexOperands())
+                code += generate(new SingleOpInstruction(indexOperand));
+
+            // Load value
+            code += generate(instruction.getRhs());
+
+            // Store value in array
+            code += "\tiastore\n";
+        }
+
+        else
+            code += "\t" + assignTypeString + "store " + regist + "\n";
 
         // Update variable table with correspondent regist
         variablesRegists.put(((Operand) instruction.getDest()).getName(), regist);
