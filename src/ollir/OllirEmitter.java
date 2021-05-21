@@ -287,6 +287,10 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         if (data.getOllirCode().equals("")) {
             //For things like integers or identifiers (a = 2; a = b)
             if (valueNode.getOptional("type").isPresent()) {
+                //Is this a class field?
+                if(identifierNode.getOptional("putfield_required").isPresent()){
+
+                }
                 ollir_code += identifierData.getReturnVar() + " :=." + getVarOllirType(valueNode) + " " + data.getReturnVar() + ";\n";
             }
             else {
@@ -523,7 +527,20 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
     private OllirData generateIdentifier(JmmNode jmmNode, String s) {
         String return_type = getVarOllirType(jmmNode);
-        return new OllirData(jmmNode.get("name") + "." + return_type, "");
+        OllirData fieldData = getOrPutFieldCode(jmmNode, s, return_type);
+
+        //Not a class field
+        if(fieldData == null){
+            return new OllirData(jmmNode.get("name") + "." + return_type, "");
+        }
+        else if(fieldData.getOllirCode().equals("")){
+            //putfield
+            jmmNode.put("putfield_required", "true");
+            return new OllirData(jmmNode.get("name") + "." + return_type, "");
+        }
+        else{
+            return fieldData;
+        }
     }
 
     public OllirData defaultVisit(JmmNode node, String data) {
@@ -893,5 +910,40 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         return (type.isArray() ? "array." : "") + ollirType;
     }
 
+    private OllirData getOrPutFieldCode(JmmNode identifierNode, String methodId, String varType){
+        String varName = identifierNode.get("name");
+        String getOrPutFieldString = "";
+        String return_var = "";
+
+        //Is it a class field?
+        if(NodeFindingMethods.isClassField(symbolTable.getMethod(methodId), symbolTable, varName)){
+            if(isSet(identifierNode)){
+                //putfield can't be done here since it requires things to be placed after operations
+                // eg: a = 2 + 2            aux1 = 2 + 2; putfield(a)
+                return new OllirData("", "");
+            }
+            else{
+                //getfield
+                String auxVarName = "aux" + localVariableCounter++ + "." + varType;
+                getOrPutFieldString = auxVarName + " :=." + varType + " getfield(this, " + varName + "." + varType + ")." + varType + ";\n";
+                return_var = auxVarName;
+                return new OllirData(return_var, getOrPutFieldString);
+            }
+        }
+
+        return null;
+    }
+
+    private boolean isSet(JmmNode node){
+        if(node.getParent().getKind().equals("Assignment")){
+            return true;
+        }
+        else if(node.getParent().getKind().equals("Index")){
+            if(node == node.getParent().getChildren().get(0)){
+                return true;
+            }
+        }
+        return false;
+    }
 
 }
