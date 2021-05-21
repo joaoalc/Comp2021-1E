@@ -772,7 +772,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         return name;
     }
 
-    private String getFunctionTypeIfNonExistant(JmmNode node){
+    private String getFunctionTypeIfNonExistant(JmmNode node) {
         JmmNode parent_node = node.getParent();
         String type = "";
         if(parent_node.getKind().equals("Assignment")){

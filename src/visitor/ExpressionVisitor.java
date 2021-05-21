@@ -505,7 +505,7 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
                     reports.add(newSemanticReport(node, ReportType.ERROR,"Cannot resolve method " + node.getChildren().get(1).get("name")));
                     report_list.add(newSemanticReport(node, ReportType.ERROR,"Cannot resolve method " + node.getChildren().get(1).get("name")));
 
-                    System.out.println("error: uninitialized variable calling method");*/
+                    System.out.println("error: uninitialized variable calling method");
                     return reports;
                 }
                 if(!ownFunction) {
