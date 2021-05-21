@@ -1,9 +1,9 @@
 import io;
 class IF {
-    int a;
     public static void main(String[] args){
+        int[] a;
         int b;
-        a = 1;
+        b = a[3];
     }
 
 }

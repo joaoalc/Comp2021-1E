@@ -103,6 +103,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         OllirData arrayData = visit(arrayNode, s);
         JmmNode indexNode = node.getChildren().get(1);
         OllirData indexData = visit(indexNode, s);
+        System.out.println("Array data: " + arrayData.getOllirCode());
         ollir_code += arrayData.getOllirCode();
         ollir_code += indexData.getOllirCode();
 
@@ -112,7 +113,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         if (parent_node.getKind().equals("Assignment")) {
             if (indexNode.getKind().equals("Integer")) {
                 ollir_code += "aux" + localVariableCounter + ".i32 :=.i32 " + indexData.getReturnVar() + ";\n";
-                return_type = "aux" + localVariableCounter++ + ".i32";
+                return_type = node.get("name") + "[" + "aux" + localVariableCounter++ + ".i32" + "]." + getOllirType(new Type(arrayNode.get("type"), false));
             }
             else {
                 return_type = node.get("name") + "[" + indexData.getReturnVar() + "]." + getOllirType(new Type(arrayNode.get("type"), false));
@@ -941,10 +942,12 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
     private boolean isSet(JmmNode node){
         if(node.getParent().getKind().equals("Assignment")){
-            return true;
+            if(node == node.getParent().getChildren().get(0)) {
+                return true;
+            }
         }
         else if(node.getParent().getKind().equals("Index")){
-            if(node == node.getParent().getChildren().get(0)){
+            if(node.getParent() == node.getParent().getParent().getChildren().get(0)){
                 return true;
             }
         }
