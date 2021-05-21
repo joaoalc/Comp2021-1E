@@ -25,7 +25,6 @@ import pt.up.fe.specs.util.SpecsStrings;
 
 import java.util.ArrayList;
 
-
 public class BackendTest {
     private void runTest(String filename, String expected) {
         JasminResult result = TestUtils.backend(SpecsIo.getResource("fixtures/" + filename));

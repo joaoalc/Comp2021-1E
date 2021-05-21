@@ -200,16 +200,16 @@ public class BackendStage implements JasminBackend {
 
     private String generateMethod(Method method) {
         variablesRegists = new HashMap<>();
-        String code = ".method ";
+        String header = ".method ";
 
         // Method access modifier
         String methodAccessModifier = acessModifierToString(method.getMethodAccessModifier());
 
         if (!methodAccessModifier.isEmpty())
-            code += methodAccessModifier + " ";
+            header += methodAccessModifier + " ";
 
         if (method.isStaticMethod())
-            code += "static ";
+            header += "static ";
 
         // Method name
         String methodName = method.getMethodName();
@@ -217,17 +217,16 @@ public class BackendStage implements JasminBackend {
         if (method.isConstructMethod())
             methodName = "<init>";
 
-        code += methodName;
+        header += methodName;
 
         // Method descriptor
-        code += generateMethodDescriptor(method.getParams(), method.getReturnType(), methodName) + "\n";
+        header += generateMethodDescriptor(method.getParams(), method.getReturnType(), methodName) + "\n";
+
+        String code = "";
 
         // Map method's parameters to regists
         for (Element operand : method.getParams())
             variablesRegists.put(((Operand) operand).getName(), registCount++);
-
-        code += "\t.limit stack 99\n";    // NOTE: Temporary for Assignment 2
-        code += "\t.limit locals 99\n\n"; // NOTE: Temporary for Assignment 2
 
         if (method.isConstructMethod())
             code += "\taload_0\n";
@@ -245,6 +244,11 @@ public class BackendStage implements JasminBackend {
             code += "\treturn\n";
 
         code += ".end method\n\n";
+
+        String stackLimit = String.format("\t.limit stack 99\n");
+        String localsLimit = String.format("\t.limit locals %d\n\n", registCount);
+
+        code = header + stackLimit + localsLimit + code;
 
         return code;
     }
