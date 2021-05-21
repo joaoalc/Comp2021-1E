@@ -3,7 +3,8 @@ class IF {
     public static void main(String[] args){
         int[] a;
         int b;
-        b = a[3];
+        a[3] = b;
+        a[b] = b;
     }
 
 }

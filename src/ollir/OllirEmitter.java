@@ -103,7 +103,6 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         OllirData arrayData = visit(arrayNode, s);
         JmmNode indexNode = node.getChildren().get(1);
         OllirData indexData = visit(indexNode, s);
-        System.out.println("Array data: " + arrayData.getOllirCode());
         ollir_code += arrayData.getOllirCode();
         ollir_code += indexData.getOllirCode();
 
@@ -120,6 +119,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             }
         }
         else {
+
             return_type = "aux" + localVariableCounter++ + ".i32";
         }
 
@@ -283,6 +283,8 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         String ollir_code = "";
         OllirData identifierData = visit(identifierNode, methodId);
         return_type = identifierData.getReturnVar();
+
+        ollir_code += identifierData.getOllirCode();
 
         OllirData data = visit(valueNode, methodId);
         if (data.getOllirCode().equals("")) {
