@@ -190,7 +190,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             case "FCall":
                 OllirData nodeFCall = visit(conditionNode, s);
                 ollir_code += nodeFCall.getOllirCode();
-                ollir_code += "aux" + localVariableCounter + ".bool" + " :-.bool" + nodeFCall.getReturnVar() + ";\n";
+                ollir_code += "aux" + localVariableCounter + ".bool" + " :=.bool " + nodeFCall.getReturnVar() + ";\n";
                 conditionString += "0.bool"  + " !.bool " + "aux" + localVariableCounter++ + ".bool";
                 break;
             default:
@@ -842,10 +842,10 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
     private String getVarOllirType(JmmNode jmmNode){
         String return_type = "";
         if (jmmNode.get("type").equals("int")) {
-            return_type += "i32";
             if (jmmNode.get("is_array").equals("true")) {
-                return_type += ".array";
+                return_type += "array.";
             }
+            return_type += "i32";
         }
         else if (jmmNode.get("type").equals("boolean")) {
             return_type += "bool";
