@@ -569,7 +569,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         ollirCode += "}";
 
-        System.out.println("Code:\n");
+        System.out.println("Full code:\n");
         System.out.println(ollirCode);
         System.out.println("End of code.");
 
@@ -722,7 +722,9 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                     if (symbol == null) {
                         //Import
                         //ollir_code += "invokestatic(" + identifier_name + "." + symbolTable.getClassName() + "," + function_name + ").V;";
-                        ollir_code += "invokestatic(" + identifier_name + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ").V;";
+                        String type = getFunctionTypeIfNonExistant(node);
+                        return_var = "aux_" + localVariableCounter++ + "." + type;
+                        ollir_code += return_var + " :=." + type + " invokestatic(" + identifier_name + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ").V;";
 
 
                     } else {
@@ -736,6 +738,17 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                         }
                         else if(symbolTable.getSuper() != null){
                             //TODO
+                            Method method = symbolTable.getMethod(function_name, types);
+                            ValueSymbol identifier = NodeFindingMethods.getVariable(symbolTable.getMethod(methodId), symbolTable, identifier_name);
+                            if(method != null){
+                                return_var = "aux_" + localVariableCounter++ + "." + getOllirType(method.getReturnType());
+                                ollir_code += return_var + ":=." + getOllirType(method.getReturnType()) + " invokevirtual(" + identifier_name + "." + getOllirType(identifier.getType()) + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + getOllirType(method.getReturnType()) + ";";
+                            }
+                            else{
+                                String type = getFunctionTypeIfNonExistant(node);
+                                return_var = "aux_" + localVariableCounter++ + "." + type;
+                                ollir_code += return_var + ":=." + type + " invokevirtual(" + identifier_name + "." + getOllirType(identifier.getType()) + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
+                            }
                         }
 
                     }
