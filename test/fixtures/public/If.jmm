@@ -1,13 +1,15 @@
-class HelloWorld {
-    public static void main(String[] args) {
-        boolean a;
-        a = true;
-        if(a){
-            a = false;
-        }
-        else{
-            a = true;
-        }
-        a = true;
+import MathUtils; //lowerLimit,upperLimit
+import Quicksort;
+
+class Lazysort extends Quicksort {
+
+    public boolean quicksort(int[] L) {
+        boolean lazy;
+        //int rand;
+        //rand = MathUtils.random(0, 5);
+        lazy = this.quicksort(L, 0, L.length - 1);
+
+        return lazy;
     }
+
 }
