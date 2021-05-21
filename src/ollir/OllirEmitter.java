@@ -727,9 +727,14 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                     if (symbol == null) {
                         //Import
                         String type = getFunctionTypeIfNonExistant(node);
-                        return_var = "aux_" + localVariableCounter++ + "." + type;
-                        ollir_code += return_var + " :=." + type + " invokestatic(" + identifier_name + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ").V;";
-
+                        if(!type.equals("V")) {
+                            return_var = "aux_" + localVariableCounter++ + "." + type;
+                            ollir_code += return_var + " :=." + type + " invokestatic(" + identifier_name + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ").V;";
+                        }
+                        else{
+                            return_var = "";
+                            ollir_code += "invokestatic(" + identifier_name + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ").V;";
+                        }
 
                     } else {
                         //Variable
@@ -750,8 +755,14 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                             }
                             else{
                                 String type = getFunctionTypeIfNonExistant(node);
-                                return_var = "aux_" + localVariableCounter++ + "." + type;
-                                ollir_code += return_var + ":=." + type + " invokevirtual(" + identifier_name + "." + getOllirType(identifier.getType()) + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
+                                if(!type.equals("V")) {
+                                    return_var = "aux_" + localVariableCounter++ + "." + type;
+                                    ollir_code += return_var + ":=." + type + " invokevirtual(" + identifier_name + "." + getOllirType(identifier.getType()) + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
+                                }
+                                else{
+                                    return_var = "";
+                                    ollir_code += "invokevirtual(" + identifier_name + "." + getOllirType(identifier.getType()) + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
+                                }
                             }
                         }
 
@@ -759,11 +770,16 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                 }
                 else{
                     //This happens when an object is created and one of it's functions are immediately called. Eg: pi_estimate_times_100 = new MonteCarloPi().estimatePi100(num_samples); in the MonteCarloPi test
-                    //TODO: Check how to do this better
-                    System.out.println("Still not done 2");
+                    //TODO: Check if it's its own class and act accordingly
                     String type = getFunctionTypeIfNonExistant(node);
-                    ollir_code += "";
-                    return_var = type + " invokevirtual(this, \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type;
+                    if(!type.equals("V")) {
+                        return_var = "aux_" + localVariableCounter++ + "." + type;
+                        ollir_code += return_var + ":=." + type + " invokevirtual(this, \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
+                    }
+                    else{
+                        return_var = "";
+                        ollir_code += "invokevirtual(this, \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
+                    }
                 }
             }
             ollir_code += "\n";

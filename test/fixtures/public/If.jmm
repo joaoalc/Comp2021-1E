@@ -5,7 +5,7 @@ class Lazysort extends Quicksort {
 
     public boolean quicksort(int[] L) {
             boolean lazy;
-            lazy = this.quicksort(L, 0, L.length - 1);
+            lazy = new Quicksort().quicksort(L, 0, L.length - 1);
             return lazy;
         }
 }
