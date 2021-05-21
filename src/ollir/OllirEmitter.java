@@ -287,14 +287,16 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         if (data.getOllirCode().equals("")) {
             //For things like integers or identifiers (a = 2; a = b)
             if (valueNode.getOptional("type").isPresent()) {
-                //Is this a class field?
-                if(identifierNode.getOptional("putfield_required").isPresent()){
-
-                }
+                //TODO: Is this a class field?
+                /*if(identifierNode.getOptional("putfield_required").isPresent()){
+                    if(identifierNode.get("putfield_required").equals("true")){
+                        ollir_code += "putfield(this, " + identifierNode.get("name") + "." + getVarOllirType(valueNode) + ", " + data.getReturnVar() + ")." + getVarOllirType(valueNode) + ";\n";
+                    }
+                }*/
                 ollir_code += identifierData.getReturnVar() + " :=." + getVarOllirType(valueNode) + " " + data.getReturnVar() + ";\n";
             }
-            else {
-                //???
+            else{
+                // ????
             }
         }
         else {
@@ -902,6 +904,9 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         }
         else if (name.equals("void")) {
             ollirType = "V";
+        }
+        else if (name.equals("boolean")) {
+            ollirType = "bool";
         }
         else {
             ollirType = name;

@@ -3,7 +3,7 @@ class IF {
     int a;
     public static void main(String[] args){
         int b;
-        b = a + 1;
+        a = 1;
     }
 
 }
