@@ -18,12 +18,8 @@ import org.junit.Test;
 
 import pt.up.fe.comp.TestUtils;
 import pt.up.fe.comp.jmm.jasmin.JasminResult;
-import pt.up.fe.comp.jmm.ollir.OllirResult;
-import pt.up.fe.comp.jmm.ollir.OllirUtils;
 import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsStrings;
-
-import java.util.ArrayList;
 
 public class BackendTest {
     private void runTest(String filename, String expected) {
@@ -37,8 +33,23 @@ public class BackendTest {
     }
 
     @Test
+    public void FindMaximum() {
+        runTest("public/FindMaximum.jmm", "");
+    }
+
+    @Test
     public void HelloWorldTest() {
         runTest("public/HelloWorld.jmm", "Hello, World!");
+    }
+
+    @Test
+    public void IfTest() {
+        runTest("public/If.jmm", "");
+    }
+
+    @Test
+    public void LazysortTest() {
+        runTest("public/Lazysort.jmm", "");
     }
 
     @Test
@@ -46,75 +57,5 @@ public class BackendTest {
         runTest("public/Simple.jmm", "30");
     }
 
-    @Test
-    public void Fac() {
-        OllirResult ollirResult = new OllirResult(
-            OllirUtils.parse(SpecsIo.getResource("fixtures/public/ollir/Fac.ollir")),
-            null,
-            new ArrayList<>()
-        );
 
-        JasminResult result = TestUtils.backend(ollirResult);
-        TestUtils.noErrors(result.getReports());
-
-        String output = result.run();
-        assertEquals("3628800", output.trim());
-    }
-
-    @Test
-    public void MyClass1() {
-        OllirResult ollirResult = new OllirResult(
-            OllirUtils.parse(SpecsIo.getResource("fixtures/public/ollir/myclass1.ollir")),
-            null,
-            new ArrayList<>()
-        );
-
-        JasminResult result = TestUtils.backend(ollirResult);
-        TestUtils.noErrors(result.getReports());
-
-        result.run();
-    }
-
-    @Test
-    public void MyClass2() {
-        OllirResult ollirResult = new OllirResult(
-            OllirUtils.parse(SpecsIo.getResource("fixtures/public/ollir/myclass2.ollir")),
-            null,
-            new ArrayList<>()
-        );
-
-        JasminResult result = TestUtils.backend(ollirResult);
-        TestUtils.noErrors(result.getReports());
-
-        result.run();
-    }
-
-    @Test
-    public void MyClass3() {
-        OllirResult ollirResult = new OllirResult(
-            OllirUtils.parse(SpecsIo.getResource("fixtures/public/ollir/myclass3.ollir")),
-            null,
-            new ArrayList<>()
-        );
-
-        JasminResult result = TestUtils.backend(ollirResult);
-        TestUtils.noErrors(result.getReports());
-
-        String output = SpecsStrings.normalizeFileContents(result.run());
-        assertEquals(SpecsStrings.normalizeFileContents("val = 2\nval = 0\nval = 2"), output.trim());
-    }
-
-    @Test
-    public void MyClass4() {
-        OllirResult ollirResult = new OllirResult(
-            OllirUtils.parse(SpecsIo.getResource("fixtures/public/ollir/myclass4.ollir")),
-            null,
-            new ArrayList<>()
-        );
-
-        JasminResult result = TestUtils.backend(ollirResult);
-        TestUtils.noErrors(result.getReports());
-
-        result.run();
-    }
 }

@@ -57,7 +57,6 @@ public class OptimizeTest {
         System.out.println(result.getReports().toString());
     }
 
-
     @Test
     public void LazysortTest() {
 
@@ -69,7 +68,6 @@ public class OptimizeTest {
 
     @Test
     public void LifeTest() {
-
         var result = TestUtils.optimize(SpecsIo.getResource("fixtures/public/Life.jmm"));
         TestUtils.noErrors(result.getReports());
 

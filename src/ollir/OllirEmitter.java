@@ -56,7 +56,6 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         addVisit("Negate", this::generateNegate); //! is a binary operator in ollir for some reason
 
 
-
         addVisit("Parentheses", this::verifyParentheses);
         addVisit("Index", this::generateIndex);
         //addVisit("FCall", this::verifyCall);
@@ -84,14 +83,14 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
     }
 
     private OllirData generateStatement1(JmmNode node, String s) {
-        if(node.getChildren().size() > 0){
+        if (node.getChildren().size() > 0) {
             return visit(node.getChildren().get(0), s);
         }
         return new OllirData("", "");
     }
 
     private OllirData generateStatement2(JmmNode node, String s) {
-        if(node.getChildren().size() > 0){
+        if (node.getChildren().size() > 0) {
             return visit(node.getChildren().get(0), s);
         }
         return new OllirData("", "");
@@ -110,8 +109,8 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         JmmNode parent_node = node.getParent();
 
         //TODO: Refactoring: Put this inside the getVarAssignmentName function, somehow
-        if(parent_node.getKind().equals("Assignment")){
-            if(indexNode.getKind().equals("Integer")){
+        if (parent_node.getKind().equals("Assignment")) {
+            if (indexNode.getKind().equals("Integer")) {
                 ollir_code += "aux" + localVariableCounter + ".i32 :=.i32 " + indexData.getReturnVar() + ";\n";
                 return_type = "aux" + localVariableCounter++ + ".i32";
             }
@@ -119,7 +118,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                 return_type = node.get("name") + "[" + indexData.getReturnVar() + "]." + getOllirType(new Type(arrayNode.get("type"), false));
             }
         }
-        else{
+        else {
             return_type = "aux" + localVariableCounter++ + ".i32";
         }
 
@@ -153,7 +152,8 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         String elseString = visit(elseNode, s).getOllirCode();
 
         String conditionString = "";
-        switch (conditionNode.getKind()){
+
+        switch (conditionNode.getKind()) {
             case "LessThan":
                 OllirData firstNodeLT = visit(conditionNode.getChildren().get(0), s);
                 OllirData secondNodeLT = visit(conditionNode.getChildren().get(1), s);
@@ -171,10 +171,10 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                 conditionString = generateOrAuxiliar(conditionNode, s, firstNegated.getReturnVar(), secondNegated.getReturnVar()).getOllirCode();
                 break;
             case "True":
-                conditionString += "0.bool"  + " !.bool " + generateTrue(conditionNode, s).getReturnVar();
+                conditionString += "0.bool" + " !.bool " + generateTrue(conditionNode, s).getReturnVar();
                 break;
             case "False":
-                conditionString += "0.bool"  + " !.bool " + generateFalse(conditionNode, s).getReturnVar();
+                conditionString += "0.bool" + " !.bool " + generateFalse(conditionNode, s).getReturnVar();
                 break;
             case "Negate":
                 OllirData nodeNegate = visit(conditionNode.getChildren().get(0), s);
@@ -185,13 +185,13 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             case "Identifier":
                 OllirData nodeIdentifier = visit(conditionNode, s);
                 ollir_code += nodeIdentifier.getOllirCode();
-                conditionString += "0.bool"  + " !.bool " + nodeIdentifier.getReturnVar();
+                conditionString += "0.bool" + " !.bool " + nodeIdentifier.getReturnVar();
                 break;
             case "FCall":
                 OllirData nodeFCall = visit(conditionNode, s);
                 ollir_code += nodeFCall.getOllirCode();
                 ollir_code += "aux" + localVariableCounter + ".bool" + " :=.bool " + nodeFCall.getReturnVar() + ";\n";
-                conditionString += "0.bool"  + " !.bool " + "aux" + localVariableCounter++ + ".bool";
+                conditionString += "0.bool" + " !.bool " + "aux" + localVariableCounter++ + ".bool";
                 break;
             default:
                 System.out.println("This condition of the if statement isn't done yet.");
@@ -199,9 +199,10 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                 break;
         }
 
-        ollir_code += "if(" + conditionString + ")" + "goto else" + labelCounter + ";\n"  + trueString + "\ngoto endif" + labelCounter + ";\n" + "else" + labelCounter + ":\n" + elseString + "endif" + labelCounter + ":\n";
+        ollir_code += "if(" + conditionString + ")" + "goto else" + labelCounter + ";\n" + trueString + "\ngoto endif" + labelCounter + ";\n" + "else" + labelCounter + ":\n" + elseString + "endif" + labelCounter + ":\n";
 
         labelCounter++;
+
         return new OllirData(return_type, ollir_code);
     }
 
@@ -216,7 +217,8 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         String trueString = visit(trueNode, s).getOllirCode();
 
         String conditionString = "";
-        switch (conditionNode.getKind()){
+
+        switch (conditionNode.getKind()) {
             case "LessThan":
                 OllirData firstNodeLT = visit(conditionNode.getChildren().get(0), s);
                 OllirData secondNodeLT = visit(conditionNode.getChildren().get(1), s);
@@ -234,10 +236,10 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                 conditionString = generateAndAuxiliar(conditionNode, s, firstNegated.getReturnVar(), secondNegated.getReturnVar()).getOllirCode();
                 break;
             case "True":
-                conditionString += "0.bool"  + " !.bool " + generateFalse(conditionNode, s).getReturnVar();
+                conditionString += "0.bool" + " !.bool " + generateFalse(conditionNode, s).getReturnVar();
                 break;
             case "False":
-                conditionString += "0.bool"  + " !.bool " + generateTrue(conditionNode, s).getReturnVar();
+                conditionString += "0.bool" + " !.bool " + generateTrue(conditionNode, s).getReturnVar();
                 break;
             case "Negate":
                 OllirData nodeNegate = visit(conditionNode.getChildren().get(0), s);
@@ -248,23 +250,25 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             case "Identifier":
                 OllirData nodeIdentifier = visit(conditionNode, s);
                 ollir_code += nodeIdentifier.getOllirCode();
-                conditionString += "1.bool"  + " &&.bool " + nodeIdentifier.getReturnVar();
+                conditionString += "1.bool" + " &&.bool " + nodeIdentifier.getReturnVar();
                 break;
             case "FCall":
                 OllirData nodeFCall = visit(conditionNode, s);
                 ollir_code += nodeFCall.getOllirCode();
                 ollir_code += "aux" + localVariableCounter + ".bool" + " :-.bool" + nodeFCall.getReturnVar() + ";\n";
-                conditionString += "1.bool"  + " &&.bool " + "aux" + localVariableCounter++ + ".bool";
+                conditionString += "1.bool" + " &&.bool " + "aux" + localVariableCounter++ + ".bool";
                 break;
             default:
                 System.out.println("This condition of the if statement isn't done yet.");
                 break;
         }
 
-        ollir_code += "if(" + conditionString + ")" + "goto Body"+ labelCounter + ";\n";
+        ollir_code += "if(" + conditionString + ")" + "goto Body" + labelCounter + ";\n";
         ollir_code += "goto EndLoop" + labelCounter + ";\n";
         ollir_code += "Body" + labelCounter + ": " + trueString;
         ollir_code += "goto Loop" + labelCounter + ";\n";
+        ollir_code += "EndLoop" + labelCounter + ":\n";
+
         //   trueString + "\nif(" + conditionString + ")" + "goto Loop" + labelCounter + ";\n" + "else" + labelCounter + ":\n"
         labelCounter++;
         return new OllirData(return_type, ollir_code);
@@ -291,7 +295,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         }
         else {
             ollir_code += data.getOllirCode();
-            if(getVarOllirType(valueNode).equals("")){
+            if (getVarOllirType(valueNode).equals("")) {
                 //TODO: This might not work properly for assignment to an index
                 ollir_code += identifierData.getReturnVar() + " :=." + getVarOllirType(identifierNode) + " " + data.getReturnVar() + ";\n";
             }
@@ -350,8 +354,8 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         String name = getVarAssignmentName(node);
         ollirCode += name + ".bool :=.bool " + "0.bool" + " !.bool " + Op.getReturnVar();
 
-        if(OllirUtils.IsEndOfLine(node)){
-            ollirCode +=  ";\n";
+        if (OllirUtils.IsEndOfLine(node)) {
+            ollirCode += ";\n";
         }
 
         return new OllirData(name + ".bool", ollirCode);
@@ -372,8 +376,8 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         String name = getVarAssignmentName(node);
         ollirCode += name + ".bool :=.bool " + firstOp.getReturnVar() + " <.i32 " + secondOp.getReturnVar();
 
-        if(OllirUtils.IsEndOfLine(node)){
-            ollirCode +=  ";\n";
+        if (OllirUtils.IsEndOfLine(node)) {
+            ollirCode += ";\n";
         }
 
         return new OllirData(name + ".bool", ollirCode);
@@ -393,8 +397,8 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         String name = getVarAssignmentName(node);
         ollirCode += name + ".i32 :=.i32 " + firstOp.getReturnVar() + " /.i32 " + secondOp.getReturnVar();
 
-        if(OllirUtils.IsEndOfLine(node)){
-            ollirCode +=  ";\n";
+        if (OllirUtils.IsEndOfLine(node)) {
+            ollirCode += ";\n";
         }
 
         return new OllirData(name + ".i32", ollirCode);
@@ -412,10 +416,10 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         ollirCode += firstOp.getOllirCode() + secondOp.getOllirCode();
 
         String name = getVarAssignmentName(node);
-        ollirCode +=  name + ".i32 :=.i32 " + firstOp.getReturnVar() + " *.i32 " + secondOp.getReturnVar();
+        ollirCode += name + ".i32 :=.i32 " + firstOp.getReturnVar() + " *.i32 " + secondOp.getReturnVar();
 
-        if(OllirUtils.IsEndOfLine(node)){
-            ollirCode +=  ";\n";
+        if (OllirUtils.IsEndOfLine(node)) {
+            ollirCode += ";\n";
         }
 
         return new OllirData(name + ".i32", ollirCode);
@@ -435,8 +439,8 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         String name = getVarAssignmentName(node);
         ollirCode += name + ".i32 :=.i32 " + firstOp.getReturnVar() + " -.i32 " + secondOp.getReturnVar();
 
-        if(OllirUtils.IsEndOfLine(node)){
-            ollirCode +=  ";\n";
+        if (OllirUtils.IsEndOfLine(node)) {
+            ollirCode += ";\n";
         }
 
         return new OllirData(name + ".i32", ollirCode);
@@ -454,10 +458,10 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         ollirCode += firstOp.getOllirCode() + secondOp.getOllirCode();
 
         String name = getVarAssignmentName(node);
-        ollirCode +=  name + ".i32" + " :=.i32 " + firstOp.getReturnVar() + " +.i32 " + secondOp.getReturnVar();
+        ollirCode += name + ".i32" + " :=.i32 " + firstOp.getReturnVar() + " +.i32 " + secondOp.getReturnVar();
 
-        if(OllirUtils.IsEndOfLine(node)){
-            ollirCode +=  ";\n";
+        if (OllirUtils.IsEndOfLine(node)) {
+            ollirCode += ";\n";
         }
 
         return new OllirData(name + ".i32", ollirCode);
@@ -477,8 +481,8 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         String name = getVarAssignmentName(node);
         ollirCode += name + ".bool :=.bool " + firstOp.getReturnVar() + " &&.bool " + secondOp.getReturnVar();
 
-        if(OllirUtils.IsEndOfLine(node)){
-            ollirCode +=  ";\n";
+        if (OllirUtils.IsEndOfLine(node)) {
+            ollirCode += ";\n";
         }
         return new OllirData(name + ".bool", ollirCode);
     }
@@ -495,8 +499,8 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         String name = getVarAssignmentName(node);
         ollirCode += name + ".bool :=.bool " + "0.bool" + " !.bool " + Op.getReturnVar();
 
-        if(OllirUtils.IsEndOfLine(node)){
-            ollirCode +=  ";\n";
+        if (OllirUtils.IsEndOfLine(node)) {
+            ollirCode += ";\n";
         }
         return new OllirData(name + ".bool", ollirCode);
     }
@@ -517,7 +521,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         return new OllirData(0 + ".bool", "");
     }
 
-    private OllirData generateIdentifier(JmmNode jmmNode, String s){
+    private OllirData generateIdentifier(JmmNode jmmNode, String s) {
         String return_type = getVarOllirType(jmmNode);
         return new OllirData(jmmNode.get("name") + "." + return_type, "");
     }
@@ -569,9 +573,9 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         ollirCode += "}";
 
-        System.out.println("Full code:\n");
+//        System.out.println("Full code:\n");
         System.out.println(ollirCode);
-        System.out.println("End of code.");
+//        System.out.println("End of code.");
 
         return new OllirData(ollirCode);
     }
@@ -629,10 +633,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         for (JmmNode child : node.getChildren()) {
             OllirData childData = visit(child, methodId);
-            if(child.getKind().equals("FCall")){
-                System.out.println("Fcall: " + child.getChildren().get(1).get("name"));
-                System.out.println("Code: " + childData.getOllirCode());
-            }
+
             ollirCode += childData.getOllirCode();
         }
 
@@ -675,7 +676,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         String function_name = function_node.get("name");
 
         String return_var = "";
-        if(!function_node.getKind().equals("Length")) {
+        if (!function_node.getKind().equals("Length")) {
             //String ollirCode = "";
             List<String> args = new ArrayList<>();
 
@@ -688,13 +689,15 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                 args.add(childData.getReturnVar());
                 if (child.getKind().equals("Integer")) {
                     types.add(new ValueSymbol(new Type("int", false), "", true));
-                } else if (child.getKind().equals("True") || child.getKind().equals("False")) {
+                }
+                else if (child.getKind().equals("True") || child.getKind().equals("False")) {
                     types.add(new ValueSymbol(new Type("boolean", false), "", true));
-                } else if (child.getOptional("name").isPresent()){
+                }
+                else if (child.getOptional("name").isPresent()) {
                     //TODO: Add value or operation possibility to this
                     types.add(NodeFindingMethods.getVariable(symbolTable.getMethod(methodId), symbolTable, child.get("name")));
                 }
-                else{
+                else {
                     ollir_code += childData.getOllirCode();
                     types.add(new ValueSymbol(new Type(child.get("type"), Boolean.parseBoolean(child.get("is_array"))), "", true));
                 }
@@ -703,40 +706,42 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
             if (identifier_node.getKind().equals("This")) {
                 Method method = symbolTable.getMethod(function_name, types);
-                if(method != null) {
+                if (method != null) {
                     return_var = "aux_" + localVariableCounter++ + "." + getOllirType(method.getReturnType());
                     ollir_code += return_var + ":=." + getOllirType(method.getReturnType()) + " invokevirtual(this, \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + getOllirType(method.getReturnType()) + ";";
                 }
-                else{
+                else {
                     //Calling a superclass' method (arguments' ollir code is already written)
                     String type = getFunctionTypeIfNonExistant(node);
-                    if(!type.equals("V")) {
+                    if (!type.equals("V")) {
                         return_var = getVarAssignmentName(node) + "." + type;
                         ollir_code += return_var + " :=." + type + " invokevirtual(this, \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
                     }
-                    else{
+                    else {
                         ollir_code += "invokevirtual(this, \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
                     }
                 }
 
 
-            } else {
-                if(identifier_node.getOptional("name").isPresent()) {
+            }
+            else {
+                if (identifier_node.getOptional("name").isPresent()) {
                     String identifier_name = identifier_node.get("name");
                     ValueSymbol symbol = NodeFindingMethods.getVariable(symbolTable.getMethod(methodId), symbolTable, identifier_name);
                     if (symbol == null) {
                         //Import
                         String type = getFunctionTypeIfNonExistant(node);
-                        if(!type.equals("V")) {
+                        if (!type.equals("V")) {
                             return_var = "aux_" + localVariableCounter++ + "." + type;
                             ollir_code += return_var + " :=." + type + " invokestatic(" + identifier_name + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ").V;";
                         }
-                        else{
+                        else {
                             return_var = "";
                             ollir_code += "invokestatic(" + identifier_name + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ").V;";
                         }
 
-                    } else {
+                    }
+                    else {
                         //Variable
                         if (symbol.getType().getName().equals(symbolTable.getClassName()) && symbolTable.getSuper() == null) {
                             Method method = symbolTable.getMethod(function_name, types);
@@ -745,21 +750,21 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                             ollir_code += return_var + ":=." + getOllirType(method.getReturnType()) + " invokevirtual(" + identifier_name + "." + getOllirType(identifier.getType()) + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + getOllirType(method.getReturnType()) + ";";
 
                         }
-                        else if(symbolTable.getSuper() != null){
+                        else if (symbolTable.getSuper() != null) {
                             //TODO
                             Method method = symbolTable.getMethod(function_name, types);
                             ValueSymbol identifier = NodeFindingMethods.getVariable(symbolTable.getMethod(methodId), symbolTable, identifier_name);
-                            if(method != null){
+                            if (method != null) {
                                 return_var = "aux_" + localVariableCounter++ + "." + getOllirType(method.getReturnType());
                                 ollir_code += return_var + ":=." + getOllirType(method.getReturnType()) + " invokevirtual(" + identifier_name + "." + getOllirType(identifier.getType()) + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + getOllirType(method.getReturnType()) + ";";
                             }
-                            else{
+                            else {
                                 String type = getFunctionTypeIfNonExistant(node);
-                                if(!type.equals("V")) {
+                                if (!type.equals("V")) {
                                     return_var = "aux_" + localVariableCounter++ + "." + type;
                                     ollir_code += return_var + ":=." + type + " invokevirtual(" + identifier_name + "." + getOllirType(identifier.getType()) + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
                                 }
-                                else{
+                                else {
                                     return_var = "";
                                     ollir_code += "invokevirtual(" + identifier_name + "." + getOllirType(identifier.getType()) + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
                                 }
@@ -768,15 +773,15 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
                     }
                 }
-                else{
+                else {
                     //This happens when an object is created and one of it's functions are immediately called. Eg: pi_estimate_times_100 = new MonteCarloPi().estimatePi100(num_samples); in the MonteCarloPi test
                     //TODO: Check if it's its own class and act accordingly
                     String type = getFunctionTypeIfNonExistant(node);
-                    if(!type.equals("V")) {
+                    if (!type.equals("V")) {
                         return_var = "aux_" + localVariableCounter++ + "." + type;
                         ollir_code += return_var + ":=." + type + " invokevirtual(this, \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
                     }
-                    else{
+                    else {
                         return_var = "";
                         ollir_code += "invokevirtual(this, \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
                     }
@@ -784,15 +789,15 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             }
             ollir_code += "\n";
         }
-        else{
+        else {
             OllirData idData = visit(identifier_node, methodId);
             ollir_code += idData.getOllirCode();
             JmmNode parent_node = node.getParent();
             //TODO: Refactoring: Put this and the index version inside the getVarAssignmentName function, somehow
-            if(parent_node.getKind().equals("Assignment")){
+            if (parent_node.getKind().equals("Assignment")) {
                 return_var = "arraylength(" + idData.getReturnVar() + ").i32";
             }
-            else{
+            else {
                 ollir_code += "aux" + localVariableCounter + ".i32 :=.i32 " + "arraylength(" + idData.getReturnVar() + ").i32" + ";\n";
                 return_var = "aux" + localVariableCounter++ + ".i32";
             }
@@ -820,26 +825,23 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         //TODO: Check if this works for array assignment
         JmmNode parent_node = node.getParent();
         String type = "";
-        if(parent_node.getKind().equals("Assignment")){
+        if (parent_node.getKind().equals("Assignment")) {
             //TODO: Implement for indices
             type = getOllirTypeNotVoid(new Type(parent_node.getChildren().get(0).get("type"), Boolean.parseBoolean(parent_node.getChildren().get(0).get("is_array"))));
-            System.out.println("type: " + type);
         }
-        else if(parent_node.getKind().equals("Add") || parent_node.getKind().equals("Sub") || parent_node.getKind().equals("Mult") || parent_node.getKind().equals("Div") || parent_node.getKind().equals("LessThan")){
+        else if (parent_node.getKind().equals("Add") || parent_node.getKind().equals("Sub") || parent_node.getKind().equals("Mult") || parent_node.getKind().equals("Div") || parent_node.getKind().equals("LessThan")) {
             type = "i32";
         }
-        else if(parent_node.getKind().equals("And") || parent_node.getKind().equals("Negate") || parent_node.getKind().equals("IfStatement")){
+        else if (parent_node.getKind().equals("And") || parent_node.getKind().equals("Negate") || parent_node.getKind().equals("IfStatement")) {
             type = "bool";
         }
         else {
-            System.out.println("TODO: Determine type");
-            System.out.println(parent_node.getKind());
             type = "V";
         }
         return type;
     }
 
-    private String getVarOllirType(JmmNode jmmNode){
+    private String getVarOllirType(JmmNode jmmNode) {
         String return_type = "";
         if (jmmNode.get("type").equals("int")) {
             if (jmmNode.get("is_array").equals("true")) {
@@ -863,9 +865,11 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         String ollirType;
         if (name.equals("int")) {
             ollirType = "i32";
-        } else if (name.equals("boolean")) {
+        }
+        else if (name.equals("boolean")) {
             ollirType = "bool";
-        } else {
+        }
+        else {
             ollirType = name;
         }
 
