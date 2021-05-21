@@ -204,6 +204,10 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         labelCounter++;
 
+        if(isLastThingInMain(node)){
+            ollir_code += "auxvar.i32 :=.i32 auxvar.i32;\n";
+        }
+
         return new OllirData(return_type, ollir_code);
     }
 
@@ -270,6 +274,10 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         ollir_code += "goto Loop" + labelCounter + ";\n";
         ollir_code += "EndLoop" + labelCounter + ":\n";
 
+
+        if(isLastThingInMain(node)){
+            ollir_code += "auxvar.i32 :=.i32 auxvar.i32;\n";
+        }
         //   trueString + "\nif(" + conditionString + ")" + "goto Loop" + labelCounter + ";\n" + "else" + labelCounter + ":\n"
         labelCounter++;
         return new OllirData(return_type, ollir_code);
@@ -951,6 +959,19 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         else if(node.getParent().getKind().equals("Index")){
             if(node.getParent() == node.getParent().getParent().getChildren().get(0)){
                 return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isLastThingInMain(JmmNode ifNode){
+        if(ifNode.getParent().getKind().equals("MethodBody")){
+            if(ifNode.getParent().getParent().getOptional("name").isPresent()) {
+                if (ifNode.getParent().getParent().get("name").equals("main")) {
+                    if (ifNode.getParent().getChildren().get(ifNode.getParent().getChildren().size() - 1) == ifNode) {
+                        return true;
+                    }
+                }
             }
         }
         return false;
