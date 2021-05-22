@@ -771,7 +771,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                         String type = getFunctionTypeIfNonExistant(node);
                         if (!type.equals("V")) {
                             return_var = "aux_" + localVariableCounter++ + "." + type;
-                            ollir_code += return_var + " :=." + type + " invokestatic(" + identifier_name + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ").V;";
+                            ollir_code += return_var + " :=." + type + " invokestatic(" + identifier_name + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
                         }
                         else {
                             return_var = "";
