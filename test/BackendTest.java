@@ -53,9 +53,32 @@ public class BackendTest {
     }
 
     @Test
+    public void LifeTest() {
+        runTest("public/Life.jmm", "");
+    }
+
+    @Test
+    public void MonteCarloPiTest() {
+        runTest("public/MonteCarloPi.jmm", "");
+    }
+
+    @Test
+    public void QuickSortTest() {
+        runTest("public/QuickSort.jmm", "1\n2\n3\n4\n5\n6\n7\n8\n9\n10");
+    }
+
+    @Test
     public void SimpleTest() {
         runTest("public/Simple.jmm", "30");
     }
 
+    @Test
+    public void TicTacToeTest() {
+        // runTest("public/TicTacToe.jmm", "");
+    }
 
+    @Test
+    public void WhileAndIf() {
+        runTest("public/WhileAndIF.jmm", "");
+    }
 }

@@ -193,6 +193,8 @@ public class BackendStage implements JasminBackend {
                 return "iand";
             case ORB:
                 return "ior";
+            case NOTB:
+                return "ineg";
             default:
                 return "i" + opType.toString().toLowerCase();
         }
@@ -588,7 +590,7 @@ public class BackendStage implements JasminBackend {
 
         OperationType opType = instruction.getCondOperation().getOpType();
 
-        if (opType == OperationType.ANDB || opType == OperationType.ORB) {
+        if (opType == OperationType.ANDB || opType == OperationType.ORB || opType == OperationType.NOTB) {
             code += String.format("\t%s\n", opTypeToString(opType));
             opType = OperationType.EQI32;
         }
