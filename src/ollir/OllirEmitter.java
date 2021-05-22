@@ -279,6 +279,9 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                 break;
         }
 
+        int auxLabel = labelCounter;
+        labelCounter++;
+
         String code_ollir = "";
         for(int i = 1; i < node.getChildren().size(); i++){
             JmmNode trueNode = node.getChildren().get(i);
@@ -286,9 +289,9 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             code_ollir += trueString;
         }
 
-        ollir_code += "if(" + conditionString + ")" + "goto Body" + labelCounter + ";\n";
-        ollir_code += "goto EndLoop" + labelCounter + ";\n";
-        ollir_code += "Body" + labelCounter + ": "; //+ trueString;
+        ollir_code += "if(" + conditionString + ")" + "goto Body" + auxLabel + ";\n";
+        ollir_code += "goto EndLoop" + auxLabel + ";\n";
+        ollir_code += "Body" + auxLabel + ": "; //+ trueString;
         ollir_code += code_ollir;
         /*for(int i = 1; i < node.getChildren().size(); i++){
             JmmNode trueNode = node.getChildren().get(i);
@@ -298,15 +301,14 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         //JmmNode trueNode = node.getChildren().get(1);
         //String trueString = visit(trueNode, s).getOllirCode();
 
-        ollir_code += "goto Loop" + labelCounter + ";\n";
-        ollir_code += "EndLoop" + labelCounter + ":\n";
+        ollir_code += "goto Loop" + auxLabel + ";\n";
+        ollir_code += "EndLoop" + auxLabel + ":\n";
 
 
         //if(isLastThingInMain(node)){
             ollir_code += "auxvar.i32 :=.i32 0.i32;\n";
         //}
         //   trueString + "\nif(" + conditionString + ")" + "goto Loop" + labelCounter + ";\n" + "else" + labelCounter + ":\n"
-        labelCounter++;
         return new OllirData(return_type, ollir_code);
     }
 
