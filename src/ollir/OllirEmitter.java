@@ -205,7 +205,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         labelCounter++;
 
         if(isLastThingInMain(node)){
-            ollir_code += "auxvar.i32 :=.i32 auxvar.i32;\n";
+            ollir_code += "auxvar.i32 :=.i32 0.i32;\n";
         }
 
         return new OllirData(return_type, ollir_code);
@@ -284,7 +284,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
 
         if(isLastThingInMain(node)){
-            ollir_code += "auxvar.i32 :=.i32 auxvar.i32;\n";
+            ollir_code += "auxvar.i32 :=.i32 0.i32;\n";
         }
         //   trueString + "\nif(" + conditionString + ")" + "goto Loop" + labelCounter + ";\n" + "else" + labelCounter + ":\n"
         labelCounter++;
@@ -307,12 +307,18 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             //For things like integers or identifiers (a = 2; a = b)
             if (valueNode.getOptional("type").isPresent()) {
                 //TODO: Is this a class field?
-                /*if(identifierNode.getOptional("putfield_required").isPresent()){
-                    if(identifierNode.get("putfield_required").equals("true")){
-                        ollir_code += "putfield(this, " + identifierNode.get("name") + "." + getVarOllirType(valueNode) + ", " + data.getReturnVar() + ")." + getVarOllirType(valueNode) + ";\n";
+                boolean isfield = false;
+                if(valueNode.get("is_array").equals("false")){
+                    if(identifierNode.getOptional("putfield_required").isPresent()){
+                        if(identifierNode.get("putfield_required").equals("true")){
+                            isfield = true;
+                            ollir_code += "putfield(this, " + identifierNode.get("name") + "." + getVarOllirType(valueNode) + ", " + data.getReturnVar() + ")." + getVarOllirType(valueNode) + ";\n";
+                        }
                     }
-                }*/
-                ollir_code += identifierData.getReturnVar() + " :=." + getVarOllirType(valueNode) + " " + data.getReturnVar() + ";\n";
+                }
+                if(!isfield) {
+                    ollir_code += identifierData.getReturnVar() + " :=." + getVarOllirType(valueNode) + " " + data.getReturnVar() + ";\n";
+                }
             }
             else{
                 // ????
