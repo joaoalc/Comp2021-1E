@@ -115,7 +115,6 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             if(arrayNode.get("putfield_required").equals("true")){
                 node.put("putfield_required", "true");
                 nodename = arrayNode.get("ollir_name");
-                System.out.println("Nodename: " + nodename);
             }
         }
 
@@ -280,14 +279,22 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                 break;
         }
 
-        ollir_code += "if(" + conditionString + ")" + "goto Body" + labelCounter + ";\n";
-        ollir_code += "goto EndLoop" + labelCounter + ";\n";
-        ollir_code += "Body" + labelCounter + ": "; //+ trueString;
+        String code_ollir = "";
         for(int i = 1; i < node.getChildren().size(); i++){
             JmmNode trueNode = node.getChildren().get(i);
             String trueString = visit(trueNode, s).getOllirCode();
-            ollir_code += trueString;
+            code_ollir += trueString;
         }
+
+        ollir_code += "if(" + conditionString + ")" + "goto Body" + labelCounter + ";\n";
+        ollir_code += "goto EndLoop" + labelCounter + ";\n";
+        ollir_code += "Body" + labelCounter + ": "; //+ trueString;
+        ollir_code += code_ollir;
+        /*for(int i = 1; i < node.getChildren().size(); i++){
+            JmmNode trueNode = node.getChildren().get(i);
+            String trueString = visit(trueNode, s).getOllirCode();
+            ollir_code += trueString;
+        }*/
         //JmmNode trueNode = node.getChildren().get(1);
         //String trueString = visit(trueNode, s).getOllirCode();
 
