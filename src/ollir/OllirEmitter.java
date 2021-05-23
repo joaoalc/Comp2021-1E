@@ -338,7 +338,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                 isfield = true;
                 if(identifierNode.getKind().equals("Index")) {
                     ollir_code += identifierData.getReturnVar() + " :=." + getVarOllirType(identifierNode) + " " + data.getReturnVar() + ";\n";
-                    ollir_code += "putfield(this, " + identifierNode.get("name") + "." + getVarOllirType(identifierNode) + ", " + identifierNode.getChildren().get(0).get("ollir_var") + ")." + getVarOllirType(identifierNode) + ";\n";
+                    ollir_code += "putfield(this, " + identifierNode.get("name") + "." + getOllirTypeNotVoid(new Type(identifierNode.get("type"), true)) + ", " + identifierNode.getChildren().get(0).get("ollir_var") + ")." + getVarOllirType(identifierNode) + ";\n";
                 }
                 else if (valueNode.getKind().equals("NewExpression")){
                     if(identifierNode.get("is_array").equals("true")){
