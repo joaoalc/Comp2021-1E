@@ -97,7 +97,7 @@ public class BackendTest {
     @Test
     public void QuickSortTest() {
         String output = runTest("public/Quicksort.jmm");
-        String expected = SpecsIo.getResource("fixtures/public/QuickSort.txt");
+        String expected = SpecsStrings.normalizeFileContents(SpecsIo.getResource("fixtures/public/QuickSort.txt"));
 
         assertEquals(output, expected);
     }
