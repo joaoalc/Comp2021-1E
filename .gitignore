@@ -2,7 +2,8 @@
 .gradle/
 /build/
 /generated/
-comp2021-*.jar
 .idea/
 
 *.dot
+comp2021-*.jar
+local.properties
