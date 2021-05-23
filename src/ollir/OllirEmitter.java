@@ -31,7 +31,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
     private int identCounter = 0;
 
-    private String[] keywords = { "array", "ret", "field", "aux" };
+    private String[] keywords = { "array", "ret", "field"};
 
     public OllirEmitter(MySymbolTable symbolTable) {
         this.symbolTable = symbolTable;
