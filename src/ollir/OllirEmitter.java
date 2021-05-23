@@ -141,8 +141,15 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             }
         }
         else {
-            return_type = "aux" + localVariableCounter++ + ".i32";
-            ollir_code += "    ".repeat(this.identCounter) + return_type + " :=." + getVarOllirType(node) + " " + nodename + "[" + indexData.getReturnVar() + "]." + getVarOllirType(node) + ";\n";
+            if (indexNode.getKind().equals("Integer")) {
+                return_type = "aux" + localVariableCounter++ + ".i32";
+                ollir_code += "    ".repeat(this.identCounter) + "aux" + localVariableCounter + ".i32 :=.i32 " + indexData.getReturnVar() + ";\n";
+                ollir_code += "    ".repeat(this.identCounter) + return_type + " :=." + getVarOllirType(node) + " " + nodename + "[" + "aux" + localVariableCounter++ + ".i32" + "]." + getVarOllirType(node) + ";\n";
+            }
+            else {
+                return_type = "aux" + localVariableCounter++ + ".i32";
+                ollir_code += "    ".repeat(this.identCounter) + return_type + " :=." + getVarOllirType(node) + " " + nodename + "[" + indexData.getReturnVar() + "]." + getVarOllirType(node) + ";\n";
+            }
         }
 
         return new OllirData(return_type, ollir_code);
