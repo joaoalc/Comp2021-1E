@@ -132,8 +132,8 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             }
         }
         else {
-
             return_type = "aux" + localVariableCounter++ + ".i32";
+            ollir_code += return_type + " :=." + getVarOllirType(node) + " " + nodename + "[" + indexData.getReturnVar() + "]." + getVarOllirType(node) + ";\n";
         }
 
         return new OllirData(return_type, ollir_code);
@@ -326,40 +326,41 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         ollir_code += identifierData.getOllirCode();
 
         OllirData data = visit(valueNode, methodId);
-        if (data.getOllirCode().equals("")) {
+        //if (data.getOllirCode().equals("")) {
             //For things like integers or identifiers (a = 2; a = b)
-            if (valueNode.getOptional("type").isPresent()) {
-                //TODO: Is this a class field?
-                boolean isfield = false;
+            //if (valueNode.getOptional("type").isPresent()) {
+        //TODO: Is this a class field?
+        boolean isfield = false;
                 //if(valueNode.get("is_array").equals("false")){
-                    if(identifierNode.getOptional("putfield_required").isPresent()){
-                        if(identifierNode.get("putfield_required").equals("true")){
-                            isfield = true;
-                            if(identifierNode.getKind().equals("Index")) {
-                                ollir_code += identifierData.getReturnVar() + " :=." + getVarOllirType(valueNode) + " " + data.getReturnVar() + ";\n";
-                                ollir_code += "putfield(this, " + identifierNode.get("name") + "." + getVarOllirType(valueNode) + ", " + identifierNode.getChildren().get(0).get("ollir_var") + ")." + getVarOllirType(valueNode) + ";\n";
-                            }
-                            else if (valueNode.getKind().equals("NewExpression")){
-                                if(identifierNode.get("is_array").equals("true")){
-                                    ollir_code += identifierData.getReturnVar() + " :=." + getVarOllirType(valueNode) + " " + data.getReturnVar() + ";\n";
-                                    ollir_code += "putfield(this, " + identifierNode.get("name") + "." + getVarOllirType(valueNode) + ", " + identifierData.getReturnVar() + ")." + getVarOllirType(valueNode) + ";\n";
-                                }
-                            }
-                            else{
-                                ollir_code += "putfield(this, " + identifierNode.get("name") + "." + getVarOllirType(valueNode) + ", " + data.getReturnVar() + ")." + getVarOllirType(valueNode) + ";\n";
-                            }
-                        }
+        ollir_code += data.getOllirCode();
+        if(identifierNode.getOptional("putfield_required").isPresent()){
+            if(identifierNode.get("putfield_required").equals("true")){
+                isfield = true;
+                if(identifierNode.getKind().equals("Index")) {
+                    ollir_code += identifierData.getReturnVar() + " :=." + getVarOllirType(identifierNode) + " " + data.getReturnVar() + ";\n";
+                    ollir_code += "putfield(this, " + identifierNode.get("name") + "." + getVarOllirType(identifierNode) + ", " + identifierNode.getChildren().get(0).get("ollir_var") + ")." + getVarOllirType(identifierNode) + ";\n";
+                }
+                else if (valueNode.getKind().equals("NewExpression")){
+                    if(identifierNode.get("is_array").equals("true")){
+                        ollir_code += identifierData.getReturnVar() + " :=." + getVarOllirType(identifierNode) + " " + data.getReturnVar() + ";\n";
+                        ollir_code += "putfield(this, " + identifierNode.get("name") + "." + getVarOllirType(identifierNode) + ", " + identifierData.getReturnVar() + ")." + getVarOllirType(identifierNode) + ";\n";
                     }
-                if(!isfield) {
-                    ollir_code += identifierData.getReturnVar() + " :=." + getVarOllirType(valueNode) + " " + data.getReturnVar() + ";\n";
+                }
+                else{
+                    ollir_code += "putfield(this, " + identifierNode.get("name") + "." + getVarOllirType(identifierNode) + ", " + data.getReturnVar() + ")." + getVarOllirType(identifierNode) + ";\n";
                 }
             }
+        }
+        if(!isfield) {
+            ollir_code += identifierData.getReturnVar() + " :=." + getVarOllirType(identifierNode) + " " + data.getReturnVar() + ";\n";
+        }
+            /*}
             else{
                 // ????
                 System.out.println("sus");
-            }
-        }
-        else {
+            }/*
+        //}
+        /*else {
             ollir_code += data.getOllirCode();
             if (getVarOllirType(valueNode).equals("")) {
                 //TODO: This might not work properly for assignment to an index
@@ -368,7 +369,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             else {
                 ollir_code += identifierData.getReturnVar() + " :=." + getVarOllirType(valueNode) + " " + data.getReturnVar() + ";\n";
             }
-        }
+        }*/
 
         return new OllirData(return_type, ollir_code);
     }
@@ -769,6 +770,8 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             // arguments
             for (JmmNode child : function_node.getChildren()) {
                 OllirData childData = visit(child, methodId);
+                System.out.println("ollir_code:" + ollir_code);
+                ollir_code += childData.getOllirCode();
                 //ollirCode += childData.getOllirCode();
                 args.add(childData.getReturnVar());
                 if (child.getKind().equals("Integer")) {
@@ -778,7 +781,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                     types.add(new ValueSymbol(new Type("boolean", false), "", true));
                 }
                 else if(child.getOptional("type").isPresent()){
-                    ollir_code += childData.getOllirCode();
+                    //ollir_code += childData.getOllirCode();
                     types.add(new ValueSymbol(new Type(child.get("type"), Boolean.parseBoolean(child.get("is_array"))), "", true));
                 }
                 else if (child.getOptional("name").isPresent()) {
