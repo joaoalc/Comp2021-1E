@@ -1,0 +1,91 @@
+import io;
+
+class Transpose {
+    public static void main(String[] args) {
+        int[] m0;
+        int[] m1;
+        int[] m2;
+
+        int[] a0;
+        int[] a1;
+        int[] a2;
+
+        int rows;
+        int cols;
+
+        m0 = new int[3];
+
+        m0[0] = 1;
+        m0[1] = 2;
+        m0[2] = 3;
+
+        m1 = new int[3];
+
+        m1[0] = 4;
+        m1[1] = 5;
+        m1[2] = 6;
+
+        m2 = new int[3];
+
+        m2[0] = 7;
+        m2[1] = 8;
+        m2[2] = 9;
+
+        a0 = new int[3];
+        a1 = new int[3];
+        a2 = new int[3];
+
+        rows = 0;
+
+        while (rows < m0.length) {
+            cols = 0;
+
+            while (cols < m0.length) {
+                if (rows < 1) {
+                    a2[cols] = m0[cols];
+                }
+
+                else {
+                    if (rows < 2) {
+                        a1[cols] = m1[cols];
+                    }
+
+                    else {
+                        a0[cols] = m2[cols];
+                    }
+                }
+
+                cols = cols + 1;
+            }
+
+            rows = rows + 1;
+        }
+
+        rows = 0;
+
+        while (rows < a0.length) {
+            cols = 0;
+
+            while (cols < a0.length) {
+                if (rows < 1) {
+                    io.print(a0[cols]);
+                }
+
+                else {
+                    if (rows < 2) {
+                        io.print(a1[cols]);
+                    }
+
+                    else {
+                        io.print(a2[cols]);
+                    }
+                }
+
+                cols = cols + 1;
+            }
+
+            io.println();
+            rows = rows + 1;
+        }
+    }
+}
