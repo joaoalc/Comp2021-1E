@@ -29,6 +29,8 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
     private int labelCounter = 0;
 
+    private int identCounter = 0;
+
     public OllirEmitter(MySymbolTable symbolTable) {
         this.symbolTable = symbolTable;
 
@@ -124,7 +126,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         //TODO: Refactoring: Put this inside the getVarAssignmentName function, somehow
         if (parent_node.getKind().equals("Assignment")) {
             if (indexNode.getKind().equals("Integer")) {
-                ollir_code += "aux" + localVariableCounter + ".i32 :=.i32 " + indexData.getReturnVar() + ";\n";
+                ollir_code += "    ".repeat(this.identCounter) + "aux" + localVariableCounter + ".i32 :=.i32 " + indexData.getReturnVar() + ";\n";
                 return_type = nodename + "[" + "aux" + localVariableCounter++ + ".i32" + "]." + getOllirType(new Type(arrayNode.get("type"), false));
             }
             else {
@@ -133,7 +135,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         }
         else {
             return_type = "aux" + localVariableCounter++ + ".i32";
-            ollir_code += return_type + " :=." + getVarOllirType(node) + " " + nodename + "[" + indexData.getReturnVar() + "]." + getVarOllirType(node) + ";\n";
+            ollir_code += "    ".repeat(this.identCounter) + return_type + " :=." + getVarOllirType(node) + " " + nodename + "[" + indexData.getReturnVar() + "]." + getVarOllirType(node) + ";\n";
         }
 
         return new OllirData(return_type, ollir_code);
@@ -161,10 +163,12 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         JmmNode conditionNode = node.getChildren().get(0);
         JmmNode trueNode = node.getChildren().get(1);
+        this.identCounter++;
         String trueString = visit(trueNode, s).getOllirCode();
         JmmNode elseNode = node.getChildren().get(2);
         String elseString = visit(elseNode, s).getOllirCode();
 
+        this.identCounter--;
         String conditionString = "";
 
         switch (conditionNode.getKind()) {
@@ -204,7 +208,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             case "FCall":
                 OllirData nodeFCall = visit(conditionNode, s);
                 ollir_code += nodeFCall.getOllirCode();
-                ollir_code += "aux" + localVariableCounter + ".bool" + " :=.bool " + nodeFCall.getReturnVar() + ";\n";
+                ollir_code += "    ".repeat(this.identCounter) + "aux" + localVariableCounter + ".bool" + " :=.bool " + nodeFCall.getReturnVar() + ";\n";
                 conditionString += "0.bool" + " !.bool " + "aux" + localVariableCounter++ + ".bool";
                 break;
             default:
@@ -213,12 +217,16 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                 break;
         }
 
-        ollir_code += "if(" + conditionString + ")" + "goto else" + labelCounter + ";\n" + trueString + "\ngoto endif" + labelCounter + ";\n" + "else" + labelCounter + ":\n" + elseString + "endif" + labelCounter + ":\n";
+        ollir_code += "    ".repeat(this.identCounter) + "if(" + conditionString + ")" + "goto else" + labelCounter + ";\n"
+                + trueString +
+                "\n" + "    ".repeat(this.identCounter) + "goto endif" + labelCounter + ";\n"
+                + "    ".repeat(this.identCounter) + "else" + labelCounter + ":\n" + elseString
+                + "    ".repeat(this.identCounter) + "endif" + labelCounter + ":\n";
 
         labelCounter++;
 
         //if(isLastThingInMain(node)){
-            ollir_code += "auxvar.i32 :=.i32 0.i32;\n";
+            ollir_code += "    ".repeat(this.identCounter) + "auxvar.i32 :=.i32 0.i32;\n";
         //}
 
         return new OllirData(return_type, ollir_code);
@@ -228,8 +236,9 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         String return_type = "";
         String ollir_code = "";
 
-        ollir_code += "Loop" + labelCounter + ":\n";
+        ollir_code += "    ".repeat(this.identCounter) + "Loop" + labelCounter + ":\n";
 
+        this.identCounter++;
         JmmNode conditionNode = node.getChildren().get(0);
         //JmmNode trueNode = node.getChildren().get(1);
         //String trueString = visit(trueNode, s).getOllirCode();
@@ -273,7 +282,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             case "FCall":
                 OllirData nodeFCall = visit(conditionNode, s);
                 ollir_code += nodeFCall.getOllirCode();
-                ollir_code += "aux" + localVariableCounter + ".bool" + " :-.bool" + nodeFCall.getReturnVar() + ";\n";
+                ollir_code += "    ".repeat(this.identCounter) + "aux" + localVariableCounter + ".bool" + " :-.bool" + nodeFCall.getReturnVar() + ";\n";
                 conditionString += "1.bool" + " &&.bool " + "aux" + localVariableCounter++ + ".bool";
                 break;
             default:
@@ -284,16 +293,18 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         int auxLabel = labelCounter;
         labelCounter++;
 
+        this.identCounter++;
         String code_ollir = "";
         for(int i = 1; i < node.getChildren().size(); i++){
             JmmNode trueNode = node.getChildren().get(i);
             String trueString = visit(trueNode, s).getOllirCode();
             code_ollir += trueString;
         }
+        this.identCounter--;
 
-        ollir_code += "if(" + conditionString + ")" + "goto Body" + auxLabel + ";\n";
-        ollir_code += "goto EndLoop" + auxLabel + ";\n";
-        ollir_code += "Body" + auxLabel + ": "; //+ trueString;
+        ollir_code += "    ".repeat(this.identCounter) + "if(" + conditionString + ")" + "goto Body" + auxLabel + ";\n";
+        ollir_code += "    ".repeat(this.identCounter) + "goto EndLoop" + auxLabel + ";\n";
+        ollir_code += "    ".repeat(this.identCounter) + "Body" + auxLabel + ":\n"; //+ trueString;
         ollir_code += code_ollir;
         /*for(int i = 1; i < node.getChildren().size(); i++){
             JmmNode trueNode = node.getChildren().get(i);
@@ -303,12 +314,14 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         //JmmNode trueNode = node.getChildren().get(1);
         //String trueString = visit(trueNode, s).getOllirCode();
 
-        ollir_code += "goto Loop" + auxLabel + ";\n";
-        ollir_code += "EndLoop" + auxLabel + ":\n";
+        ollir_code += "    ".repeat(this.identCounter) + "goto Loop" + auxLabel + ";\n";
+        ollir_code += "    ".repeat(this.identCounter) + "EndLoop" + auxLabel + ":\n";
 
 
         //if(isLastThingInMain(node)){
-            ollir_code += "auxvar.i32 :=.i32 0.i32;\n";
+            ollir_code += "    ".repeat(this.identCounter + 1) + "auxvar.i32 :=.i32 0.i32;\n";
+
+        this.identCounter--;
         //}
         //   trueString + "\nif(" + conditionString + ")" + "goto Loop" + labelCounter + ";\n" + "else" + labelCounter + ":\n"
         return new OllirData(return_type, ollir_code);
@@ -337,22 +350,22 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             if(identifierNode.get("putfield_required").equals("true")){
                 isfield = true;
                 if(identifierNode.getKind().equals("Index")) {
-                    ollir_code += identifierData.getReturnVar() + " :=." + getVarOllirType(identifierNode) + " " + data.getReturnVar() + ";\n";
-                    ollir_code += "putfield(this, " + identifierNode.get("name") + "." + getOllirTypeNotVoid(new Type(identifierNode.get("type"), true)) + ", " + identifierNode.getChildren().get(0).get("ollir_var") + ")." + getVarOllirType(identifierNode) + ";\n";
+                    ollir_code += "    ".repeat(this.identCounter) + identifierData.getReturnVar() + " :=." + getVarOllirType(identifierNode) + " " + data.getReturnVar() + ";\n";
+                    ollir_code += "    ".repeat(this.identCounter) + "putfield(this, " + identifierNode.get("name") + "." + getOllirTypeNotVoid(new Type(identifierNode.get("type"), true)) + ", " + identifierNode.getChildren().get(0).get("ollir_var") + ")." + getVarOllirType(identifierNode) + ";\n";
                 }
                 else if (valueNode.getKind().equals("NewExpression")){
                     if(identifierNode.get("is_array").equals("true")){
-                        ollir_code += identifierData.getReturnVar() + " :=." + getVarOllirType(identifierNode) + " " + data.getReturnVar() + ";\n";
-                        ollir_code += "putfield(this, " + identifierNode.get("name") + "." + getVarOllirType(identifierNode) + ", " + identifierData.getReturnVar() + ")." + getVarOllirType(identifierNode) + ";\n";
+                        ollir_code += "    ".repeat(this.identCounter) + identifierData.getReturnVar() + " :=." + getVarOllirType(identifierNode) + " " + data.getReturnVar() + ";\n";
+                        ollir_code += "    ".repeat(this.identCounter) + "putfield(this, " + identifierNode.get("name") + "." + getVarOllirType(identifierNode) + ", " + identifierData.getReturnVar() + ")." + getVarOllirType(identifierNode) + ";\n";
                     }
                 }
                 else{
-                    ollir_code += "putfield(this, " + identifierNode.get("name") + "." + getVarOllirType(identifierNode) + ", " + data.getReturnVar() + ")." + getVarOllirType(identifierNode) + ";\n";
+                    ollir_code += "    ".repeat(this.identCounter) + "putfield(this, " + identifierNode.get("name") + "." + getVarOllirType(identifierNode) + ", " + data.getReturnVar() + ")." + getVarOllirType(identifierNode) + ";\n";
                 }
             }
         }
         if(!isfield) {
-            ollir_code += identifierData.getReturnVar() + " :=." + getVarOllirType(identifierNode) + " " + data.getReturnVar() + ";\n";
+            ollir_code += "    ".repeat(this.identCounter) + identifierData.getReturnVar() + " :=." + getVarOllirType(identifierNode) + " " + data.getReturnVar() + ";\n";
         }
             /*}
             else{
@@ -419,7 +432,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         ollirCode += Op.getOllirCode();
 
         String name = getVarAssignmentName(node);
-        ollirCode += name + ".bool :=.bool " + "0.bool" + " !.bool " + Op.getReturnVar();
+        ollirCode += "    ".repeat(this.identCounter) + name + ".bool :=.bool " + "0.bool" + " !.bool " + Op.getReturnVar();
 
         if (OllirUtils.IsEndOfLine(node)) {
             ollirCode += ";\n";
@@ -441,7 +454,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         ollirCode += firstOp.getOllirCode() + secondOp.getOllirCode();
 
         String name = getVarAssignmentName(node);
-        ollirCode += name + ".bool :=.bool " + firstOp.getReturnVar() + " <.i32 " + secondOp.getReturnVar();
+        ollirCode += "    ".repeat(this.identCounter) + name + ".bool :=.bool " + firstOp.getReturnVar() + " <.i32 " + secondOp.getReturnVar();
 
         if (OllirUtils.IsEndOfLine(node)) {
             ollirCode += ";\n";
@@ -462,7 +475,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         ollirCode += firstOp.getOllirCode() + secondOp.getOllirCode();
 
         String name = getVarAssignmentName(node);
-        ollirCode += name + ".i32 :=.i32 " + firstOp.getReturnVar() + " /.i32 " + secondOp.getReturnVar();
+        ollirCode += "    ".repeat(this.identCounter) + name + ".i32 :=.i32 " + firstOp.getReturnVar() + " /.i32 " + secondOp.getReturnVar();
 
         if (OllirUtils.IsEndOfLine(node)) {
             ollirCode += ";\n";
@@ -483,7 +496,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         ollirCode += firstOp.getOllirCode() + secondOp.getOllirCode();
 
         String name = getVarAssignmentName(node);
-        ollirCode += name + ".i32 :=.i32 " + firstOp.getReturnVar() + " *.i32 " + secondOp.getReturnVar();
+        ollirCode += "    ".repeat(this.identCounter) + name + ".i32 :=.i32 " + firstOp.getReturnVar() + " *.i32 " + secondOp.getReturnVar();
 
         if (OllirUtils.IsEndOfLine(node)) {
             ollirCode += ";\n";
@@ -504,7 +517,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         ollirCode += firstOp.getOllirCode() + secondOp.getOllirCode();
 
         String name = getVarAssignmentName(node);
-        ollirCode += name + ".i32 :=.i32 " + firstOp.getReturnVar() + " -.i32 " + secondOp.getReturnVar();
+        ollirCode += "    ".repeat(this.identCounter) + name + ".i32 :=.i32 " + firstOp.getReturnVar() + " -.i32 " + secondOp.getReturnVar();
 
         if (OllirUtils.IsEndOfLine(node)) {
             ollirCode += ";\n";
@@ -525,7 +538,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         ollirCode += firstOp.getOllirCode() + secondOp.getOllirCode();
 
         String name = getVarAssignmentName(node);
-        ollirCode += name + ".i32" + " :=.i32 " + firstOp.getReturnVar() + " +.i32 " + secondOp.getReturnVar();
+        ollirCode += "    ".repeat(this.identCounter) + name + ".i32" + " :=.i32 " + firstOp.getReturnVar() + " +.i32 " + secondOp.getReturnVar();
 
         if (OllirUtils.IsEndOfLine(node)) {
             ollirCode += ";\n";
@@ -546,7 +559,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         ollirCode += firstOp.getOllirCode() + secondOp.getOllirCode();
 
         String name = getVarAssignmentName(node);
-        ollirCode += name + ".bool :=.bool " + firstOp.getReturnVar() + " &&.bool " + secondOp.getReturnVar();
+        ollirCode += "    ".repeat(this.identCounter) + name + ".bool :=.bool " + firstOp.getReturnVar() + " &&.bool " + secondOp.getReturnVar();
 
         if (OllirUtils.IsEndOfLine(node)) {
             ollirCode += ";\n";
@@ -564,7 +577,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         ollirCode += Op.getOllirCode();
 
         String name = getVarAssignmentName(node);
-        ollirCode += name + ".bool :=.bool " + "0.bool" + " !.bool " + Op.getReturnVar();
+        ollirCode += "    ".repeat(this.identCounter) + name + ".bool :=.bool " + "0.bool" + " !.bool " + Op.getReturnVar();
 
         if (OllirUtils.IsEndOfLine(node)) {
             ollirCode += ";\n";
@@ -628,14 +641,16 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         List<String> imports = symbolTable.getImports();
 
         for (String importString : imports) {
-            ollirCode += "import " + importString + ";\n";
+            ollirCode += "    ".repeat(this.identCounter) + "import " + importString + ";\n";
         }
 
         String className = symbolTable.getClassName();
         String superClass = symbolTable.getSuper();
 
-        ollirCode += className + " " +
+        ollirCode += "    ".repeat(this.identCounter) + className + " " +
             (superClass != null ? ("extends " + superClass) : "") + " {\n";
+
+        this.identCounter++;
 
         List<Symbol> classFields = symbolTable.getFields();
 
@@ -643,12 +658,12 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             Type fieldType = field.getType();
             String fieldName = field.getName();
 
-            ollirCode += ".field " + fieldName + "." + getOllirType(fieldType) + ";\n";
+            ollirCode += "    ".repeat(this.identCounter) + ".field " + fieldName + "." + getOllirType(fieldType) + ";\n";
         }
 
-        ollirCode += ".construct " + className + "().V {\n" +
-            "invokespecial(this, \"<init>\").V;\n" +
-            "}\n";
+        ollirCode += "    ".repeat(this.identCounter) + ".construct " + className + "().V {\n" +
+                "    ".repeat(this.identCounter + 1) + "invokespecial(this, \"<init>\").V;\n" +
+                "    ".repeat(this.identCounter) + "}\n";
 
 
         for (JmmNode child : node.getChildren()) {
@@ -657,6 +672,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         }
 
         ollirCode += "}";
+        this.identCounter--;
 
 //        System.out.println("Full code:\n");
         System.out.println(ollirCode);
@@ -696,7 +712,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         final List<ValueSymbol> parameters = symbolTable.getParams(methodId);
 
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(".method public " + (methodName.equals("main") ? "static " : "") + methodName + "(");
+        stringBuilder.append("    ".repeat(this.identCounter) + ".method public " + (methodName.equals("main") ? "static " : "") + methodName + "(");
         List<String> parametersOllir = new ArrayList<>();
         for (Symbol parameter : parameters) {
             final Type parameterType = parameter.getType();
@@ -704,13 +720,15 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             parametersOllir.add(parameter.getName() + "." + getOllirType(parameterType));
         }
         stringBuilder.append(String.join(", ", parametersOllir) + ")." + getOllirType(returnType) + " {\n");
+        this.identCounter++;
 
         for (JmmNode child : node.getChildren()) {
             OllirData childData = visit(child, methodId);
             ollirCode += childData.getOllirCode();
         }
+        this.identCounter--;
 
-        return new OllirData(stringBuilder.toString() + ollirCode + "}\n");
+        return new OllirData(stringBuilder.toString() + ollirCode + "    ".repeat(this.identCounter) + "}\n");
     }
 
     private OllirData generateMethodBody(JmmNode node, String methodId) {
@@ -730,8 +748,8 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         OllirData expression = visit(returnExpression, methodId);
 
-        String ollirCode = expression.getOllirCode() +
-            "ret." + getOllirType(symbolTable.getReturnType(methodId));
+        String ollirCode = expression.getOllirCode();
+        ollirCode += "    ".repeat(this.identCounter) + "ret." + getOllirType(symbolTable.getReturnType(methodId));
 
         ollirCode += " " + expression.getReturnVar() + ";\n";
 
@@ -747,8 +765,8 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
     private OllirData generateVarCreation(JmmNode node, String methodId) {
         String return_type = getVarOllirType(node);
         String aux = "aux_" + localVariableCounter++;
-        String ollir_code = aux + "." + return_type + " :=." + return_type + " new(" + return_type + ")." + return_type + ";\n";
-        ollir_code += "invokespecial(" + aux + "." + return_type + ",\"<init>\").V;\n";
+        String ollir_code = "    ".repeat(this.identCounter) + aux + "." + return_type + " :=." + return_type + " new(" + return_type + ")." + return_type + ";\n";
+        ollir_code += "    ".repeat(this.identCounter) + "invokespecial(" + aux + "." + return_type + ",\"<init>\").V;\n";
 
         return new OllirData(aux + "." + return_type, ollir_code);
     }
@@ -795,17 +813,17 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                 Method method = symbolTable.getMethod(function_name, types);
                 if (method != null) {
                     return_var = "aux_" + localVariableCounter++ + "." + getOllirType(method.getReturnType());
-                    ollir_code += return_var + ":=." + getOllirType(method.getReturnType()) + " invokevirtual(this, \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + getOllirType(method.getReturnType()) + ";";
+                    ollir_code += "    ".repeat(this.identCounter) + return_var + ":=." + getOllirType(method.getReturnType()) + " invokevirtual(this, \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + getOllirType(method.getReturnType()) + ";";
                 }
                 else {
                     //Calling a superclass' method (arguments' ollir code is already written)
                     String type = getFunctionTypeIfNonExistant(node);
                     if (!type.equals("V")) {
                         return_var = getVarAssignmentName(node) + "." + type;
-                        ollir_code += return_var + " :=." + type + " invokevirtual(this, \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
+                        ollir_code += "    ".repeat(this.identCounter) + return_var + " :=." + type + " invokevirtual(this, \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
                     }
                     else {
-                        ollir_code += "invokevirtual(this, \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
+                        ollir_code += "    ".repeat(this.identCounter) + "invokevirtual(this, \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
                     }
                 }
 
@@ -820,11 +838,11 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                         String type = getFunctionTypeIfNonExistant(node);
                         if (!type.equals("V")) {
                             return_var = "aux_" + localVariableCounter++ + "." + type;
-                            ollir_code += return_var + " :=." + type + " invokestatic(" + identifier_name + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
+                            ollir_code += "    ".repeat(this.identCounter) + return_var + " :=." + type + " invokestatic(" + identifier_name + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
                         }
                         else {
                             return_var = "";
-                            ollir_code += "invokestatic(" + identifier_name + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ").V;";
+                            ollir_code += "    ".repeat(this.identCounter) + "invokestatic(" + identifier_name + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ").V;";
                         }
 
                     }
@@ -834,7 +852,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                             Method method = symbolTable.getMethod(function_name, types);
                             ValueSymbol identifier = NodeFindingMethods.getVariable(symbolTable.getMethod(methodId), symbolTable, identifier_name);
                             return_var = "aux_" + localVariableCounter++ + "." + getOllirType(method.getReturnType());
-                            ollir_code += return_var + ":=." + getOllirType(method.getReturnType()) + " invokevirtual(" + identifier_name + "." + getOllirType(identifier.getType()) + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + getOllirType(method.getReturnType()) + ";";
+                            ollir_code += "    ".repeat(this.identCounter) + return_var + ":=." + getOllirType(method.getReturnType()) + " invokevirtual(" + identifier_name + "." + getOllirType(identifier.getType()) + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + getOllirType(method.getReturnType()) + ";";
 
                         }
                         else if (symbolTable.getSuper() != null) {
@@ -843,17 +861,17 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                             ValueSymbol identifier = NodeFindingMethods.getVariable(symbolTable.getMethod(methodId), symbolTable, identifier_name);
                             if (method != null) {
                                 return_var = "aux_" + localVariableCounter++ + "." + getOllirType(method.getReturnType());
-                                ollir_code += return_var + ":=." + getOllirType(method.getReturnType()) + " invokevirtual(" + identifier_name + "." + getOllirType(identifier.getType()) + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + getOllirType(method.getReturnType()) + ";";
+                                ollir_code += "    ".repeat(this.identCounter) + return_var + ":=." + getOllirType(method.getReturnType()) + " invokevirtual(" + identifier_name + "." + getOllirType(identifier.getType()) + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + getOllirType(method.getReturnType()) + ";";
                             }
                             else {
                                 String type = getFunctionTypeIfNonExistant(node);
                                 if (!type.equals("V")) {
                                     return_var = "aux_" + localVariableCounter++ + "." + type;
-                                    ollir_code += return_var + ":=." + type + " invokevirtual(" + identifier_name + "." + getOllirType(identifier.getType()) + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
+                                    ollir_code += "    ".repeat(this.identCounter) + return_var + ":=." + type + " invokevirtual(" + identifier_name + "." + getOllirType(identifier.getType()) + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
                                 }
                                 else {
                                     return_var = "";
-                                    ollir_code += "invokevirtual(" + identifier_name + "." + getOllirType(identifier.getType()) + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
+                                    ollir_code += "    ".repeat(this.identCounter) + "invokevirtual(" + identifier_name + "." + getOllirType(identifier.getType()) + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
                                 }
                             }
                         }
@@ -868,11 +886,11 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                     String type = getFunctionTypeIfNonExistant(node);
                     if (!type.equals("V")) {
                         return_var = "aux_" + localVariableCounter++ + "." + type;
-                        ollir_code += return_var + ":=." + type + " invokevirtual(" + data.getReturnVar() + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
+                        ollir_code += "    ".repeat(this.identCounter) + return_var + ":=." + type + " invokevirtual(" + data.getReturnVar() + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
                     }
                     else {
                         return_var = "";
-                        ollir_code += "invokevirtual(" + data.getReturnVar() + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
+                        ollir_code += "    ".repeat(this.identCounter) + "invokevirtual(" + data.getReturnVar() + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
                     }
                 }
             }
@@ -887,7 +905,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                 return_var = "arraylength(" + idData.getReturnVar() + ").i32";
             }
             else {
-                ollir_code += "aux" + localVariableCounter + ".i32 :=.i32 " + "arraylength(" + idData.getReturnVar() + ").i32" + ";\n";
+                ollir_code += "    ".repeat(this.identCounter) + "aux" + localVariableCounter + ".i32 :=.i32 " + "arraylength(" + idData.getReturnVar() + ").i32" + ";\n";
                 return_var = "aux" + localVariableCounter++ + ".i32";
             }
             //return_var = "arraylength(" + idData.getReturnVar() + ").i32";
@@ -1000,14 +1018,14 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                 // eg: a = 2 + 2            aux1 = 2 + 2; putfield(a)
                 //return new OllirData("", "");
                 String auxVarName = "aux" + localVariableCounter++ + "." + varType;
-                getOrPutFieldString = auxVarName + " :=." + varType + " getfield(this, " + varName + "." + varType + ")." + varType + ";\n";
+                getOrPutFieldString = "    ".repeat(this.identCounter) + auxVarName + " :=." + varType + " getfield(this, " + varName + "." + varType + ")." + varType + ";\n";
                 return_var = auxVarName;
                 return new OllirData(return_var, getOrPutFieldString);
             }
             else{
                 //getfield
                 String auxVarName = "aux" + localVariableCounter++ + "." + varType;
-                getOrPutFieldString = auxVarName + " :=." + varType + " getfield(this, " + varName + "." + varType + ")." + varType + ";\n";
+                getOrPutFieldString = "    ".repeat(this.identCounter) + auxVarName + " :=." + varType + " getfield(this, " + varName + "." + varType + ")." + varType + ";\n";
                 return_var = auxVarName;
                 return new OllirData(return_var, getOrPutFieldString);
             }
