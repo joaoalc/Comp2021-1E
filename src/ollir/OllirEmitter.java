@@ -361,21 +361,22 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         boolean isfield = false;
                 //if(valueNode.get("is_array").equals("false")){
         ollir_code += data.getOllirCode();
+        String varname = filter_keywords(identifierNode.get("name"));
         if(identifierNode.getOptional("putfield_required").isPresent()){
             if(identifierNode.get("putfield_required").equals("true")){
                 isfield = true;
                 if(identifierNode.getKind().equals("Index")) {
                     ollir_code += "    ".repeat(this.identCounter) + identifierData.getReturnVar() + " :=." + getVarOllirType(identifierNode) + " " + data.getReturnVar() + ";\n";
-                    ollir_code += "    ".repeat(this.identCounter) + "putfield(this, " + identifierNode.get("name") + "." + getOllirTypeNotVoid(new Type(identifierNode.get("type"), true)) + ", " + identifierNode.getChildren().get(0).get("ollir_var") + ")." + getVarOllirType(identifierNode) + ";\n";
+                    ollir_code += "    ".repeat(this.identCounter) + "putfield(this, " + varname + "." + getOllirTypeNotVoid(new Type(identifierNode.get("type"), true)) + ", " + identifierNode.getChildren().get(0).get("ollir_var") + ")." + getVarOllirType(identifierNode) + ";\n";
                 }
                 else if (valueNode.getKind().equals("NewExpression")){
                     if(identifierNode.get("is_array").equals("true")){
                         ollir_code += "    ".repeat(this.identCounter) + identifierData.getReturnVar() + " :=." + getVarOllirType(identifierNode) + " " + data.getReturnVar() + ";\n";
-                        ollir_code += "    ".repeat(this.identCounter) + "putfield(this, " + identifierNode.get("name") + "." + getVarOllirType(identifierNode) + ", " + identifierData.getReturnVar() + ")." + getVarOllirType(identifierNode) + ";\n";
+                        ollir_code += "    ".repeat(this.identCounter) + "putfield(this, " + varname + "." + getVarOllirType(identifierNode) + ", " + identifierData.getReturnVar() + ")." + getVarOllirType(identifierNode) + ";\n";
                     }
                 }
                 else{
-                    ollir_code += "    ".repeat(this.identCounter) + "putfield(this, " + identifierNode.get("name") + "." + getVarOllirType(identifierNode) + ", " + data.getReturnVar() + ")." + getVarOllirType(identifierNode) + ";\n";
+                    ollir_code += "    ".repeat(this.identCounter) + "putfield(this, " + varname + "." + getVarOllirType(identifierNode) + ", " + data.getReturnVar() + ")." + getVarOllirType(identifierNode) + ";\n";
                 }
             }
         }
@@ -1031,19 +1032,20 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         //Is it a class field?
         if(NodeFindingMethods.isClassField(symbolTable.getMethod(methodId), symbolTable, varName)){
+            String var = filter_keywords(varName);
             if(isSet(identifierNode)){
                 //putfield can't be done here since it requires things to be placed after operations
                 // eg: a = 2 + 2            aux1 = 2 + 2; putfield(a)
                 //return new OllirData("", "");
                 String auxVarName = "aux" + localVariableCounter++ + "." + varType;
-                getOrPutFieldString = "    ".repeat(this.identCounter) + auxVarName + " :=." + varType + " getfield(this, " + varName + "." + varType + ")." + varType + ";\n";
+                getOrPutFieldString = "    ".repeat(this.identCounter) + auxVarName + " :=." + varType + " getfield(this, " + var + "." + varType + ")." + varType + ";\n";
                 return_var = auxVarName;
                 return new OllirData(return_var, getOrPutFieldString);
             }
             else{
                 //getfield
                 String auxVarName = "aux" + localVariableCounter++ + "." + varType;
-                getOrPutFieldString = "    ".repeat(this.identCounter) + auxVarName + " :=." + varType + " getfield(this, " + varName + "." + varType + ")." + varType + ";\n";
+                getOrPutFieldString = "    ".repeat(this.identCounter) + auxVarName + " :=." + varType + " getfield(this, " + var + "." + varType + ")." + varType + ";\n";
                 return_var = auxVarName;
                 return new OllirData(return_var, getOrPutFieldString);
             }
