@@ -13,6 +13,7 @@
  */
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -55,9 +56,14 @@ public class BackendTest {
     @Test
     public void LazysortTest() {
         String output = runTest("public/Lazysort.jmm");
-        String expected = "1\n2\n3\n4\n5\n6\n7\n8\n9\n10";
 
-        assertEquals(output, expected);
+        String expected = "";
+
+        for (int i = 0; i < 10; i++)
+            expected += "([0-9]|1[0-1])\n";
+
+        expected = expected.substring(0, expected.length() - 1); // Remove newline in the end
+        assertTrue(output.matches(expected));
     }
 
     @Test
