@@ -63,19 +63,35 @@ public class BackendTest {
             expected += "([0-9]|1[0-1])\n";
 
         expected = expected.substring(0, expected.length() - 1); // Remove newline in the end
+
         assertTrue(output.matches(expected));
     }
 
     @Test
     public void LifeTest() {
         String output = runTest("public/Life.jmm");
-        String expected = "";
+        String expected =
+            "001000000\n" +
+            "010100000\n" +
+            "000110000\n" +
+            "000000000\n" +
+            "000000000\n" +
+            "000000000\n" +
+            "000000000\n" +
+            "000000000\n" +
+            "000000000\n" +
+            "000000000\n" +
+            "000000000";
+
+        assertEquals(output, expected);
     }
 
     @Test
     public void MonteCarloPiTest() {
-        String output = runTest("public/MonteCarloPi.jmm", "10\n");
-        String expected = "";
+        String output = runTest("public/MonteCarloPi.jmm", "1000\n");
+        String expected = "Insert number: Result: [0-9]{3}";
+
+        assertTrue(output.matches(expected));
     }
 
     @Test
