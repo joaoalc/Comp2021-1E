@@ -2,13 +2,20 @@ import io;
 class WhileAndIF {
 
     public static void main(String[] args){
-        int a;
-        int b;
+        boolean a;
+        boolean b;
         int c;
         int[] d;
 
-        a = 1 + d[c];
-        //io.println(d[c]);
+        while(!true){}
+
     }
+
+    public boolean doStuff(int L) {
+           boolean lazy;
+           lazy = true;
+
+           return lazy;
+       }
 
 }
