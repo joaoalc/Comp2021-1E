@@ -449,7 +449,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         ollirCode += Op.getOllirCode();
 
         String name = getVarAssignmentName(node);
-        ollirCode += "    ".repeat(this.identCounter) + name + ".bool :=.bool " + "0.bool" + " !.bool " + Op.getReturnVar();
+        ollirCode += "    ".repeat(this.identCounter) + name + ".bool :=.bool " + Op.getReturnVar() + " !.bool " + Op.getReturnVar();
 
         if (OllirUtils.IsEndOfLine(node)) {
             ollirCode += ";\n";
@@ -594,7 +594,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         ollirCode += Op.getOllirCode();
 
         String name = getVarAssignmentName(node);
-        ollirCode += "    ".repeat(this.identCounter) + name + ".bool :=.bool " + "0.bool" + " !.bool " + Op.getReturnVar();
+        ollirCode += "    ".repeat(this.identCounter) + name + ".bool :=.bool " + Op.getReturnVar() + " !.bool " + Op.getReturnVar();
 
         if (OllirUtils.IsEndOfLine(node)) {
             ollirCode += ";\n";
