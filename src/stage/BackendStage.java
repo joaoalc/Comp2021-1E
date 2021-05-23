@@ -86,7 +86,7 @@ public class BackendStage implements JasminBackend {
             // More reports from this stage
             List<Report> reports = new ArrayList<>();
 
-            System.out.println(jasminCode);
+            // System.out.println(jasminCode);
 
             return new JasminResult(ollirResult, jasminCode, reports);
         }
@@ -266,7 +266,7 @@ public class BackendStage implements JasminBackend {
 
         code += ".end method\n\n";
 
-        maxStackCount = 99;
+        maxStackCount = 200;
         String stackLimit = String.format("\t.limit stack %d\n", maxStackCount);
         String localsLimit = String.format("\t.limit locals %d\n\n", registCount);
 
