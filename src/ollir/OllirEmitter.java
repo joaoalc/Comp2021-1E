@@ -114,6 +114,11 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         String nodename = node.get("name");
 
+        //For getfield
+        if(arrayNode.getOptional("ollir_name").isPresent()){
+            nodename = arrayNode.get("ollir_name");
+        }
+
         //For putfield
         if(arrayNode.getOptional("putfield_required").isPresent()){
             if(arrayNode.get("putfield_required").equals("true")){
@@ -788,7 +793,6 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             // arguments
             for (JmmNode child : function_node.getChildren()) {
                 OllirData childData = visit(child, methodId);
-                System.out.println("ollir_code:" + ollir_code);
                 ollir_code += childData.getOllirCode();
                 //ollirCode += childData.getOllirCode();
                 args.add(childData.getReturnVar());

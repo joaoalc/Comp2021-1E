@@ -15,13 +15,7 @@
 import org.junit.Test;
 
 import pt.up.fe.comp.TestUtils;
-import pt.up.fe.comp.jmm.JmmParserResult;
-import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.specs.util.SpecsIo;
-
-import java.util.List;
-
-import static pt.up.fe.comp.TestUtils.mustFail;
 
 public class OptimizeTest {
 
@@ -86,7 +80,7 @@ public class OptimizeTest {
     @Test
     public void QuicksortTest() {
 
-        var result = TestUtils.optimize(SpecsIo.getResource("fixtures/public/QuickSort.jmm"));
+        var result = TestUtils.optimize(SpecsIo.getResource("fixtures/public/Quicksort.jmm"));
         TestUtils.noErrors(result.getReports());
 
         System.out.println(result.getReports().toString());
