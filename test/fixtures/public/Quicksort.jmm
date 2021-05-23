@@ -1,10 +1,10 @@
 import io;
 
-class QuickSort {
+class Quicksort {
     public static void main(String[] a) {
         int[] L;
         int i;
-        QuickSort q;
+        Quicksort q;
 
         L = new int[10];
 
@@ -15,7 +15,7 @@ class QuickSort {
             i = i + 1;
         }
 
-        q = new QuickSort();
+        q = new Quicksort();
 
         q.quicksort(L);
         q.printL(L);

@@ -96,6 +96,21 @@ public class NodeFindingMethods {
         return result;
     }
 
+    public static boolean isClassField(Method method, MySymbolTable symbolTable, String varName){
+        ValueSymbol result;
+
+        result = method.getLocalVariable(varName);
+        if(result == null){
+            result = symbolTable.getField(varName);
+            if(result == null){
+                return false;
+            }
+            return true;
+        }
+
+        return false;
+    }
+
     public static boolean variableExists(Method method, MySymbolTable symbolTable, ValueSymbol symbol){
         if(!method.localVariableExists(symbol)){
             if(!symbolTable.fieldExists(symbol)){

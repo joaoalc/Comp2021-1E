@@ -34,4 +34,74 @@ public class OptimizeTest {
 
         System.out.println(result.getReports().toString());
     }
+
+    @Test
+    public void IfTest() {
+        var result = TestUtils.optimize(SpecsIo.getResource("fixtures/public/If.jmm"));
+        TestUtils.noErrors(result.getReports());
+
+        System.out.println(result.getReports().toString());
+    }
+
+    @Test
+    public void FindMaximumTest() {
+        var result = TestUtils.optimize(SpecsIo.getResource("fixtures/public/FindMaximum.jmm"));
+        TestUtils.noErrors(result.getReports());
+
+        System.out.println(result.getReports().toString());
+    }
+
+    @Test
+    public void LazysortTest() {
+
+        var result = TestUtils.optimize(SpecsIo.getResource("fixtures/public/Lazysort.jmm"));
+        TestUtils.noErrors(result.getReports());
+
+        System.out.println(result.getReports().toString());
+    }
+
+    @Test
+    public void LifeTest() {
+        var result = TestUtils.optimize(SpecsIo.getResource("fixtures/public/Life.jmm"));
+        TestUtils.noErrors(result.getReports());
+
+        System.out.println(result.getReports().toString());
+    }
+
+    @Test
+    public void MonteCarloPiTest() {
+
+        var result = TestUtils.optimize(SpecsIo.getResource("fixtures/public/MonteCarloPi.jmm"));
+        TestUtils.noErrors(result.getReports());
+
+        System.out.println(result.getReports().toString());
+    }
+
+    @Test
+    public void QuicksortTest() {
+
+        var result = TestUtils.optimize(SpecsIo.getResource("fixtures/public/Quicksort.jmm"));
+        TestUtils.noErrors(result.getReports());
+
+        System.out.println(result.getReports().toString());
+    }
+
+    @Test
+    public void TicTacToeTest() {
+
+        var result = TestUtils.optimize(SpecsIo.getResource("fixtures/public/TicTacToe.jmm"));
+        TestUtils.noErrors(result.getReports());
+
+        System.out.println(result.getReports().toString());
+    }
+
+    @Test
+    public void WhileAndIFTest() {
+
+        var result = TestUtils.optimize(SpecsIo.getResource("fixtures/public/WhileAndIF.jmm"));
+        TestUtils.noErrors(result.getReports());
+
+        System.out.println(result.getReports().toString());
+    }
+
 }

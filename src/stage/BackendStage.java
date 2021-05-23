@@ -1,8 +1,8 @@
 package stage;
 
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import org.specs.comp.ollir.*;
@@ -27,8 +27,10 @@ import pt.up.fe.comp.jmm.report.Stage;
  */
 
 public class BackendStage implements JasminBackend {
-    int stackCount = 0;
+    private int registCount = 1, labelCount = 1, stackCount = 0, maxStackCount = 0;
+    String className;
     String superClassName;
+    HashMap<String, Integer> variablesRegists = new HashMap<>();
 
     @Override
     public JasminResult toJasmin(OllirResult ollirResult) {
@@ -41,20 +43,22 @@ public class BackendStage implements JasminBackend {
             ollirClass.buildCFGs();          // Build the CFG of each method
             // ollirClass.outputCFGs();         // Output to .dot files the CFGs, one per method
             ollirClass.buildVarTables();     // Build the table of variables for each method
-//            ollirClass.show();               // Print to console main information about the input OLLIR
+            // ollirClass.show();               // Print to console main information about the input OLLIR
 
             // Convert the OLLIR to a String containing the equivalent Jasmin code
             String jasminCode = "";
 
+            // Class name
             String classAccessModifier = acessModifierToString(ollirClass.getClassAccessModifier());
 
             if (classAccessModifier.isEmpty())
                 classAccessModifier = "public";
 
-            String className = ollirClass.getClassName();
+            className = ollirClass.getClassName();
 
             jasminCode += String.format(".class %s %s\n", classAccessModifier, className);
 
+            // Superclass name
             superClassName = ollirClass.getSuperClass();
 
             if (superClassName == null)
@@ -62,17 +66,27 @@ public class BackendStage implements JasminBackend {
 
             jasminCode += String.format(".super %s\n\n", superClassName);
 
+            // Iterate over class fields
+            for (Field field : ollirClass.getFields())
+                jasminCode += generateField(field);
+
+            if (ollirClass.getFields().size() > 0)
+                jasminCode += "\n";
+
             // Iterate over class methods
             for (Method method : ollirClass.getMethods()) {
                 jasminCode += generateMethod(method);
 
+                // Reset counts
+                registCount = 1;
                 stackCount = 0;
+                maxStackCount = 0;
             }
 
             // More reports from this stage
             List<Report> reports = new ArrayList<>();
 
-            System.out.println(jasminCode);
+            // System.out.println(jasminCode);
 
             return new JasminResult(ollirResult, jasminCode, reports);
         }
@@ -92,6 +106,21 @@ public class BackendStage implements JasminBackend {
                 )
             );
         }
+    }
+
+    private void incrementStack() {
+        stackCount++;
+
+        if (stackCount > maxStackCount)
+            maxStackCount = stackCount;
+    }
+
+    private void decrementStack() {
+        stackCount--;
+    }
+
+    private void decrementStack(int value) {
+        stackCount -= value;
     }
 
     private String acessModifierToString(AccessModifiers accessModifier) {
@@ -115,30 +144,91 @@ public class BackendStage implements JasminBackend {
     private String elementTypeToString(ElementType elementType) {
         switch (elementType) {
             case VOID:
-            case OBJECTREF:
                 return "V";
 
+            case BOOLEAN:
             case INT32:
                 return "I";
 
             case ARRAYREF:
-                return "[";
+                return "[I";
+
+            case STRING:
+                return "Ljava/lang/String;";
+
+            case OBJECTREF:
+                return "A";
         }
 
         return "";
     }
 
+    private String elementToString(Element element) {
+        if (element.isLiteral())
+            return ((LiteralElement) element).getLiteral();
+
+        else
+            return ((Operand) element).getName();
+    }
+
+    private String opTypeToString(OperationType opType) {
+        switch (opType) {
+            case EQ:
+                return "if_icmpeq";
+            case EQI32:
+                return "ifeq";
+            case NEQ:
+                return "if_icmpne";
+            case NEQI32:
+                return "ifneq";
+            case LTH:
+                return "if_icmplt";
+            case LTE:
+                return "if_icmple";
+            case GTH:
+                return "if_icmpgt";
+            case GTE:
+                return "if_icmpge";
+            case ANDB:
+                return "iand";
+            case ORB:
+                return "ior";
+            case NOTB:
+                return "ineg";
+            default:
+                return "i" + opType.toString().toLowerCase();
+        }
+    }
+
+    private String generateField(Field field) {
+        String code = ".field ";
+
+        code += acessModifierToString(field.getFieldAccessModifier()) + " ";
+
+        if (field.isStaticField())
+            code += "static ";
+
+        if (field.isFinalField())
+            code += "final ";
+
+        code += field.getFieldName() + " ";
+        code += elementTypeToString(field.getFieldType().getTypeOfElement());
+
+        return code + "\n";
+    }
+
     private String generateMethod(Method method) {
-        String code = ".method ";
+        variablesRegists = new HashMap<>();
+        String header = ".method ";
 
         // Method access modifier
         String methodAccessModifier = acessModifierToString(method.getMethodAccessModifier());
 
         if (!methodAccessModifier.isEmpty())
-            code += methodAccessModifier + " ";
+            header += methodAccessModifier + " ";
 
         if (method.isStaticMethod())
-            code += "static ";
+            header += "static ";
 
         // Method name
         String methodName = method.getMethodName();
@@ -146,23 +236,41 @@ public class BackendStage implements JasminBackend {
         if (method.isConstructMethod())
             methodName = "<init>";
 
-        code += methodName;
+        header += methodName;
 
         // Method descriptor
-        code += generateMethodDescriptor(method.getParams(), method.getReturnType(), methodName) + "\n";
+        header += generateMethodDescriptor(method.getParams(), method.getReturnType(), methodName) + "\n";
 
-        code += "\t.limit stack 99\n";    // NOTE: Temporary for Assignment 2
-        code += "\t.limit locals 99\n\n"; // NOTE: Temporary for Assignment 2
+        String code = "";
 
-        if (method.isConstructMethod())
+        // Map method's parameters to regists
+        for (Element operand : method.getParams())
+            variablesRegists.put(((Operand) operand).getName(), registCount++);
+
+        if (method.isConstructMethod()) {
             code += "\taload_0\n";
+            incrementStack();
+        }
 
         // Iterate over method's instructions
-        for (Instruction instruction : method.getInstructions())
-            code += generate(instruction);
+        for (Instruction instruction : method.getInstructions()) {
+            // Iterate over instruction's labels
+            for (String label : method.getLabels(instruction))
+                code += String.format("%s:\n", label);
 
-        code += "return\n"; // TODO: Change this in OLLIR
+            code += generate(instruction);
+        }
+
+        if (method.getReturnType().getTypeOfElement() == ElementType.VOID)
+            code += "\treturn\n";
+
         code += ".end method\n\n";
+
+        maxStackCount = 200;
+        String stackLimit = String.format("\t.limit stack %d\n", maxStackCount);
+        String localsLimit = String.format("\t.limit locals %d\n\n", registCount);
+
+        code = header + stackLimit + localsLimit + code;
 
         return code;
     }
@@ -173,13 +281,23 @@ public class BackendStage implements JasminBackend {
         // Iterate over method's parameters
         for (Element parameter : parameters) {
             // Element type
-            descriptor += elementTypeToString(parameter.getType().getTypeOfElement());
+            ElementType elementType = parameter.getType().getTypeOfElement();
 
-            if (methodName.equals("main"))
-                descriptor += "Ljava/lang/String;";
+            if (elementType == ElementType.BOOLEAN)
+                descriptor += "Z";
+
+            else if (methodName.equals("main"))
+                descriptor += "[Ljava/lang/String;";
+
+            else
+                descriptor += elementTypeToString(parameter.getType().getTypeOfElement());
         }
 
-        descriptor += ")" + elementTypeToString(returnType.getTypeOfElement());
+        if (returnType.getTypeOfElement() == ElementType.BOOLEAN)
+            descriptor += ")Z";
+
+        else
+            descriptor += ")" + elementTypeToString(returnType.getTypeOfElement());
 
         return descriptor;
     }
@@ -212,25 +330,36 @@ public class BackendStage implements JasminBackend {
     }
 
     private String generate(CallInstruction instruction) {
+        if (instruction.getInvocationType() == CallType.ldc) {
+            incrementStack();
+
+            return String.format("\tldc %s\n", ((LiteralElement) instruction.getFirstArg()).getLiteral());
+        }
+
         String code = "";
 
-        for (Element operand : instruction.getListOfOperands())
-                code += "\tldc 1\n";
-
-        // Invocation type
-        String invocationType = instruction.getInvocationType().toString();
-
-        if (invocationType.equals("NEW"))
-            invocationType = "invokespecial";
+        Operand firstArg = ((Operand) instruction.getFirstArg());
 
         // Class name
         String className = "";
 
-        if (instruction.getFirstArg().isLiteral())
-            className += ((LiteralElement) instruction.getFirstArg()).getLiteral();
+        if (firstArg.getType().getTypeOfElement() == ElementType.OBJECTREF)
+            className += ((ClassType) firstArg.getType()).getName();
 
         else
-            className += ((Operand) instruction.getFirstArg()).getName();
+            className += firstArg.getName();
+
+        if (instruction.getInvocationType() == CallType.invokevirtual) {
+            int regist = variablesRegists.getOrDefault(firstArg.getName(), 0);
+
+            if (regist < 4)
+                code += String.format("\taload_%d\n", regist);
+
+            else
+                code += String.format("\taload %d\n", regist);
+
+            incrementStack();
+        }
 
         // Method name
         String methodName = "";
@@ -244,18 +373,55 @@ public class BackendStage implements JasminBackend {
 
         methodName = methodName.replaceAll("\"", "");
 
-        if (methodName.equals("<init>"))
+        if (methodName.equals("<init>") && className.equals("this"))
             className = superClassName;
 
-        if (methodName.isEmpty())
-            methodName = "<init>";
+        else if (className.equals("this"))
+            className = this.className;
 
-        // Descriptor
-        Type returnType = instruction.getReturnType();
+        // Invocation type
+        String invocationType = instruction.getInvocationType().toString().toLowerCase();
 
-        String descriptor = generateMethodDescriptor(instruction.getListOfOperands(), returnType, methodName);
+        // Call to arraylength
+        if (instruction.getInvocationType() == CallType.arraylength) {
+            code += generate(new SingleOpInstruction(instruction.getFirstArg()));
+            code += String.format("\t%s\n", invocationType);
 
-        code += String.format("\t%s %s/%s%s\n", invocationType, className, methodName, descriptor);
+            return code;
+        }
+
+        // Load operands
+        for (Element operand : instruction.getListOfOperands()) {
+            SingleOpInstruction opInstruction = new SingleOpInstruction(operand);
+
+            code += generate(opInstruction);
+        }
+
+        // If is constructor
+        if (invocationType.equals("new")) {
+            if (className.equals("array"))
+                code += String.format("\t%s%s int\n", invocationType, className);
+
+            else {
+                code += String.format("\t%s %s\n", invocationType, className);
+                code += "\tdup\n";
+                incrementStack();
+            }
+
+            incrementStack();
+        }
+
+        else {
+            // Descriptor
+            Type returnType = instruction.getReturnType();
+
+            String descriptor = generateMethodDescriptor(instruction.getListOfOperands(), returnType, methodName);
+
+            code += String.format("\t%s %s/%s%s\n", invocationType, className, methodName, descriptor);
+
+            if (returnType.getTypeOfElement() == ElementType.VOID)
+                decrementStack();
+        }
 
         return code;
     }
@@ -267,9 +433,74 @@ public class BackendStage implements JasminBackend {
     private String generate(SingleOpInstruction instruction) {
         String code = "\t";
         Element operand = instruction.getSingleOperand();
+        ElementType operandType = operand.getType().getTypeOfElement();
 
+        // Literal
         if (operand.isLiteral()) {
-            code += "ldc " + ((LiteralElement) operand).getLiteral();
+            String value = ((LiteralElement) operand).getLiteral();
+
+            if (value.matches("-?\\d+")) {
+                int integerValue = Integer.parseInt(value);
+
+                if (integerValue == -1)
+                    code += "iconst_m1";
+
+                else if (integerValue >= 0 && integerValue <= 5)
+                    code += "iconst_" + value;
+
+                else if (integerValue >= -128 && integerValue <= 127)
+                    code += "bipush " + value;
+
+                else if (integerValue >= -32768 && integerValue <= 32767)
+                    code += "sipush " + value;
+
+                else
+                    code += "ldc " + value;
+            }
+
+            else
+                code += "ldc " + value;
+
+            incrementStack();
+        }
+
+        // Array
+        else if (operand instanceof ArrayOperand) {
+            ArrayOperand arrayOperand = (ArrayOperand) operand;
+            int regist = variablesRegists.get(arrayOperand.getName());
+
+            // Load array reference
+            if (regist < 4)
+                code += String.format("aload_%s\n", regist);
+
+            else
+                code += String.format("aload %s\n", regist);
+
+            incrementStack();
+
+            // Iterate over index operands
+            for (Element indexOperand : arrayOperand.getIndexOperands())
+                code += generate(new SingleOpInstruction(indexOperand));
+
+            code += "\tiaload";
+            incrementStack();
+        }
+
+        // Operand
+        else {
+            int regist = variablesRegists.get(((Operand) operand).getName());
+            String loadType = elementTypeToString(operandType).toLowerCase();
+
+            if (operandType == ElementType.STRING || operandType == ElementType.ARRAYREF)
+                loadType = "a";
+
+            if (regist < 4)
+                code += loadType + "load_" + regist;
+
+            else
+                code += loadType + "load " + regist;
+
+            incrementStack();
         }
 
         code += "\n";
@@ -278,65 +509,186 @@ public class BackendStage implements JasminBackend {
     }
 
     private String generate(AssignInstruction instruction) {
-        String code = "";
-        boolean isObjetRef = instruction.getRhs().getInstType() == InstructionType.CALL && instruction.getTypeOfAssign().getTypeOfElement() == ElementType.OBJECTREF ;
+        String code = generate(instruction.getRhs()); // Generate RHS
 
-        if (isObjetRef) {
-            CallInstruction rhsInstruction = (CallInstruction) instruction.getRhs();
-            String className = ((Operand) rhsInstruction.getFirstArg()).getName();
-            code = "\tnew " + className + "\n";
+        // Assignment type
+        ElementType assignType = instruction.getTypeOfAssign().getTypeOfElement();
+        String assignTypeString = elementTypeToString(assignType).toLowerCase();
+
+        if (assignType == ElementType.STRING || assignType == ElementType.ARRAYREF)
+            assignTypeString = "a";
+
+        // Boolean assignment using binary logic operation
+        else if (assignType == ElementType.BOOLEAN && instruction.getRhs().getInstType() == InstructionType.BINARYOPER) {
+            BinaryOpInstruction rhs = (BinaryOpInstruction) instruction.getRhs();
+
+            code = generate(new CondBranchInstruction(
+                rhs.getLeftOperand(),
+                rhs.getRightOperand(),
+                rhs.getUnaryOperation(),
+                String.format(" Comparison_%d", labelCount)
+            ));
+
+            code += "\ticonst_1\n"; // True
+            code += String.format("\tgoto Assign_%d\n", labelCount);
+            code += String.format("Comparison_%d:\n", labelCount);
+            code += "\ticonst_0\n"; // False
+            code += String.format("Assign_%d:\n", labelCount);
+
+            labelCount++;
         }
 
-        code += generate(instruction.getRhs()); // Generate RHS
+        // Get variable's correspondent regist number
+        int regist = variablesRegists.getOrDefault(((Operand) instruction.getDest()).getName(), registCount++);
 
-        String variableType = elementTypeToString(instruction.getTypeOfAssign().getTypeOfElement()).toLowerCase();
+        // Store instruction
+        if (instruction.getDest() instanceof ArrayOperand) {
+            int stackSize = 2;
 
-        if (!isObjetRef)
-            code += "\t" + variableType + "load " + stackCount + "\n";
+            ArrayOperand arrayOperand = (ArrayOperand) instruction.getDest();
+
+            // Load array reference
+            if (regist < 4)
+                code = String.format("\taload_%s\n", regist);
+
+            else
+                code = String.format("\taload %s\n", regist);
+
+            incrementStack();
+
+            // Iterate over index operands
+            for (Element indexOperand : arrayOperand.getIndexOperands()) {
+                code += generate(new SingleOpInstruction(indexOperand));
+                stackSize++;
+            }
+
+            // Load value
+            code += generate(instruction.getRhs());
+
+            // Store value in array
+            code += "\tiastore\n";
+
+            decrementStack(stackSize);
+        }
+
+        else {
+            if (regist < 4)
+                code += "\t" + assignTypeString + "store_" + regist + "\n";
+
+            else
+                code += "\t" + assignTypeString + "store " + regist + "\n";
+
+            decrementStack();
+        }
+
+        // Update variable table with correspondent regist
+        variablesRegists.put(((Operand) instruction.getDest()).getName(), regist);
+
+        code += "\n";
 
         return code;
     }
 
     private String generate(CondBranchInstruction instruction) {
-        return "";
+        String code = "";
+        OperationType opType = instruction.getCondOperation().getOpType();
+
+        if (opType != OperationType.NOTB && opType != OperationType.NOT)
+            code += generate(new SingleOpInstruction(instruction.getLeftOperand()));
+
+        code += generate(new SingleOpInstruction(instruction.getRightOperand()));
+
+        if (opType == OperationType.ANDB || opType == OperationType.ORB || opType == OperationType.NOTB) {
+            code += String.format("\t%s\n", opTypeToString(opType));
+            opType = OperationType.EQI32;
+        }
+
+        code += String.format("\t%s %s\n", opTypeToString(opType), instruction.getLabel());
+
+        return code;
     }
 
     private String generate(ReturnInstruction instruction) {
-        return "\treturn\n";
+        String code = "";
+
+        if (instruction.hasReturnValue()) {
+            Element operand = instruction.getOperand();
+            ElementType returnType = operand.getType().getTypeOfElement();
+            SingleOpInstruction opInstruction = new SingleOpInstruction(operand);
+            String returnTypeString = elementTypeToString(returnType).toLowerCase();
+
+            if (returnType == ElementType.STRING || returnType == ElementType.ARRAYREF)
+                returnTypeString = "a";
+
+            code += generate(opInstruction);
+            code += String.format("\t%sreturn\n", returnTypeString);
+        }
+
+        return code;
     }
 
     private String generate(GetFieldInstruction instruction) {
-        return null;
+        String code = "\taload_0\n";
+        incrementStack();
+
+        String className = elementToString(instruction.getFirstOperand());
+
+        if (className.equals("this"))
+            className = this.className;
+
+        String fieldName = elementToString(instruction.getSecondOperand());
+        String fieldType = elementTypeToString(instruction.getSecondOperand().getType().getTypeOfElement());
+
+
+        code += String.format("\tgetfield %s/%s %s\n", className, fieldName, fieldType);
+
+        return code;
     }
 
     private String generate(PutFieldInstruction instruction) {
-        return null;
+        String code = "\taload_0\n";
+        incrementStack();
+
+        code += generate(new SingleOpInstruction(instruction.getThirdOperand()));
+
+        String className = elementToString(instruction.getFirstOperand());
+
+        if (className.equals("this"))
+            className = this.className;
+
+        String fieldName = elementToString(instruction.getSecondOperand());
+
+        String fieldType = elementTypeToString(instruction.getSecondOperand().getType().getTypeOfElement());
+
+        code += String.format("\tputfield %s/%s %s\n", className, fieldName, fieldType);
+
+        return code;
     }
 
     private String generate(UnaryOpInstruction instruction) {
-        OperationType opType = instruction.getUnaryOperation().getOpType();
+        String opType = opTypeToString(instruction.getUnaryOperation().getOpType());
         String elementType = elementTypeToString(instruction.getRightOperand().getType().getTypeOfElement());
 
         String code = "\t" + elementType;
 
-        code += "\t" + elementType + opType.toString().toLowerCase() + "\n"; // Operation code
+        code += "\t" + elementType + opType + "\n"; // Operation code
 
         return code;
     }
 
     private String generate(BinaryOpInstruction instruction) {
-        OperationType opType = instruction.getUnaryOperation().getOpType();
-        String elementType = elementTypeToString(instruction.getLeftOperand().getType().getTypeOfElement()).toLowerCase();
+        String code = "";
 
-        String code = "\t" + elementType + "store " + stackCount + "\n";
+        String opType = opTypeToString(instruction.getUnaryOperation().getOpType());
+        Element leftOperand = instruction.getLeftOperand();
+        Element rightOperand = instruction.getRightOperand();
 
-        stackCount++;
+        code += generate(new SingleOpInstruction(leftOperand));
+        code += generate(new SingleOpInstruction(rightOperand));
 
-        code += "\t" + elementType + "store " + stackCount + "\n";
+        code += "\t" + opType + "\n"; // Operation code
 
-        code += "\t" + elementType + opType.toString().toLowerCase() + "\n"; // Operation code
-
-        code += "\n";
+        decrementStack();
 
         return code;
     }

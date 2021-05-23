@@ -59,10 +59,7 @@ public class MySymbolTable implements SymbolTable {
         Method tmpMethod = new Method(methodName, new Type("", false), methodArgs);
         String methodIdentifier = tmpMethod.getIdentifier();
 
-        if(methods.getOrDefault(methodIdentifier, null) != null){
-            return true;
-        }
-        return false;
+        return methods.getOrDefault(methodIdentifier, null) != null;
     }
 
     public Method getMethod(String methodName, List<ValueSymbol> methodArgs){

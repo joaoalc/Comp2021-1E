@@ -19,8 +19,6 @@ public class DeclarationVisitor extends PreorderJmmVisitor<List<Report>, Boolean
     private final MySymbolTable symbolTable = new MySymbolTable();
 
     public DeclarationVisitor() {
-        //TODO: consider other scopes I guess
-
         addVisit("ImportDeclaration", this::importDeclaration);
         addVisit("ClassDeclaration", this::classDeclaration);
         //addVisit("VarDeclaration", this::varDeclaration);
@@ -31,25 +29,11 @@ public class DeclarationVisitor extends PreorderJmmVisitor<List<Report>, Boolean
     }
 
     private boolean importDeclaration(JmmNode node, List<Report> reports) {
-        /*StringBuilder importString = new StringBuilder();
+        String importString = node.get("name");
 
-        // Get the first identifier's name
-        importString.append(node.get("name"));
-
-        // Get the other identifiers' names after each dot
         for (JmmNode child : node.getChildren()) {
-            String importIdentifier = child.get("name");
-
-            importString.append(".").append(importIdentifier);
-        }*/
-        String importString;
-        if(node.getChildren().size() == 0){
-            importString = node.get("name");
+            importString += child.get("name");
         }
-        else{
-            importString = node.getChildren().get(node.getChildren().size() - 1).get("name");
-        }
-
         symbolTable.addImport(importString);
 
         return true;
@@ -110,22 +94,7 @@ public class DeclarationVisitor extends PreorderJmmVisitor<List<Report>, Boolean
     }
 
     private Boolean defaultVisit(JmmNode node, List<Report> reports) {
-        /*System.out.println("Node: " + node.getKind());
-        System.out.println("Node has " + node.getAttributes().size() + " attributes.");
-        for (String entry : node.getAttributes()) {
-            System.out.println(entry);
-        }*/
-        //String content = space + node.getKind();
-        /*String attrs = node.getAttributes()
-                .stream()
-                .filter(a -> !a.equals("line"))
-                .map(a -> a + "=" + node.get(a))
-                .collect(Collectors.joining(", ", "[", "]"));
 
-        //content += ((attrs.length() > 2) ? attrs : "") + "\n";
-        for (JmmNode child : node.getChildren()) {
-            visit(child, reports);
-        }*/
         return true;
     }
 

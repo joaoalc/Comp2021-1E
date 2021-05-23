@@ -1,0 +1,14 @@
+import io;
+class WhileAndIF {
+
+    public static void main(String[] args){
+        int a;
+        int b;
+        int c;
+        int[] d;
+
+        a = 1 + d[c];
+        //io.println(d[c]);
+    }
+
+}
