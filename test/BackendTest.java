@@ -95,9 +95,9 @@ public class BackendTest {
     }
 
     @Test
-    public void QuicksortTest() {
+    public void QuickSortTest() {
         String output = runTest("public/Quicksort.jmm");
-        String expected = "1\n2\n3\n4\n5\n6\n7\n8\n9\n10";
+        String expected = SpecsIo.getResource("fixtures/public/QuickSort.txt");
 
         assertEquals(output, expected);
     }
@@ -112,8 +112,17 @@ public class BackendTest {
 
     @Test
     public void TicTacToeTest() {
-        String output = runTest("public/TicTacToe.jmm");
-        String expected = "";
+        String input = SpecsIo.getResource("fixtures/public/TicTacToe.input");
+        String output = runTest("public/TicTacToe.jmm", input);
+        String expected = SpecsIo.getResource("fixtures/public/TicTacToe.txt");
+
+        assertEquals(output, expected);
+    }
+
+    @Test
+    public void TransposeTest() {
+        String output = runTest("public/Transpose.jmm");
+        String expected = SpecsStrings.normalizeFileContents(SpecsIo.getResource("fixtures/public/Transpose.txt"));
 
         assertEquals(output, expected);
     }
@@ -121,7 +130,7 @@ public class BackendTest {
     @Test
     public void WhileAndIf() {
         String output = runTest("public/WhileAndIF.jmm");
-        String expected = "10\n10\n10\n10\n10\n10\n10\n10\n10\n10";
+        String expected = SpecsIo.getResource("fixtures/public/WhileAndIF.txt");
 
         assertEquals(output, expected);
     }

@@ -73,6 +73,10 @@ public class ParserTests {
         sucessfullTest("If.jmm");
     }
 
+    @Test
+    public void TransposeTest() {
+        sucessfullTest("Transpose.jmm");
+    }
 
     // Fail Tests
 
