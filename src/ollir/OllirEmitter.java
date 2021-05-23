@@ -83,17 +83,19 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
     }
 
     private OllirData generateStatement1(JmmNode node, String s) {
-        if (node.getChildren().size() > 0) {
-            return visit(node.getChildren().get(0), s);
+        String ollir_code = "";
+        for(int i = 0; i < node.getChildren().size(); i++) {
+            ollir_code += visit(node.getChildren().get(i), s).getOllirCode();
         }
-        return new OllirData("", "");
+        return new OllirData("", ollir_code);
     }
 
     private OllirData generateStatement2(JmmNode node, String s) {
-        if (node.getChildren().size() > 0) {
-            return visit(node.getChildren().get(0), s);
+        String ollir_code = "";
+        for(int i = 0; i < node.getChildren().size(); i++) {
+            ollir_code += visit(node.getChildren().get(i), s).getOllirCode();
         }
-        return new OllirData("", "");
+        return new OllirData("", ollir_code);
     }
 
     private OllirData generateIndex(JmmNode node, String s) {

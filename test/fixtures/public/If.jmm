@@ -2,9 +2,21 @@ import MathUtils; //lowerLimit,upperLimit
 import Quicksort;
 
 class Lazysort extends Quicksort {
-    int[] a;
     public static void main(String[] tmp) {
-            a = new int[1];
-    		a[3] = 5;
+        int a;
+        int b;
+        int c;
+        if(true){
+            if(false){
+                a = 5;
+            }
+            else{
+                a = 7;
+            }
+            a = 2;
+        }
+        else{
+            a = 1;
+        }
     }
 }
