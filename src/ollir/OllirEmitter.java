@@ -861,16 +861,18 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                     }
                 }
                 else {
+                    OllirData data = visit(identifier_node, methodId);
+                    ollir_code += data.getOllirCode();
                     //This happens when an object is created and one of it's functions are immediately called. Eg: pi_estimate_times_100 = new MonteCarloPi().estimatePi100(num_samples); in the MonteCarloPi test
                     //TODO: Check if it's its own class and act accordingly
                     String type = getFunctionTypeIfNonExistant(node);
                     if (!type.equals("V")) {
                         return_var = "aux_" + localVariableCounter++ + "." + type;
-                        ollir_code += return_var + ":=." + type + " invokevirtual(this, \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
+                        ollir_code += return_var + ":=." + type + " invokevirtual(" + data.getReturnVar() + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
                     }
                     else {
                         return_var = "";
-                        ollir_code += "invokevirtual(this, \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
+                        ollir_code += "invokevirtual(" + data.getReturnVar() + ", \"" + function_name + "\"" + (args.isEmpty() ? "" : ", " + String.join(", ", args)) + ")." + type + ";";
                     }
                 }
             }
