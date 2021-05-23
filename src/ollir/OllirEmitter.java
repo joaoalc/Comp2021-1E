@@ -675,7 +675,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         for (Symbol field : classFields) {
             Type fieldType = field.getType();
-            String fieldName = field.getName();
+            String fieldName = filter_keywords(field.getName());
 
             ollirCode += "    ".repeat(this.identCounter) + ".field " + fieldName + "." + getOllirType(fieldType) + ";\n";
         }
