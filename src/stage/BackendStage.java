@@ -151,7 +151,7 @@ public class BackendStage implements JasminBackend {
                 return "I";
 
             case ARRAYREF:
-                return "[";
+                return "[I";
 
             case STRING:
                 return "Ljava/lang/String;";
@@ -266,6 +266,7 @@ public class BackendStage implements JasminBackend {
 
         code += ".end method\n\n";
 
+        maxStackCount = 99;
         String stackLimit = String.format("\t.limit stack %d\n", maxStackCount);
         String localsLimit = String.format("\t.limit locals %d\n\n", registCount);
 
@@ -280,19 +281,23 @@ public class BackendStage implements JasminBackend {
         // Iterate over method's parameters
         for (Element parameter : parameters) {
             // Element type
-            descriptor += elementTypeToString(parameter.getType().getTypeOfElement());
+            ElementType elementType = parameter.getType().getTypeOfElement();
 
-            if (methodName.equals("main"))
-                descriptor += "Ljava/lang/String;";
+            if (elementType == ElementType.BOOLEAN)
+                descriptor += "Z";
 
-            else if (parameter.getType().getTypeOfElement() == ElementType.ARRAYREF)
-                descriptor += "I";
+            else if (methodName.equals("main"))
+                descriptor += "[Ljava/lang/String;";
+
+            else
+                descriptor += elementTypeToString(parameter.getType().getTypeOfElement());
         }
 
-        descriptor += ")" + elementTypeToString(returnType.getTypeOfElement());
+        if (returnType.getTypeOfElement() == ElementType.BOOLEAN)
+            descriptor += ")Z";
 
-        if (returnType.getTypeOfElement() == ElementType.ARRAYREF)
-            descriptor += "I"; // Only integer arrays are allowed
+        else
+            descriptor += ")" + elementTypeToString(returnType.getTypeOfElement());
 
         return descriptor;
     }
@@ -513,7 +518,7 @@ public class BackendStage implements JasminBackend {
         if (assignType == ElementType.STRING || assignType == ElementType.ARRAYREF)
             assignTypeString = "a";
 
-            // Boolean assignment using binary logic operation
+        // Boolean assignment using binary logic operation
         else if (assignType == ElementType.BOOLEAN && instruction.getRhs().getInstType() == InstructionType.BINARYOPER) {
             BinaryOpInstruction rhs = (BinaryOpInstruction) instruction.getRhs();
 
@@ -579,16 +584,19 @@ public class BackendStage implements JasminBackend {
         // Update variable table with correspondent regist
         variablesRegists.put(((Operand) instruction.getDest()).getName(), regist);
 
+        code += "\n";
+
         return code;
     }
 
     private String generate(CondBranchInstruction instruction) {
         String code = "";
-
-        code += generate(new SingleOpInstruction(instruction.getLeftOperand()));
-        code += generate(new SingleOpInstruction(instruction.getRightOperand()));
-
         OperationType opType = instruction.getCondOperation().getOpType();
+
+        if (opType != OperationType.NOTB && opType != OperationType.NOT)
+            code += generate(new SingleOpInstruction(instruction.getLeftOperand()));
+
+        code += generate(new SingleOpInstruction(instruction.getRightOperand()));
 
         if (opType == OperationType.ANDB || opType == OperationType.ORB || opType == OperationType.NOTB) {
             code += String.format("\t%s\n", opTypeToString(opType));
@@ -630,6 +638,7 @@ public class BackendStage implements JasminBackend {
 
         String fieldName = elementToString(instruction.getSecondOperand());
         String fieldType = elementTypeToString(instruction.getSecondOperand().getType().getTypeOfElement());
+
 
         code += String.format("\tgetfield %s/%s %s\n", className, fieldName, fieldType);
 
@@ -678,7 +687,6 @@ public class BackendStage implements JasminBackend {
         code += generate(new SingleOpInstruction(rightOperand));
 
         code += "\t" + opType + "\n"; // Operation code
-        code += "\n";
 
         decrementStack();
 

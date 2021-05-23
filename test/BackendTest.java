@@ -32,9 +32,19 @@ public class BackendTest {
         assertEquals(output, expected);
     }
 
+    private void runTest(String filename, String expected, String input) {
+        JasminResult result = TestUtils.backend(SpecsIo.getResource("fixtures/" + filename));
+        TestUtils.noErrors(result.getReports());
+
+        String output = SpecsStrings.normalizeFileContents(result.run(input).trim());
+        expected = SpecsStrings.normalizeFileContents(expected);
+
+        assertEquals(output, expected);
+    }
+
     @Test
     public void FindMaximum() {
-        runTest("public/FindMaximum.jmm", "");
+        runTest("public/FindMaximum.jmm", "Result: 28");
     }
 
     @Test
@@ -43,13 +53,9 @@ public class BackendTest {
     }
 
     @Test
-    public void IfTest() {
-        runTest("public/If.jmm", "");
-    }
-
-    @Test
     public void LazysortTest() {
-        runTest("public/Lazysort.jmm", "");
+        // This tests might sometimes fail because of randomness
+        runTest("public/Lazysort.jmm", "1\n2\n3\n4\n5\n6\n7\n8\n9\n10");
     }
 
     @Test
@@ -59,7 +65,7 @@ public class BackendTest {
 
     @Test
     public void MonteCarloPiTest() {
-        runTest("public/MonteCarloPi.jmm", "");
+        runTest("public/MonteCarloPi.jmm", "", "10\n");
     }
 
     @Test
@@ -74,11 +80,11 @@ public class BackendTest {
 
     @Test
     public void TicTacToeTest() {
-        // runTest("public/TicTacToe.jmm", "");
+        runTest("public/TicTacToe.jmm", "");
     }
 
     @Test
     public void WhileAndIf() {
-        runTest("public/WhileAndIF.jmm", "");
+        runTest("public/WhileAndIF.jmm", "10\n10\n10\n10\n10\n10\n10\n10\n10\n10");
     }
 }
