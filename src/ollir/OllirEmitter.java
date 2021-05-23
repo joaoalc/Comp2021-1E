@@ -131,13 +131,14 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
 
         //TODO: Refactoring: Put this inside the getVarAssignmentName function, somehow
+        String varname = filter_keywords(nodename);
         if (parent_node.getKind().equals("Assignment")) {
             if (indexNode.getKind().equals("Integer")) {
                 ollir_code += "    ".repeat(this.identCounter) + "aux" + localVariableCounter + ".i32 :=.i32 " + indexData.getReturnVar() + ";\n";
-                return_type = nodename + "[" + "aux" + localVariableCounter++ + ".i32" + "]." + getOllirType(new Type(arrayNode.get("type"), false));
+                return_type = varname + "[" + "aux" + localVariableCounter++ + ".i32" + "]." + getOllirType(new Type(arrayNode.get("type"), false));
             }
             else {
-                return_type = nodename + "[" + indexData.getReturnVar() + "]." + getOllirType(new Type(arrayNode.get("type"), false));
+                return_type = varname + "[" + indexData.getReturnVar() + "]." + getOllirType(new Type(arrayNode.get("type"), false));
             }
         }
         else {
@@ -616,11 +617,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         String varname = jmmNode.get("name");
 
-        for (String keyword : this.keywords) {
-            if (varname.startsWith(keyword)) {
-                varname = "var_keyword_" + varname;
-            }
-        }
+        varname = this.filter_keywords(varname);
 
         //Not a class field
         if(fieldData == null){
@@ -1089,6 +1086,17 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             }
         }
         return false;
+    }
+
+    private String filter_keywords(String current_name) {
+        String filtered = current_name;
+        for (String keyword : this.keywords) {
+            if (current_name.startsWith(keyword)) {
+                filtered = "var_keyword_" + current_name;
+                break;
+            }
+        }
+        return filtered;
     }
 
 }
