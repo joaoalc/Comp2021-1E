@@ -22,69 +22,85 @@ import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsStrings;
 
 public class BackendTest {
-    private void runTest(String filename, String expected) {
+    private String runTest(String filename) {
         JasminResult result = TestUtils.backend(SpecsIo.getResource("fixtures/" + filename));
         TestUtils.noErrors(result.getReports());
 
-        String output = SpecsStrings.normalizeFileContents(result.run().trim());
-        expected = SpecsStrings.normalizeFileContents(expected);
-
-        assertEquals(output, expected);
+        return SpecsStrings.normalizeFileContents(result.run().trim());
     }
 
-    private void runTest(String filename, String expected, String input) {
+    private String runTest(String filename, String input) {
         JasminResult result = TestUtils.backend(SpecsIo.getResource("fixtures/" + filename));
         TestUtils.noErrors(result.getReports());
 
-        String output = SpecsStrings.normalizeFileContents(result.run(input).trim());
-        expected = SpecsStrings.normalizeFileContents(expected);
-
-        assertEquals(output, expected);
+        return SpecsStrings.normalizeFileContents(result.run(input).trim());
     }
 
     @Test
     public void FindMaximum() {
-        runTest("public/FindMaximum.jmm", "Result: 28");
+        String output = runTest("public/FindMaximum.jmm");
+        String expected = "Result: 28";
+
+        assertEquals(output, expected);
     }
 
     @Test
     public void HelloWorldTest() {
-        runTest("public/HelloWorld.jmm", "Hello, World!");
+        String output = runTest("public/HelloWorld.jmm");
+        String expected = "Hello, World!";
+
+        assertEquals(output, expected);
     }
 
     @Test
     public void LazysortTest() {
-        // This tests might sometimes fail because of randomness
-        runTest("public/Lazysort.jmm", "1\n2\n3\n4\n5\n6\n7\n8\n9\n10");
+        String output = runTest("public/Lazysort.jmm");
+        String expected = "1\n2\n3\n4\n5\n6\n7\n8\n9\n10";
+
+        assertEquals(output, expected);
     }
 
     @Test
     public void LifeTest() {
-        runTest("public/Life.jmm", "");
+        String output = runTest("public/Life.jmm");
+        String expected = "";
     }
 
     @Test
     public void MonteCarloPiTest() {
-        runTest("public/MonteCarloPi.jmm", "", "10\n");
+        String output = runTest("public/MonteCarloPi.jmm", "10\n");
+        String expected = "";
     }
 
     @Test
-    public void QuickSortTest() {
-        runTest("public/QuickSort.jmm", "1\n2\n3\n4\n5\n6\n7\n8\n9\n10");
+    public void QuicksortTest() {
+        String output = runTest("public/Quicksort.jmm");
+        String expected = "1\n2\n3\n4\n5\n6\n7\n8\n9\n10";
+
+        assertEquals(output, expected);
     }
 
     @Test
     public void SimpleTest() {
-        runTest("public/Simple.jmm", "30");
+        String output = runTest("public/Simple.jmm");
+        String expected = "30";
+
+        assertEquals(output, expected);
     }
 
     @Test
     public void TicTacToeTest() {
-        runTest("public/TicTacToe.jmm", "");
+        String output = runTest("public/TicTacToe.jmm");
+        String expected = "";
+
+        assertEquals(output, expected);
     }
 
     @Test
     public void WhileAndIf() {
-        runTest("public/WhileAndIF.jmm", "10\n10\n10\n10\n10\n10\n10\n10\n10\n10");
+        String output = runTest("public/WhileAndIF.jmm");
+        String expected = "10\n10\n10\n10\n10\n10\n10\n10\n10\n10";
+
+        assertEquals(output, expected);
     }
 }
