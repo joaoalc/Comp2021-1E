@@ -31,6 +31,8 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
     private int identCounter = 0;
 
+    private String[] keywords = { "array", "ret", "field", "aux" };
+
     public OllirEmitter(MySymbolTable symbolTable) {
         this.symbolTable = symbolTable;
 
@@ -612,15 +614,23 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         boolean isSet = putFieldCodeString(jmmNode, s, return_type);
 
+        String varname = jmmNode.get("name");
+
+        for (String keyword : this.keywords) {
+            if (varname.startsWith(keyword)) {
+                varname = "var_keyword_" + varname;
+            }
+        }
+
         //Not a class field
         if(fieldData == null){
-            return new OllirData(jmmNode.get("name") + "." + return_type, "");
+            return new OllirData(varname+ "." + return_type, "");
         }
         if(isSet){
             //putfield
             jmmNode.put("putfield_required", "true");
             if(fieldData == null) {
-                return new OllirData(jmmNode.get("name") + "." + return_type, "");
+                return new OllirData(varname + "." + return_type, "");
             }
         }
         jmmNode.put("ollir_var", fieldData.getReturnVar());
