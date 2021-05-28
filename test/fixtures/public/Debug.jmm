@@ -1,0 +1,23 @@
+import io;
+class Testing {
+    public static void main(String[] args) {
+        boolean a;
+        Testing b;
+
+        b = new Testing();
+
+        a = b.returnTrue();
+
+        if (!!a && true) {
+            io.print(1);
+        }
+
+        else {
+            io.print(0);
+        }
+    }
+
+    public boolean returnTrue() {
+        return true;
+    }
+}

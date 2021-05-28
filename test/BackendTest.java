@@ -42,7 +42,7 @@ public class BackendTest {
         String output = runTest("public/FindMaximum.jmm");
         String expected = "Result: 28";
 
-        assertEquals(output, expected);
+        assertEquals(expected, output);
     }
 
     @Test
@@ -50,7 +50,7 @@ public class BackendTest {
         String output = runTest("public/HelloWorld.jmm");
         String expected = "Hello, World!";
 
-        assertEquals(output, expected);
+        assertEquals(expected, output);
     }
 
     @Test
@@ -69,7 +69,8 @@ public class BackendTest {
 
     @Test
     public void LifeTest() {
-        String output = runTest("public/Life.jmm");
+        String input = "1\n2\n3\n4\n5\n6\n7\n8\n9\n\n";
+        String output = runTest("public/Life.jmm", input);
         String expected =
             "001000000\n" +
             "010100000\n" +
@@ -83,7 +84,7 @@ public class BackendTest {
             "000000000\n" +
             "000000000";
 
-        assertEquals(output, expected);
+        assertEquals(expected, output);
     }
 
     @Test
@@ -99,7 +100,7 @@ public class BackendTest {
         String output = runTest("public/Quicksort.jmm");
         String expected = SpecsStrings.normalizeFileContents(SpecsIo.getResource("fixtures/public/QuickSort.txt"));
 
-        assertEquals(output, expected);
+        assertEquals(expected, output);
     }
 
     @Test
@@ -107,7 +108,7 @@ public class BackendTest {
         String output = runTest("public/Simple.jmm");
         String expected = "30";
 
-        assertEquals(output, expected);
+        assertEquals(expected, output);
     }
 
     @Test
@@ -116,7 +117,7 @@ public class BackendTest {
         String output = runTest("public/TicTacToe.jmm", input);
         String expected = SpecsIo.getResource("fixtures/public/TicTacToe.txt");
 
-        assertEquals(output, expected);
+        assertEquals(expected, output);
     }
 
     @Test
@@ -124,7 +125,7 @@ public class BackendTest {
         String output = runTest("public/Transpose.jmm");
         String expected = SpecsStrings.normalizeFileContents(SpecsIo.getResource("fixtures/public/Transpose.txt"));
 
-        assertEquals(output, expected);
+        assertEquals(expected, output);
     }
 
     @Test
@@ -132,6 +133,6 @@ public class BackendTest {
         String output = runTest("public/WhileAndIF.jmm");
         String expected = SpecsIo.getResource("fixtures/public/WhileAndIF.txt");
 
-        assertEquals(output, expected);
+        assertEquals(expected, output);
     }
 }
