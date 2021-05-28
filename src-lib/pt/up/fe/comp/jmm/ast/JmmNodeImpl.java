@@ -41,6 +41,8 @@ public class JmmNodeImpl implements JmmNode {
         return this.kind;
     }
 
+    public void setKind(String kind) { this.kind = kind; }
+
     @Override
     public List<String> getAttributes() {
         return new ArrayList<>(this.attributes.keySet());

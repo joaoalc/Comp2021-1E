@@ -2,20 +2,19 @@ import io;
 class WhileAndIF {
 
     public static void main(String[] args){
-        boolean a;
-        boolean b;
+        int a;
+        int b;
         int c;
-        int[] d;
-
-        while(!true){}
-
+        int d;
+        boolean e;
+        boolean f;
+        a = 1 + 2 * (3 + 2 + 5);
+        b = 1 - 2;
+        c = 1 * 2;
+        d = 20 / 21;
+        e = 3 < 5;
+        f = true && false;
     }
 
-    public boolean doStuff(int L) {
-           boolean lazy;
-           lazy = true;
-
-           return lazy;
-       }
 
 }
