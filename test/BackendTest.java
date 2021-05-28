@@ -69,20 +69,9 @@ public class BackendTest {
 
     @Test
     public void LifeTest() {
-        String input = "1\n2\n3\n4\n5\n6\n7\n8\n9\n\n";
+        String input = "1\n\n";
         String output = runTest("public/Life.jmm", input);
-        String expected =
-            "001000000\n" +
-            "010100000\n" +
-            "000110000\n" +
-            "000000000\n" +
-            "000000000\n" +
-            "000000000\n" +
-            "000000000\n" +
-            "000000000\n" +
-            "000000000\n" +
-            "000000000\n" +
-            "000000000";
+        String expected = SpecsStrings.normalizeFileContents(SpecsIo.getResource("fixtures/public/Life.txt"));
 
         assertEquals(expected, output);
     }
@@ -134,5 +123,10 @@ public class BackendTest {
         String expected = SpecsIo.getResource("fixtures/public/WhileAndIF.txt");
 
         assertEquals(expected, output);
+    }
+
+    @Test
+    public void DebugTest() {
+        runTest("public/Debug.jmm");
     }
 }

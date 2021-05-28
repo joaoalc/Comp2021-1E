@@ -86,7 +86,7 @@ public class BackendStage implements JasminBackend {
             // More reports from this stage
             List<Report> reports = new ArrayList<>();
 
-            // System.out.println(jasminCode);
+            System.out.println(jasminCode);
 
             return new JasminResult(ollirResult, jasminCode, reports);
         }
@@ -598,8 +598,13 @@ public class BackendStage implements JasminBackend {
 
         code += generate(new SingleOpInstruction(instruction.getRightOperand()));
 
-        if (opType == OperationType.ANDB || opType == OperationType.ORB || opType == OperationType.NOTB) {
+        if (opType == OperationType.ANDB || opType == OperationType.ORB) {
             code += String.format("\t%s\n", opTypeToString(opType));
+            code += "\ticonst_1\n";
+            opType = OperationType.EQ;
+        }
+
+        if (opType == OperationType.NOTB) {
             code += "\ticonst_1\n";
             opType = OperationType.EQ;
         }
