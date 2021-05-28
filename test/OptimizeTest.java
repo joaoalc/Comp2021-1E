@@ -29,7 +29,7 @@ public class OptimizeTest {
 
     @Test
     public void testTesting() {
-        var result = TestUtils.optimize(SpecsIo.getResource("fixtures/public/Testing.jmm"));
+        var result = TestUtils.optimize(SpecsIo.getResource("fixtures/public/Debug.jmm"));
         TestUtils.noErrors(result.getReports());
 
         System.out.println(result.getReports().toString());

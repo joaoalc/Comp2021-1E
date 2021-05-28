@@ -180,7 +180,7 @@ public class BackendStage implements JasminBackend {
             case NEQ:
                 return "if_icmpne";
             case NEQI32:
-                return "ifneq";
+                return "ifne";
             case LTH:
                 return "if_icmplt";
             case LTE:
@@ -600,7 +600,8 @@ public class BackendStage implements JasminBackend {
 
         if (opType == OperationType.ANDB || opType == OperationType.ORB || opType == OperationType.NOTB) {
             code += String.format("\t%s\n", opTypeToString(opType));
-            opType = OperationType.EQI32;
+            code += "\ticonst_1\n";
+            opType = OperationType.EQ;
         }
 
         code += String.format("\t%s %s\n", opTypeToString(opType), instruction.getLabel());
