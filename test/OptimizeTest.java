@@ -28,6 +28,14 @@ public class OptimizeTest {
     }
 
     @Test
+    public void testTesting() {
+        var result = TestUtils.optimize(SpecsIo.getResource("fixtures/public/Testing.jmm"));
+        TestUtils.noErrors(result.getReports());
+
+        System.out.println(result.getReports().toString());
+    }
+
+    @Test
     public void testSimple() {
         var result = TestUtils.optimize(SpecsIo.getResource("fixtures/public/Simple.jmm"));
         TestUtils.noErrors(result.getReports());

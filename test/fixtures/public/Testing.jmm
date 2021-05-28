@@ -1,0 +1,9 @@
+import io;
+class Testing {
+    public static void main(String[] args){
+        int c;
+        while(!true){
+            c = 5;
+        }
+    }
+}
