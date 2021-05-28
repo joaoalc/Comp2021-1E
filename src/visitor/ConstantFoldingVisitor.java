@@ -30,8 +30,10 @@ public class ConstantFoldingVisitor  extends PostorderJmmVisitor<Boolean, List<R
             ((JmmNodeImpl) node).setKind("Integer");
             node.put("value", node.getChildren().get(0).get("value"));
         }
+
         else if(node.getChildren().get(0).getKind().equals("True") || node.getChildren().get(0).getKind().equals("False")){
             ((JmmNodeImpl) node).setKind(node.getChildren().get(0).getKind());
+            node.put("value", node.getChildren().get(0).get("value"));
         }
         else{
             return new ArrayList<>();
