@@ -65,7 +65,7 @@ class Binary {
         i = 0;
         result = 0;
 
-        while (binary.equals(a, 0)) {
+        while (!binary.equals(a, 0)) {
             result = result + binary.modulo(a, 2) * binary.pow(10, i);
             a = binary.division(a, 2);
             i = i + 1;

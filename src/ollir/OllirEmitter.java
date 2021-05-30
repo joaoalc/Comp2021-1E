@@ -75,8 +75,8 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         addVisit("Identifier", this::generateIdentifier);
         addVisit("Integer", this::generateInteger);
-        addVisit("True", this::generateFalse);
-        addVisit("False", this::generateTrue);
+        addVisit("True", this::generateTrue);
+        addVisit("False", this::generateFalse);
         addVisit("NewExpression", this::generateNewExpression);
         addVisit("VarCreation", this::generateVarCreation);
         addVisit("FCall", this::generateFCall);
@@ -241,9 +241,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         labelCounter++;
 
-        //if(isLastThingInMain(node)){
-            ollir_code += "    ".repeat(this.identCounter) + "auxvar.i32 :=.i32 0.i32;\n";
-        //}
+        ollir_code += "    ".repeat(this.identCounter) + "auxvar.i32 :=.i32 0.i32;\n";
 
         return new OllirData(return_type, ollir_code);
     }
@@ -298,7 +296,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             case "FCall":
                 OllirData nodeFCall = visit(conditionNode, s);
                 ollir_code += nodeFCall.getOllirCode();
-                ollir_code += "    ".repeat(this.identCounter) + "aux" + localVariableCounter + ".bool" + " :-.bool" + nodeFCall.getReturnVar() + ";\n";
+                ollir_code += "    ".repeat(this.identCounter) + "aux" + localVariableCounter + ".bool" + " :=.bool " + nodeFCall.getReturnVar() + ";\n";
                 conditionString += "1.bool" + " &&.bool " + "aux" + localVariableCounter++ + ".bool";
                 break;
             default:

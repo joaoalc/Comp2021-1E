@@ -562,19 +562,10 @@ public class BackendStage implements JasminBackend {
                 String.format(" Comparison_%d", labelCount)
             ));
 
-            if (rhs.getUnaryOperation().getOpType() == OperationType.NOTB) {
-                code += "\ticonst_0\n"; // True
-                code += String.format("\tgoto Assign_%d\n", labelCount);
-                code += String.format("Comparison_%d:\n", labelCount);
-                code += "\ticonst_1\n"; // False
-            }
-
-            else {
-                code += "\ticonst_1\n"; // True
-                code += String.format("\tgoto Assign_%d\n", labelCount);
-                code += String.format("Comparison_%d:\n", labelCount);
-                code += "\ticonst_0\n"; // False
-            }
+            code += "\ticonst_0\n"; // False
+            code += String.format("\tgoto Assign_%d\n", labelCount);
+            code += String.format("Comparison_%d:\n", labelCount);
+            code += "\ticonst_1\n"; // True
 
             code += String.format("Assign_%d:\n", labelCount);
 
@@ -649,7 +640,7 @@ public class BackendStage implements JasminBackend {
         }
 
         if (opType == OperationType.NOTB) {
-            code += "\ticonst_1\n";
+            code += "\ticonst_0\n";
             opType = OperationType.EQ;
         }
 

@@ -102,17 +102,9 @@ public class BackendTest {
 
     @Test
     public void TicTacToeTest() {
-        String input = SpecsIo.getResource("fixtures/public/TicTacToe.input");
-        String output = runTest("public/TicTacToe.jmm", input);
-        String expected = SpecsIo.getResource("fixtures/public/TicTacToe.txt");
-
-        assertEquals(expected, output);
-    }
-
-    @Test
-    public void TransposeTest() {
-        String output = runTest("public/Transpose.jmm");
-        String expected = SpecsStrings.normalizeFileContents(SpecsIo.getResource("fixtures/public/Transpose.txt"));
+        String input = SpecsStrings.normalizeFileContents(SpecsIo.getResource("fixtures/public/TicTacToe.input"));
+        String output = SpecsStrings.normalizeFileContents(runTest("public/TicTacToe.jmm", input));
+        String expected = SpecsStrings.normalizeFileContents(SpecsIo.getResource("fixtures/public/TicTacToe.txt"));
 
         assertEquals(expected, output);
     }
@@ -125,8 +117,21 @@ public class BackendTest {
         assertEquals(expected, output);
     }
 
+    // Custom tests
+
     @Test
-    public void DebugTest() {
-        runTest("public/Debug.jmm");
+    public void TransposeTest() {
+        String output = runTest("public/Transpose.jmm");
+        String expected = SpecsStrings.normalizeFileContents(SpecsIo.getResource("fixtures/public/Transpose.txt"));
+
+        assertEquals(expected, output);
+    }
+
+    @Test
+    public void BinaryTest() {
+        String output = runTest("public/Binary.jmm", "42\n");
+        String expected = "101010";
+
+        assertEquals(expected, output);
     }
 }
