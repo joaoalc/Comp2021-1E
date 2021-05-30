@@ -46,6 +46,19 @@ public class AnalysisStage implements JmmAnalysis {
         ExpressionVisitor a_s_vis = new ExpressionVisitor(symbolTable, report_list);
         expressionReports = a_s_vis.visit(node, true);
 
+        boolean o_optimization = true;
+
+        ConstantFoldingVisitor c_f_vis = new ConstantFoldingVisitor(symbolTable, report_list);
+        ConstantPropagationVisitor c_prop_vis = new ConstantPropagationVisitor(symbolTable, report_list);
+        if(o_optimization){
+            do {
+                c_f_vis.isChanged = false;
+                c_prop_vis.isChanged = false;
+                c_f_vis.visit(node, true);
+                c_prop_vis.visit(node, true);
+            } while(c_prop_vis.isChanged);
+        }
+
         System.out.println(report_list.size());
 
         System.out.println("Reports: ");
