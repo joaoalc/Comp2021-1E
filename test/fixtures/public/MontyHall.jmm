@@ -1,0 +1,56 @@
+import io;
+import MathUtils;
+
+class MontyHall {
+    public static void main(String[] args) {
+        int plays;
+        int i;
+        int choice;
+        int stay_wins;
+        int switch_wins;
+        int winner;
+        int shown;
+        int[] doors;
+        
+        plays = io.read();
+        i = 0;
+        stay_wins = 0;
+        switch_wins = 0;
+        
+        while (i < plays) {
+            doors = new int[3];
+            
+            doors[0] = 0;
+            doors[1] = 0;     
+            doors[2] = 0; 
+            
+            winner = MathUtils.random(0, 2);
+            
+            doors[winner] = 1;                 // Put a winner in a random door
+            choice = MathUtils.random(0, 2);   // Pick any door
+            
+            shown = MathUtils.random(0, 2);
+            
+            // Don't show the winner or the choice
+            while (
+                // This is equivalent to a logical OR
+                !(
+                    !(!(doors[shown] < 1) && !(doors[shown] < 1)) &&  // doors[shown] == 1
+                    !(!(shown < choice) && !(choice < shown))         // choice == shown
+                )
+            ) {
+                shown = MathUtils.random(0, 2);
+            }
+            
+            stay_wins = stay_wins + doors[choice];
+            switch_wins = switch_wins + doors[3 - choice - shown];
+        
+            i = i + 1;
+        }
+        
+        io.print(switch_wins);
+        io.println();
+        io.print(stay_wins);
+        io.println();
+    }
+}

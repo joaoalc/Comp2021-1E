@@ -120,17 +120,25 @@ public class BackendTest {
     // Custom tests
 
     @Test
-    public void TransposeTest() {
-        String output = runTest("public/Transpose.jmm");
-        String expected = SpecsStrings.normalizeFileContents(SpecsIo.getResource("fixtures/public/Transpose.txt"));
+    public void BinaryTest() {
+        String output = runTest("public/Binary.jmm", "42\n");
+        String expected = "101010";
 
         assertEquals(expected, output);
     }
 
     @Test
-    public void BinaryTest() {
-        String output = runTest("public/Binary.jmm", "42\n");
-        String expected = "101010";
+    public void MontyHallTest() {
+        String output = runTest("public/MontyHall.jmm", "32768\n");
+        String expected = "[0-9]{5}\n[0-9]{5}";
+
+        assertTrue(output.matches(expected));
+    }
+    
+    @Test
+    public void TransposeTest() {
+        String output = runTest("public/Transpose.jmm");
+        String expected = SpecsStrings.normalizeFileContents(SpecsIo.getResource("fixtures/public/Transpose.txt"));
 
         assertEquals(expected, output);
     }
