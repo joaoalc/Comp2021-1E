@@ -516,11 +516,26 @@ public class BackendStage implements JasminBackend {
             // Variable = Variable + Constant
             if (
                 !rhs.getLeftOperand().isLiteral() &&
-                rhs.getRightOperand().isLiteral() &&
-                ((Operand) instruction.getDest()).getName().equals(((Operand) rhs.getLeftOperand()).getName())
+                    rhs.getRightOperand().isLiteral() &&
+                    ((Operand) instruction.getDest()).getName().equals(((Operand) rhs.getLeftOperand()).getName())
             ) {
                 int regist = variablesRegists.get(((Operand) rhs.getLeftOperand()).getName());
                 int value = Integer.parseInt(((LiteralElement) rhs.getRightOperand()).getLiteral());
+
+                if (rhs.getUnaryOperation().getOpType() == OperationType.SUB)
+                    value = -value;
+
+                return String.format("\tiinc %d %d\n", regist, value);
+            }
+
+            // Variable = Constant + Variable
+            else if (
+                !rhs.getRightOperand().isLiteral() &&
+                    rhs.getLeftOperand().isLiteral() &&
+                    ((Operand) instruction.getDest()).getName().equals(((Operand) rhs.getRightOperand()).getName())
+            ) {
+                int regist = variablesRegists.get(((Operand) rhs.getRightOperand()).getName());
+                int value = Integer.parseInt(((LiteralElement) rhs.getLeftOperand()).getLiteral());
 
                 if (rhs.getUnaryOperation().getOpType() == OperationType.SUB)
                     value = -value;
