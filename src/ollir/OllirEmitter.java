@@ -75,8 +75,8 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         addVisit("Identifier", this::generateIdentifier);
         addVisit("Integer", this::generateInteger);
-        addVisit("True", this::generateTrue);
-        addVisit("False", this::generateFalse);
+        addVisit("True", this::generateFalse);
+        addVisit("False", this::generateTrue);
         addVisit("NewExpression", this::generateNewExpression);
         addVisit("VarCreation", this::generateVarCreation);
         addVisit("FCall", this::generateFCall);
