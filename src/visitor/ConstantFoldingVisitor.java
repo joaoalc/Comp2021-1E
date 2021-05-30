@@ -4,14 +4,20 @@ import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.ast.JmmNodeImpl;
 import pt.up.fe.comp.jmm.ast.PostorderJmmVisitor;
 import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp.jmm.report.ReportType;
 import table.MySymbolTable;
+import utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 public class ConstantFoldingVisitor  extends PostorderJmmVisitor<Boolean, List<Report>> {
+    public boolean isChanged = false;
+    public List<Report> report_list;
+
     public ConstantFoldingVisitor(MySymbolTable symbolTable, List<Report> report_list) {
+        this.report_list = report_list;
 
         addVisit("Add", this::verifySum);
         addVisit("Sub", this::verifySub);
@@ -39,6 +45,7 @@ public class ConstantFoldingVisitor  extends PostorderJmmVisitor<Boolean, List<R
             return new ArrayList<>();
         }
         node.removeChild(0);
+        isChanged = true;
         return new ArrayList<>();
     }
 
@@ -49,10 +56,11 @@ public class ConstantFoldingVisitor  extends PostorderJmmVisitor<Boolean, List<R
             result = result.toLowerCase();
             node.put("value", result);
             result = result.substring(0, 1).toUpperCase() + result.substring(1);
-
+            System.out.println(node.getClass());
             ((JmmNodeImpl) node).setKind(result);
             node.removeChild(1);
             node.removeChild(0);
+            isChanged = true;
         }
         return new ArrayList<>();
 
@@ -79,6 +87,7 @@ public class ConstantFoldingVisitor  extends PostorderJmmVisitor<Boolean, List<R
             node.put("value", result);
             node.removeChild(1);
             node.removeChild(0);
+            isChanged = true;
         }
         return new ArrayList<>();
     }
@@ -90,6 +99,7 @@ public class ConstantFoldingVisitor  extends PostorderJmmVisitor<Boolean, List<R
             node.put("value", result);
             node.removeChild(1);
             node.removeChild(0);
+            isChanged = true;
         }
         return new ArrayList<>();
     }
@@ -101,6 +111,7 @@ public class ConstantFoldingVisitor  extends PostorderJmmVisitor<Boolean, List<R
             node.put("value", result);
             node.removeChild(1);
             node.removeChild(0);
+            isChanged = true;
         }
         return new ArrayList<>();
     }
@@ -112,23 +123,26 @@ public class ConstantFoldingVisitor  extends PostorderJmmVisitor<Boolean, List<R
             node.put("value", result);
             node.removeChild(1);
             node.removeChild(0);
+            isChanged = true;
         }
         return new ArrayList<>();
     }
 
     private List<Report> verifyDiv(JmmNode node, Boolean aBoolean) {
         if (node.getChildren().get(0).getKind().equals("Integer") && node.getChildren().get(1).getKind().equals("Integer")) {
-            String result = String.valueOf(Integer.parseInt(node.getChildren().get(0).get("value")) / Integer.parseInt(node.getChildren().get(1).get("value")));
-            ((JmmNodeImpl) node).setKind("Integer");
-            node.put("value", result);
-            node.removeChild(1);
-            node.removeChild(0);
+            try {
+                String result = String.valueOf(Integer.parseInt(node.getChildren().get(0).get("value")) / Integer.parseInt(node.getChildren().get(1).get("value")));
+                ((JmmNodeImpl) node).setKind("Integer");
+                node.put("value", result);
+                node.removeChild(1);
+                node.removeChild(0);
+                isChanged = true;
+            }
+            catch(ArithmeticException e){
+                report_list.add(Utils.newSemanticReport(node, ReportType.WARNING, "division by zero"));
+            }
+
         }
         return new ArrayList<>();
     }
-
-
-
-
-
 }

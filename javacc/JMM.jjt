@@ -314,8 +314,8 @@ void Call() #void : {Token t;} {
 void _Expression() #void: { Token t; } {
     (
         Integer()
-        | t=<TRUE> { jjtThis.put("type", "boolean"); jjtThis.put("is_array", "false"); } #True
-        | t=<FALSE> { jjtThis.put("type", "boolean"); jjtThis.put("is_array", "false"); } #False
+        | t=<TRUE> { jjtThis.put("value", "true"); jjtThis.put("type", "boolean"); jjtThis.put("is_array", "false"); } #True
+        | t=<FALSE> { jjtThis.put("value", "false"); jjtThis.put("type", "boolean"); jjtThis.put("is_array", "false"); } #False
         | t=<IDENTIFIER> { jjtThis.put("name", t.image); } #Identifier
         | <THIS> #This
         | NewExpression()
