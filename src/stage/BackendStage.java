@@ -266,7 +266,6 @@ public class BackendStage implements JasminBackend {
 
         code += ".end method\n\n";
 
-        maxStackCount = 200;
         String stackLimit = String.format("\t.limit stack %d\n", maxStackCount);
         String localsLimit = String.format("\t.limit locals %d\n\n", registCount);
 
@@ -406,6 +405,7 @@ public class BackendStage implements JasminBackend {
                 code += String.format("\t%s %s\n", invocationType, className);
                 code += "\tdup\n";
                 incrementStack();
+                incrementStack();
             }
 
             incrementStack();
@@ -532,13 +532,11 @@ public class BackendStage implements JasminBackend {
             else if (
                 !rhs.getRightOperand().isLiteral() &&
                     rhs.getLeftOperand().isLiteral() &&
+                    rhs.getUnaryOperation().getOpType() == OperationType.ADD &&
                     ((Operand) instruction.getDest()).getName().equals(((Operand) rhs.getRightOperand()).getName())
             ) {
                 int regist = variablesRegists.get(((Operand) rhs.getRightOperand()).getName());
                 int value = Integer.parseInt(((LiteralElement) rhs.getLeftOperand()).getLiteral());
-
-                if (rhs.getUnaryOperation().getOpType() == OperationType.SUB)
-                    value = -value;
 
                 return String.format("\tiinc %d %d\n", regist, value);
             }
