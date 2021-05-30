@@ -513,14 +513,20 @@ public class BackendStage implements JasminBackend {
         if (instruction.getRhs().getInstType() == InstructionType.BINARYOPER) {
             BinaryOpInstruction rhs = (BinaryOpInstruction) instruction.getRhs();
 
+            // Variable = Variable + Constant
             if (
                 !rhs.getLeftOperand().isLiteral() &&
                 rhs.getRightOperand().isLiteral() &&
-                rhs.getUnaryOperation().getOpType() == OperationType.ADD &&
-                ((LiteralElement) rhs.getRightOperand()).getLiteral().equals("1") &&
                 ((Operand) instruction.getDest()).getName().equals(((Operand) rhs.getLeftOperand()).getName())
-            )
-                return String.format("\tiinc %s 1\n", variablesRegists.get(((Operand) rhs.getLeftOperand()).getName()));
+            ) {
+                int regist = variablesRegists.get(((Operand) rhs.getLeftOperand()).getName());
+                int value = Integer.parseInt(((LiteralElement) rhs.getRightOperand()).getLiteral());
+
+                if (rhs.getUnaryOperation().getOpType() == OperationType.SUB)
+                    value = -value;
+
+                return String.format("\tiinc %d %d\n", regist, value);
+            }
         }
 
         String code = generate(instruction.getRhs()); // Generate RHS
