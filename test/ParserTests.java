@@ -73,11 +73,6 @@ public class ParserTests {
         sucessfullTest("If.jmm");
     }
 
-    @Test
-    public void TransposeTest() {
-        sucessfullTest("Transpose.jmm");
-    }
-
     // Fail Tests
 
     @Test
@@ -108,5 +103,17 @@ public class ParserTests {
     @Test
     public void NestedLoopTest() {
         failureTest("NestedLoop.jmm");
+    }
+
+    // Custom tests
+
+    @Test
+    public void BinaryTest() {
+        sucessfullTest("Binary.jmm");
+    }
+
+    @Test
+    public void TransposeTest() {
+        sucessfullTest("Transpose.jmm");
     }
 }

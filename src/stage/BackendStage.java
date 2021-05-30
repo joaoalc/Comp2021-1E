@@ -266,7 +266,6 @@ public class BackendStage implements JasminBackend {
 
         code += ".end method\n\n";
 
-        maxStackCount = 200;
         String stackLimit = String.format("\t.limit stack %d\n", maxStackCount);
         String localsLimit = String.format("\t.limit locals %d\n\n", registCount);
 
@@ -406,6 +405,7 @@ public class BackendStage implements JasminBackend {
                 code += String.format("\t%s %s\n", invocationType, className);
                 code += "\tdup\n";
                 incrementStack();
+                incrementStack();
             }
 
             incrementStack();
@@ -509,6 +509,39 @@ public class BackendStage implements JasminBackend {
     }
 
     private String generate(AssignInstruction instruction) {
+        // Incrementing variable
+        if (instruction.getRhs().getInstType() == InstructionType.BINARYOPER) {
+            BinaryOpInstruction rhs = (BinaryOpInstruction) instruction.getRhs();
+
+            // Variable = Variable + Constant
+            if (
+                !rhs.getLeftOperand().isLiteral() &&
+                    rhs.getRightOperand().isLiteral() &&
+                    ((Operand) instruction.getDest()).getName().equals(((Operand) rhs.getLeftOperand()).getName())
+            ) {
+                int regist = variablesRegists.get(((Operand) rhs.getLeftOperand()).getName());
+                int value = Integer.parseInt(((LiteralElement) rhs.getRightOperand()).getLiteral());
+
+                if (rhs.getUnaryOperation().getOpType() == OperationType.SUB)
+                    value = -value;
+
+                return String.format("\tiinc %d %d\n", regist, value);
+            }
+
+            // Variable = Constant + Variable
+            else if (
+                !rhs.getRightOperand().isLiteral() &&
+                    rhs.getLeftOperand().isLiteral() &&
+                    rhs.getUnaryOperation().getOpType() == OperationType.ADD &&
+                    ((Operand) instruction.getDest()).getName().equals(((Operand) rhs.getRightOperand()).getName())
+            ) {
+                int regist = variablesRegists.get(((Operand) rhs.getRightOperand()).getName());
+                int value = Integer.parseInt(((LiteralElement) rhs.getLeftOperand()).getLiteral());
+
+                return String.format("\tiinc %d %d\n", regist, value);
+            }
+        }
+
         String code = generate(instruction.getRhs()); // Generate RHS
 
         // Assignment type
@@ -529,19 +562,11 @@ public class BackendStage implements JasminBackend {
                 String.format(" Comparison_%d", labelCount)
             ));
 
-            if (rhs.getUnaryOperation().getOpType() == OperationType.NOTB) {
-                code += "\ticonst_0\n"; // True
-                code += String.format("\tgoto Assign_%d\n", labelCount);
-                code += String.format("Comparison_%d:\n", labelCount);
-                code += "\ticonst_1\n"; // False
-            }
+            code += "\ticonst_0\n"; // False
+            code += String.format("\tgoto Assign_%d\n", labelCount);
+            code += String.format("Comparison_%d:\n", labelCount);
+            code += "\ticonst_1\n"; // True
 
-            else {
-                code += "\ticonst_1\n"; // True
-                code += String.format("\tgoto Assign_%d\n", labelCount);
-                code += String.format("Comparison_%d:\n", labelCount);
-                code += "\ticonst_0\n"; // False
-            }
             code += String.format("Assign_%d:\n", labelCount);
 
             labelCount++;
@@ -550,7 +575,7 @@ public class BackendStage implements JasminBackend {
         // Get variable's correspondent regist number
         int regist = variablesRegists.getOrDefault(((Operand) instruction.getDest()).getName(), registCount++);
 
-        // Store instruction
+        // Array assignment
         if (instruction.getDest() instanceof ArrayOperand) {
             int stackSize = 2;
 
@@ -580,6 +605,7 @@ public class BackendStage implements JasminBackend {
             decrementStack(stackSize);
         }
 
+        // Store instruction
         else {
             if (regist < 4)
                 code += "\t" + assignTypeString + "store_" + regist + "\n";
@@ -614,7 +640,7 @@ public class BackendStage implements JasminBackend {
         }
 
         if (opType == OperationType.NOTB) {
-            code += "\ticonst_1\n";
+            code += "\ticonst_0\n";
             opType = OperationType.EQ;
         }
 
@@ -653,7 +679,6 @@ public class BackendStage implements JasminBackend {
 
         String fieldName = elementToString(instruction.getSecondOperand());
         String fieldType = elementTypeToString(instruction.getSecondOperand().getType().getTypeOfElement());
-
 
         code += String.format("\tgetfield %s/%s %s\n", className, fieldName, fieldType);
 
@@ -694,13 +719,12 @@ public class BackendStage implements JasminBackend {
     private String generate(BinaryOpInstruction instruction) {
         String code = "";
 
-        String opType = opTypeToString(instruction.getUnaryOperation().getOpType());
         Element leftOperand = instruction.getLeftOperand();
         Element rightOperand = instruction.getRightOperand();
+        String opType = opTypeToString(instruction.getUnaryOperation().getOpType());
 
         code += generate(new SingleOpInstruction(leftOperand));
         code += generate(new SingleOpInstruction(rightOperand));
-
         code += "\t" + opType + "\n"; // Operation code
 
         decrementStack();

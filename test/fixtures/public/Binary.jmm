@@ -1,0 +1,76 @@
+import io;
+
+class Binary {
+    public int division(int a, int b) {
+        int quotient;
+
+        quotient = 0;
+
+        if (1 < a) {
+            while (b < a) {
+                a = a - b;
+                quotient = quotient + 1;
+            }
+
+            if (b < a + 1)
+                quotient = quotient + 1;
+
+            else {
+
+            }
+        }
+
+        else {
+
+        }
+
+        return quotient;
+    }
+
+    public int modulo(int a, int b) {
+        int result;
+
+        result = a - b * new Binary().division(a, b);
+
+        return result;
+    }
+
+    public int pow(int n, int exponent) {
+        int result;
+        int i;
+
+        result = 1;
+        i = exponent;
+
+        while (0 < i) {
+            result = result * n;
+            i = i - 1;
+        }
+
+        return result;
+    }
+
+    public boolean equals(int a, int b) {
+        return !(a < b) && !(b < a);
+    }
+
+    public static void main(String[] args) {
+        Binary binary;
+        int a;
+        int i;
+        int result;
+
+        binary = new Binary();
+        a = io.read();
+        i = 0;
+        result = 0;
+
+        while (!binary.equals(a, 0)) {
+            result = result + binary.modulo(a, 2) * binary.pow(10, i);
+            a = binary.division(a, 2);
+            i = i + 1;
+        }
+
+        io.print(result);
+    }
+}
