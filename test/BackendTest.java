@@ -112,7 +112,7 @@ public class BackendTest {
     @Test
     public void WhileAndIf() {
         String output = runTest("public/WhileAndIF.jmm");
-        String expected = SpecsIo.getResource("fixtures/public/WhileAndIF.txt");
+        String expected = SpecsStrings.normalizeFileContents(SpecsIo.getResource("fixtures/public/WhileAndIF.txt"));
 
         assertEquals(expected, output);
     }
