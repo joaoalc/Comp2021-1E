@@ -64,7 +64,6 @@ public class ConstantPropagationVisitor  extends AJmmVisitor<Boolean, List<Repor
 
     private List<Report> verifyMethodDeclaration(JmmNode node, Boolean propagate) {
         final String methodName = node.get("name");
-        System.out.println(node.getChildren());
         List<JmmNode> parameterNodes = getChildrenOfKind(node, "Argument");
         List<String> parameter_types = new ArrayList<>();
         for (JmmNode parameterNode : parameterNodes) {

@@ -1,14 +1,18 @@
-import io;
+import ioPlus;
 class ConstantFolding {
 
     public static void main(String[] args){
+        ConstantFolding cf;
         int a;
         int b;
         int c;
         int d;
         boolean e;
         boolean f;
+        cf = new ConstantFolding();
         a = 1 + 2 * (3 + 2 + 5);
+        b = cf.doStuff(15, a) + cf.doStuff(15, 4);
+        b = args.length;
         b = 1 - 2;
         c = 1 * 2;
         d = 20 / 21;
@@ -20,7 +24,7 @@ class ConstantFolding {
         d = 2 * 20 / 21;
     }
 
-    public int dostuff(int a, int b){
+    public int doStuff(int a, int b){
 
         boolean c;
         boolean d;
@@ -30,8 +34,16 @@ class ConstantFolding {
 
         d = c && false;
 
+        a = this.ahaha();
 
-        return a + b;
+
+        return b;
     }
+
+    public int ahaha() {
+        ioPlus.printHelloWorld();
+        return 1;
+    }
+
 
 }
