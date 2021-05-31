@@ -21,6 +21,16 @@ Describe how the syntactic error recovery of your tool works. Does it exit after
 ## Semantic Analysis
 
 Refer the semantic rules implemented by your tool.
+Our tool's semantic analysis stage detects errors of 4 different types:
+	TypeMismatch: An expression has at least one argument of the wrong type.
+		Eg: true && 1;
+	UndeclaredVariable: A variable is used without being declared.
+		Eg: 
+			int b;
+			b = a + 1; //a is not a class or method field
+	UndeclaredMethod: A method is being called that isn't declared, imported or from a superclass
+		Eg: 
+			
 
 ## Code Generation
 
