@@ -68,9 +68,17 @@ public class BackendTest {
     }
 
     @Test
+
     public void LifeTest() {
+        // We include an extra newline at the end of the input to send an empty string
+        // This will cause an exception, since it's expecting a number
+        // However, it is necessary to stop the infinite loop of the program
         String input = "1\n2\n3\n4\n5\n6\n7\n8\n9\n\n"; // Execute 10 iterations of the program
         String output = runTest("public/Life.jmm", input);
+        
+        // Filter the exception text 
+        output = output.replaceAll("[a-zA-Z].+", "").trim();
+
         String expected = SpecsStrings.normalizeFileContents(SpecsIo.getResource("fixtures/public/Life.txt"));
 
         assertEquals(expected, output);
@@ -112,7 +120,7 @@ public class BackendTest {
     @Test
     public void WhileAndIf() {
         String output = runTest("public/WhileAndIF.jmm");
-        String expected = SpecsIo.getResource("fixtures/public/WhileAndIF.txt");
+        String expected = SpecsStrings.normalizeFileContents(SpecsIo.getResource("fixtures/public/WhileAndIF.txt"));
 
         assertEquals(expected, output);
     }
@@ -134,7 +142,7 @@ public class BackendTest {
 
         assertTrue(output.matches(expected));
     }
-    
+
     @Test
     public void TransposeTest() {
         String output = runTest("public/Transpose.jmm");
