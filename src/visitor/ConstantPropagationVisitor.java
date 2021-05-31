@@ -27,9 +27,11 @@ public class ConstantPropagationVisitor  extends AJmmVisitor<Boolean, List<Repor
 
     public MySymbolTable symbolTable;
 
-    public ConstantPropagationVisitor(MySymbolTable symbolTable, List<Report> report_list) {
+    private List<Runnable> toChange = new ArrayList<>();
 
-/*
+    public ConstantPropagationVisitor(MySymbolTable symbolTable, List<Report> report_list) {
+        this.symbolTable = symbolTable;
+
         addVisit("Identifier", this::verifyIdentifier);
 
         addVisit("Assignment", this::verifyAssignment);
@@ -42,11 +44,27 @@ public class ConstantPropagationVisitor  extends AJmmVisitor<Boolean, List<Repor
 
 
         //Default
-        setDefaultVisit(this::defaultVisit);*/
+        setDefaultVisit(this::defaultVisit);
+    }
+
+    public void makeChanges() {
+        for (Runnable change : toChange) {
+            change.run();
+        }
+
+        toChange.clear();
+    }
+
+    private void replaceNode(JmmNode from, JmmNode to) {
+        JmmNode parent = from.getParent();
+        int index = parent.getChildren().indexOf(from);
+        parent.removeChild(index);
+        parent.add(to, index);
     }
 
     private List<Report> verifyMethodDeclaration(JmmNode node, Boolean propagate) {
         final String methodName = node.get("name");
+        System.out.println(node.getChildren());
         List<JmmNode> parameterNodes = getChildrenOfKind(node, "Argument");
         List<String> parameter_types = new ArrayList<>();
         for (JmmNode parameterNode : parameterNodes) {
@@ -60,10 +78,7 @@ public class ConstantPropagationVisitor  extends AJmmVisitor<Boolean, List<Repor
         currentMethod = symbolTable.getMethod(methodId);
 
         varMap.clear();
-        for(int i = 0; i < node.getChildren().size(); i++){
-            visit(node, true);
-        }
-        return new ArrayList<>();
+        return defaultVisit(node, true);
     }
 
     private List<Report> verifyIdentifier(JmmNode node, Boolean propagate) {
@@ -74,10 +89,16 @@ public class ConstantPropagationVisitor  extends AJmmVisitor<Boolean, List<Repor
             String value = varMap.get(varName);
             Type varType = currentMethod.getLocalVariable(varName).getType();
             if(varType.getName().equals("boolean") && !varType.isArray()){
-                node.put("value", value);
                 String result = value.substring(0, 1).toUpperCase() + value.substring(1);
-                //((JmmNodeImpl) node).setKind(result);
+                JmmNode new_node = new JmmNodeImpl(result);
+                new_node.put("value", value);
+                toChange.add(() -> replaceNode(node, new_node));
 
+                isChanged = true;
+            } else if (varType.getName().equals("int") && !varType.isArray()) {
+                JmmNode new_node = new JmmNodeImpl("Integer");
+                new_node.put("value", value);
+                toChange.add(() -> replaceNode(node, new_node));
             }
         }
         return new ArrayList<>();
@@ -106,23 +127,17 @@ public class ConstantPropagationVisitor  extends AJmmVisitor<Boolean, List<Repor
     }
 
     private List<Report> verifyWhileStatement(JmmNode node, Boolean aBoolean) {
-        for(int i = 0; i < node.getChildren().size(); i++){
-            visit(node, false);
-        }
-        return new ArrayList<>();
+        return defaultVisit(node, false);
 
     }
 
     private List<Report> verifyIfStatement(JmmNode node, Boolean propagate) {
-        for(int i = 0; i < node.getChildren().size(); i++){
-            visit(node, false);
-        }
-        return new ArrayList<>();
+        return defaultVisit(node, false);
     }
 
     private List<Report> defaultVisit(JmmNode node, Boolean propagate) {
-        for(int i = 0; i < node.getChildren().size(); i++){
-            visit(node, propagate);
+        for(JmmNode child : node.getChildren()){
+            visit(child, propagate);
         }
         return new ArrayList<>();
     }

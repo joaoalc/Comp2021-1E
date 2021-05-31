@@ -21,8 +21,16 @@ class ConstantFolding {
     }
 
     public int dostuff(int a, int b){
+
+        boolean c;
+        boolean d;
         a = 5;
-        b = a;
+        b = a + 5;
+        c = true;
+
+        d = c && false;
+
+
         return a + b;
     }
 

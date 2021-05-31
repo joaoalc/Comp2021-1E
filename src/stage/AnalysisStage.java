@@ -57,6 +57,7 @@ public class AnalysisStage implements JmmAnalysis {
                 c_f_vis.visit(node, true);
                 c_f_vis.makeChanges();
                 c_prop_vis.visit(node, true);
+                c_prop_vis.makeChanges();
             } while(c_prop_vis.isChanged || c_f_vis.isChanged);
         }
 
