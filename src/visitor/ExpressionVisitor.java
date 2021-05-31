@@ -184,8 +184,8 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
                 method = NodeFindingMethods.FindParentMethod(firstChild, symbolTable);
                 Symbol var = NodeFindingMethods.getVariable(method, symbolTable, firstChild.get("name"));
                 if(var == null){
-                    reports.add(newSemanticReport(node, ReportType.ERROR,"Undeclared variable"));
-                    report_list.add(newSemanticReport(node, ReportType.ERROR,"Undeclared variable"));
+                    reports.add(newSemanticReport(node, ReportType.WARNING,"Undeclared variable"));
+                    report_list.add(newSemanticReport(node, ReportType.WARNING,"Undeclared variable"));
                     return reports;
                 }
                 if(!firstChild.getOptional("type").isPresent()) {
@@ -199,8 +199,8 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
                 method = NodeFindingMethods.FindParentMethod(secondChild, symbolTable);
                 Symbol var = NodeFindingMethods.getVariable(method, symbolTable, secondChild.get("name"));
                 if(var == null){
-                    reports.add(newSemanticReport(node, ReportType.ERROR,"Undeclared variable"));
-                    report_list.add(newSemanticReport(node, ReportType.ERROR,"Undeclared variable"));
+                    reports.add(newSemanticReport(node, ReportType.WARNING,"Undeclared variable"));
+                    report_list.add(newSemanticReport(node, ReportType.WARNING,"Undeclared variable"));
                     return reports;
                 }
                 if(!secondChild.getOptional("type").isPresent())
@@ -390,8 +390,8 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
                     if(method != null){
                         if(method.getLocalVariable(node.getChildren().get(0).get("name")) == null) {
                             if(symbolTable.getField(node.getChildren().get(0).get("name")) == null) {
-                                reports.add(newSemanticReport(node, ReportType.ERROR,"Undeclared variable"));
-                                report_list.add(newSemanticReport(node, ReportType.ERROR,"Undeclared variable"));
+                                reports.add(newSemanticReport(node, ReportType.WARNING,"Undeclared variable"));
+                                report_list.add(newSemanticReport(node, ReportType.WARNING,"Undeclared variable"));
 
                                 return reports;
                             }
@@ -399,8 +399,8 @@ public class ExpressionVisitor extends PostorderJmmVisitor<Boolean, List<Report>
                     }
                     //If it doesn't have a method, find in symbol table only
                     else if (symbolTable.getField(node.getChildren().get(0).get("name")) == null){
-                        reports.add(newSemanticReport(node, ReportType.ERROR,"Undeclared variable"));
-                        report_list.add(newSemanticReport(node, ReportType.ERROR,"Undeclared variable"));
+                        reports.add(newSemanticReport(node, ReportType.WARNING,"Undeclared variable"));
+                        report_list.add(newSemanticReport(node, ReportType.WARNING,"Undeclared variable"));
 
                         return reports;
                     }

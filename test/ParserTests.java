@@ -29,6 +29,11 @@ public class ParserTests {
     }
 
     @Test
+    public void testFunctionIndexing() {
+        sucessfullTest("FunctionIndexing.jmm");
+    }
+
+    @Test
     public void HelloWorldTest() {
         sucessfullTest("HelloWorld.jmm");
     }

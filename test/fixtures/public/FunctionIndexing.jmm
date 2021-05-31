@@ -1,0 +1,14 @@
+import ioPlus;
+import MathUtils;
+class FunctionIndexing {
+    public static void main(String[] args) {
+        int[] doors;
+        doors = new int[3];
+
+        doors[this.getIndex()] = 1;
+    }
+
+    public int getIndex() {
+        return 1;
+    }
+}

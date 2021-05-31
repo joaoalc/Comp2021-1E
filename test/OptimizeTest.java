@@ -17,6 +17,8 @@ import org.junit.Test;
 import pt.up.fe.comp.TestUtils;
 import pt.up.fe.specs.util.SpecsIo;
 
+import static org.junit.Assert.assertEquals;
+
 public class OptimizeTest {
 
     @Test
@@ -28,8 +30,8 @@ public class OptimizeTest {
     }
 
     @Test
-    public void testTesting() {
-        var result = TestUtils.optimize(SpecsIo.getResource("fixtures/public/Debug.jmm"));
+    public void testFunctionIndexing() {
+        var result = TestUtils.optimize(SpecsIo.getResource("fixtures/public/FunctionIndexing.jmm"));
         TestUtils.noErrors(result.getReports());
 
         System.out.println(result.getReports().toString());
