@@ -2,12 +2,12 @@
 
 ## Group 1E
 
-- **Name:** Eduardo Correia | **Number:** up201806433 | **Grade:** | **Contribution:** 33.3%
-- **Name:** João Cardoso | **Number:** up201806531 | **Grade:** | **Contribution:** 33.3%
-- **Name:** Guilherme Calassi | **Number:** up201800157 | **Grade:** | **Contribution:** 0.0%
-- **Name:** Telmo Baptista | **Number:** up201806554 | **Grade:** | **Contribution:** 33.3%
+- **Name:** Eduardo Correia | **Number:** up201806433 | **Grade:** 18.0 | **Contribution:** 33.3%
+- **Name:** João Cardoso | **Number:** up201806531 | **Grade:** 18.0 | **Contribution:** 33.3%
+- **Name:** Guilherme Calassi | **Number:** up201800157 | **Grade:** 0.0 | **Contribution:** 0.0%
+- **Name:** Telmo Baptista | **Number:** up201806554 | **Grade:** 18.0 | **Contribution:** 33.3%
 
-**Grade of the project:** 17.5
+**Grade of the project:** 18.0
 
 ## Summary
 
@@ -25,11 +25,13 @@ Refer the semantic rules implemented by your tool.
 ## Code Generation
 
 Describe how the code generation of your tool works and identify the possible problems your tool has regarding code
-generation.)
+generation.
 
 ## Task Distribution
 
-Identify the set of tasks done by each member of the project. You can divide this by checkpoint it if helps)
+- **Eduardo Correia:** Grammar, Jasmin code generation and tests. 
+- **João Cardoso:** Grammar, Semantic analysis, OLLIR code generation.
+- **Telmo Baptista:** Semantic analysis, OLLIR code generation.
 
 ## Pros
 
