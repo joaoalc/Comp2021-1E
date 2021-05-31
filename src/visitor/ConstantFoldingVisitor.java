@@ -16,6 +16,8 @@ public class ConstantFoldingVisitor  extends PostorderJmmVisitor<Boolean, List<R
     public boolean isChanged = false;
     public List<Report> report_list;
 
+    private List<Runnable> toChange = new ArrayList<>();
+
     public ConstantFoldingVisitor(MySymbolTable symbolTable, List<Report> report_list) {
         this.report_list = report_list;
 
@@ -28,23 +30,40 @@ public class ConstantFoldingVisitor  extends PostorderJmmVisitor<Boolean, List<R
         addVisit("Parentheses", this::verifyParentheses);
     }
 
+    public void makeChanges() {
+        for (Runnable change : toChange) {
+            change.run();
+        }
+
+        toChange.clear();
+    }
+
+    private void replaceNode(JmmNode from, JmmNode to) {
+        JmmNode parent = from.getParent();
+        int index = parent.getChildren().indexOf(from);
+        parent.removeChild(index);
+        parent.add(to, index);
+    }
+
     private List<Report> verifyParentheses(JmmNode node, Boolean aBoolean) {
         if(node.getChildren().size() != 1){
             return new ArrayList<>();
         }
         if(node.getChildren().get(0).getKind().equals("Integer")){
-            ((JmmNodeImpl) node).setKind("Integer");
-            node.put("value", node.getChildren().get(0).get("value"));
+            JmmNode new_node = new JmmNodeImpl("Integer");
+            new_node.put("value", node.getChildren().get(0).get("value"));
+
+            toChange.add(() -> replaceNode(node, new_node));
         }
 
         else if(node.getChildren().get(0).getKind().equals("True") || node.getChildren().get(0).getKind().equals("False")){
-            ((JmmNodeImpl) node).setKind(node.getChildren().get(0).getKind());
-            node.put("value", node.getChildren().get(0).get("value"));
+            JmmNode new_node = new JmmNodeImpl(node.getChildren().get(0).getKind());
+            new_node.put("value", node.getChildren().get(0).get("value"));
+            toChange.add(() -> replaceNode(node, new_node));
         }
         else{
             return new ArrayList<>();
         }
-        node.removeChild(0);
         isChanged = true;
         return new ArrayList<>();
     }
@@ -52,14 +71,12 @@ public class ConstantFoldingVisitor  extends PostorderJmmVisitor<Boolean, List<R
     private List<Report> verifyLessThan(JmmNode node, Boolean aBoolean) {
         if(node.getChildren().get(0).getKind().equals("Integer") && node.getChildren().get(1).getKind().equals("Integer")){
             String result = String.valueOf(Integer.parseInt(node.getChildren().get(0).get("value")) < Integer.parseInt(node.getChildren().get(1).get("value")));
-
             result = result.toLowerCase();
-            node.put("value", result);
-            result = result.substring(0, 1).toUpperCase() + result.substring(1);
-            System.out.println(node.getClass());
-            ((JmmNodeImpl) node).setKind(result);
-            node.removeChild(1);
-            node.removeChild(0);
+            String kind = result.substring(0, 1).toUpperCase() + result.substring(1);
+            JmmNode new_node = new JmmNodeImpl(kind);
+            new_node.put("value", result);
+            toChange.add(() -> replaceNode(node, new_node));
+
             isChanged = true;
         }
         return new ArrayList<>();
@@ -83,10 +100,9 @@ public class ConstantFoldingVisitor  extends PostorderJmmVisitor<Boolean, List<R
                 result = "False";
             }
 
-            ((JmmNodeImpl) node).setKind(result);
-            node.put("value", result);
-            node.removeChild(1);
-            node.removeChild(0);
+            JmmNode new_node = new JmmNodeImpl(result);
+            new_node.put("value", result);
+            toChange.add(() -> replaceNode(node, new_node));
             isChanged = true;
         }
         return new ArrayList<>();
@@ -95,10 +111,11 @@ public class ConstantFoldingVisitor  extends PostorderJmmVisitor<Boolean, List<R
     public List<Report> verifySum(JmmNode node, Boolean aBoolean) {
         if(node.getChildren().get(0).getKind().equals("Integer") && node.getChildren().get(1).getKind().equals("Integer")){
             String result = String.valueOf(Integer.parseInt(node.getChildren().get(0).get("value")) + Integer.parseInt(node.getChildren().get(1).get("value")));
-            ((JmmNodeImpl) node).setKind("Integer");
-            node.put("value", result);
-            node.removeChild(1);
-            node.removeChild(0);
+
+            JmmNode new_node = new JmmNodeImpl("Integer");
+            new_node.put("value", result);
+            toChange.add(() -> replaceNode(node, new_node));
+
             isChanged = true;
         }
         return new ArrayList<>();
@@ -107,10 +124,9 @@ public class ConstantFoldingVisitor  extends PostorderJmmVisitor<Boolean, List<R
     private List<Report> verifySub(JmmNode node, Boolean aBoolean) {
         if(node.getChildren().get(0).getKind().equals("Integer") && node.getChildren().get(1).getKind().equals("Integer")){
             String result = String.valueOf(Integer.parseInt(node.getChildren().get(0).get("value")) - Integer.parseInt(node.getChildren().get(1).get("value")));
-            ((JmmNodeImpl) node).setKind("Integer");
-            node.put("value", result);
-            node.removeChild(1);
-            node.removeChild(0);
+            JmmNode new_node = new JmmNodeImpl("Integer");
+            new_node.put("value", result);
+            toChange.add(() -> replaceNode(node, new_node));
             isChanged = true;
         }
         return new ArrayList<>();
@@ -119,10 +135,9 @@ public class ConstantFoldingVisitor  extends PostorderJmmVisitor<Boolean, List<R
     private List<Report> verifyMult(JmmNode node, Boolean aBoolean) {
         if(node.getChildren().get(0).getKind().equals("Integer") && node.getChildren().get(1).getKind().equals("Integer")){
             String result = String.valueOf(Integer.parseInt(node.getChildren().get(0).get("value")) * Integer.parseInt(node.getChildren().get(1).get("value")));
-            ((JmmNodeImpl) node).setKind("Integer");
-            node.put("value", result);
-            node.removeChild(1);
-            node.removeChild(0);
+            JmmNode new_node = new JmmNodeImpl("Integer");
+            new_node.put("value", result);
+            toChange.add(() -> replaceNode(node, new_node));
             isChanged = true;
         }
         return new ArrayList<>();
@@ -132,10 +147,9 @@ public class ConstantFoldingVisitor  extends PostorderJmmVisitor<Boolean, List<R
         if (node.getChildren().get(0).getKind().equals("Integer") && node.getChildren().get(1).getKind().equals("Integer")) {
             try {
                 String result = String.valueOf(Integer.parseInt(node.getChildren().get(0).get("value")) / Integer.parseInt(node.getChildren().get(1).get("value")));
-                ((JmmNodeImpl) node).setKind("Integer");
-                node.put("value", result);
-                node.removeChild(1);
-                node.removeChild(0);
+                JmmNode new_node = new JmmNodeImpl("Integer");
+                new_node.put("value", result);
+                toChange.add(() -> replaceNode(node, new_node));
                 isChanged = true;
             }
             catch(ArithmeticException e){

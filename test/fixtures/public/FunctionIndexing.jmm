@@ -1,14 +1,29 @@
-import ioPlus;
-import MathUtils;
-class FunctionIndexing {
-    public static void main(String[] args) {
-        int[] doors;
-        doors = new int[3];
+import io;
+class ConstantFolding {
 
-        doors[this.getIndex()] = 1;
+    public static void main(String[] args){
+        int a;
+        int b;
+        int c;
+        int d;
+        boolean e;
+        boolean f;
+        a = 1 + 2 * (3 + 2 + 5);
+        b = 1 - 2;
+        c = 1 * 2;
+        d = 20 / 21;
+        e = 3 < 5;
+        f = true && false;
+
+        d = 5 / 0;
+
+        d = 2 * 20 / 21;
     }
 
-    public int getIndex() {
-        return 1;
+    public int dostuff(int a, int b){
+        a = 5;
+        b = a;
+        return a + b;
     }
+
 }
