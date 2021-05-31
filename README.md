@@ -2,12 +2,12 @@
 
 ## Group 1E
 
-- **Name:** Eduardo Correia | **Number:** up201806433 | **Grade:** 18.0 | **Contribution:** 33.3%
-- **Name:** João Cardoso | **Number:** up201806531 | **Grade:** 18.0 | **Contribution:** 33.3%
-- **Name:** Guilherme Calassi | **Number:** up201800157 | **Grade:** 0.0 | **Contribution:** 0.0%
-- **Name:** Telmo Baptista | **Number:** up201806554 | **Grade:** 18.0 | **Contribution:** 33.3%
+- **Name:** Eduardo Correia | **Number:** up201806433 | **Grade:** | **Contribution:** 33.3%
+- **Name:** João Cardoso | **Number:** up201806531 | **Grade:** | **Contribution:** 33.3%
+- **Name:** Guilherme Calassi | **Number:** up201800157 | **Grade:** | **Contribution:** 0.0%
+- **Name:** Telmo Baptista | **Number:** up201806554 | **Grade:** | **Contribution:** 33.3%
 
-**Grade of the project:** 18.0
+**Grade of the project:** 17.5
 
 ## Summary
 
@@ -19,23 +19,39 @@ Java) programs into Java bytecodes.
 Describe how the syntactic error recovery of your tool works. Does it exit after the first error?
 
 ## Semantic Analysis
+Our semantic analyser, upon finding an error, skips the node it is currently analyzing and continues as if there were no errors.
+Additionally, it does not have an error limit.
+It detects errors of 4 different types, which have messages similiar to those :
+	TypeMismatch: An expression has at least one argument of the wrong type.
+		Eg: true && 1;
+	UndeclaredVariable: A variable is used without being declared.
+		Eg: 
+			int b;
+			b = a + 1; //a is not a class or method field
+	UndeclaredMethod: A method is being called that isn't declared, imported or from a superclass
 
-Refer the semantic rules implemented by your tool.
-
+	VariableRedefinition: A variable is redeclared in the same scope. This can be inside the class or inside of a method; However, if one is inside
+		Eg:
+			int a;
+			boolean a; //Inside the same method as the other declaration.
+Additionally, we also detect some instances of variables being declared but not initialized as a warning.
 ## Code Generation
 
 Describe how the code generation of your tool works and identify the possible problems your tool has regarding code
-generation.
+generation.)
 
 ## Task Distribution
 
-- **Eduardo Correia:** Grammar, Jasmin code generation and tests. 
-- **João Cardoso:** Grammar, Semantic analysis, OLLIR code generation.
-- **Telmo Baptista:** Semantic analysis, OLLIR code generation.
+Identify the set of tasks done by each member of the project. You can divide this by checkpoint it if helps)
 
 ## Pros
 
-Identify the most positive aspects of your tool
+Our tool allows for function overloading.
+We have implemented the -o optimizations (constant propagation and while loop goto usage reduction).
+We also implemented constant folding (eg: a = 1+1; turns into a = 2;) and removed unused local variables).
+Proper synthatic error detection.
+Proper semantic error detection.
+
 
 ## Cons
 
