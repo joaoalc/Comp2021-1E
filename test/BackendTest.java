@@ -46,6 +46,11 @@ public class BackendTest {
     }
 
     @Test
+    public void testFunctionIndexing() {
+        runTest("public/FunctionIndexing.jmm");
+    }
+
+    @Test
     public void HelloWorldTest() {
         String output = runTest("public/HelloWorld.jmm");
         String expected = "Hello, World!";

@@ -3,8 +3,10 @@ import pt.up.fe.comp.jmm.JmmParserResult;
 
 import java.util.ArrayList;
 import java.io.StringReader;
+import java.util.regex.Pattern;
 
 public class Main implements JmmParser {
+
     public JmmParserResult parse(String jmmCode) {
         JMM jmm = new JMM(new StringReader(jmmCode));
         try {
