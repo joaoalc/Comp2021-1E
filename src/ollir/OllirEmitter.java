@@ -31,7 +31,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
     private int identCounter = 0;
 
-    private String[] keywords = { "array", "ret", "field"};
+    private String[] keywords = {"array", "ret", "field"};
 
     public OllirEmitter(MySymbolTable symbolTable) {
         this.symbolTable = symbolTable;
@@ -88,7 +88,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
     private OllirData generateStatement1(JmmNode node, String s) {
         String ollir_code = "";
-        for(int i = 0; i < node.getChildren().size(); i++) {
+        for (int i = 0; i < node.getChildren().size(); i++) {
             ollir_code += visit(node.getChildren().get(i), s).getOllirCode();
         }
         return new OllirData("", ollir_code);
@@ -96,7 +96,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
     private OllirData generateStatement2(JmmNode node, String s) {
         String ollir_code = "";
-        for(int i = 0; i < node.getChildren().size(); i++) {
+        for (int i = 0; i < node.getChildren().size(); i++) {
             ollir_code += visit(node.getChildren().get(i), s).getOllirCode();
         }
         return new OllirData("", ollir_code);
@@ -117,21 +117,21 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         String nodename = node.get("name");
 
         //For getfield
-        if(arrayNode.getOptional("ollir_name").isPresent()){
+        if (arrayNode.getOptional("ollir_name").isPresent()) {
             nodename = arrayNode.get("ollir_name");
         }
 
         //For putfield
-        if(arrayNode.getOptional("putfield_required").isPresent()){
-            if(arrayNode.get("putfield_required").equals("true")){
+        if (arrayNode.getOptional("putfield_required").isPresent()) {
+            if (arrayNode.get("putfield_required").equals("true")) {
                 node.put("putfield_required", "true");
                 nodename = arrayNode.get("ollir_name");
             }
         }
 
-
         //TODO: Refactoring: Put this inside the getVarAssignmentName function, somehow
         String varname = filter_keywords(nodename);
+        
         if (parent_node.getKind().equals("Assignment")) {
             if (indexNode.getKind().equals("Integer")) {
                 ollir_code += "    ".repeat(this.identCounter) + "aux" + localVariableCounter + ".i32 :=.i32 " + indexData.getReturnVar() + ";\n";
@@ -141,12 +141,14 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                 return_type = varname + "[" + indexData.getReturnVar() + "]." + getOllirType(new Type(arrayNode.get("type"), false));
             }
         }
+        
         else {
             if (indexNode.getKind().equals("Integer")) {
                 return_type = "aux" + localVariableCounter++ + ".i32";
                 ollir_code += "    ".repeat(this.identCounter) + "aux" + localVariableCounter + ".i32 :=.i32 " + indexData.getReturnVar() + ";\n";
                 ollir_code += "    ".repeat(this.identCounter) + return_type + " :=." + getVarOllirType(node) + " " + varname + "[" + "aux" + localVariableCounter++ + ".i32" + "]." + getVarOllirType(node) + ";\n";
             }
+            
             else {
                 return_type = "aux" + localVariableCounter++ + ".i32";
                 ollir_code += "    ".repeat(this.identCounter) + return_type + " :=." + getVarOllirType(node) + " " + varname + "[" + indexData.getReturnVar() + "]." + getVarOllirType(node) + ";\n";
@@ -234,10 +236,10 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         }
 
         ollir_code += "    ".repeat(this.identCounter) + "if(" + conditionString + ")" + "goto else" + labelCounter + ";\n"
-                + trueString +
-                "\n" + "    ".repeat(this.identCounter) + "goto endif" + labelCounter + ";\n"
-                + "    ".repeat(this.identCounter) + "else" + labelCounter + ":\n" + elseString
-                + "    ".repeat(this.identCounter) + "endif" + labelCounter + ":\n";
+            + trueString +
+            "\n" + "    ".repeat(this.identCounter) + "goto endif" + labelCounter + ";\n"
+            + "    ".repeat(this.identCounter) + "else" + labelCounter + ":\n" + elseString
+            + "    ".repeat(this.identCounter) + "endif" + labelCounter + ":\n";
 
         labelCounter++;
 
@@ -309,7 +311,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         this.identCounter++;
         String code_ollir = "";
-        for(int i = 1; i < node.getChildren().size(); i++){
+        for (int i = 1; i < node.getChildren().size(); i++) {
             JmmNode trueNode = node.getChildren().get(i);
             String trueString = visit(trueNode, s).getOllirCode();
             code_ollir += trueString;
@@ -352,50 +354,34 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
 
         OllirData data = visit(valueNode, methodId);
         //if (data.getOllirCode().equals("")) {
-            //For things like integers or identifiers (a = 2; a = b)
-            //if (valueNode.getOptional("type").isPresent()) {
+        //For things like integers or identifiers (a = 2; a = b)
+        //if (valueNode.getOptional("type").isPresent()) {
         //TODO: Is this a class field?
         boolean isfield = false;
-                //if(valueNode.get("is_array").equals("false")){
+        //if(valueNode.get("is_array").equals("false")){
         ollir_code += data.getOllirCode();
         String varname = filter_keywords(identifierNode.get("name"));
-        if(identifierNode.getOptional("putfield_required").isPresent()){
-            if(identifierNode.get("putfield_required").equals("true")){
+        if (identifierNode.getOptional("putfield_required").isPresent()) {
+            if (identifierNode.get("putfield_required").equals("true")) {
                 isfield = true;
-                if(identifierNode.getKind().equals("Index")) {https://www.youtube.com/watch?v=qlIlHCjrM_Ebdnd
+                if (identifierNode.getKind().equals("Index")) {
                     ollir_code += "    ".repeat(this.identCounter) + identifierData.getReturnVar() + " :=." + getVarOllirType(identifierNode) + " " + data.getReturnVar() + ";\n";
                     ollir_code += "    ".repeat(this.identCounter) + "putfield(this, " + varname + "." + getOllirTypeNotVoid(new Type(identifierNode.get("type"), true)) + ", " + identifierNode.getChildren().get(0).get("ollir_var") + ")." + getVarOllirType(identifierNode) + ";\n";
                 }
-                else if (valueNode.getKind().equals("NewExpression")){
-                    if(identifierNode.get("is_array").equals("true")){
+                else if (valueNode.getKind().equals("NewExpression")) {
+                    if (identifierNode.get("is_array").equals("true")) {
                         ollir_code += "    ".repeat(this.identCounter) + identifierData.getReturnVar() + " :=." + getVarOllirType(identifierNode) + " " + data.getReturnVar() + ";\n";
                         ollir_code += "    ".repeat(this.identCounter) + "putfield(this, " + varname + "." + getVarOllirType(identifierNode) + ", " + identifierData.getReturnVar() + ")." + getVarOllirType(identifierNode) + ";\n";
                     }
                 }
-                else{
+                else {
                     ollir_code += "    ".repeat(this.identCounter) + "putfield(this, " + varname + "." + getVarOllirType(identifierNode) + ", " + data.getReturnVar() + ")." + getVarOllirType(identifierNode) + ";\n";
                 }
             }
         }
-        if(!isfield) {
+        if (!isfield) {
             ollir_code += "    ".repeat(this.identCounter) + identifierData.getReturnVar() + " :=." + getVarOllirType(identifierNode) + " " + data.getReturnVar() + ";\n";
         }
-            /*}
-            else{
-                // ????
-                System.out.println("sus");
-            }/*
-        //}
-        /*else {
-            ollir_code += data.getOllirCode();
-            if (getVarOllirType(valueNode).equals("")) {
-                //TODO: This might not work properly for assignment to an index
-                ollir_code += identifierData.getReturnVar() + " :=." + getVarOllirType(identifierNode) + " " + data.getReturnVar() + ";\n";
-            }
-            else {
-                ollir_code += identifierData.getReturnVar() + " :=." + getVarOllirType(valueNode) + " " + data.getReturnVar() + ";\n";
-            }
-        }*/
 
         return new OllirData(return_type, ollir_code);
     }
@@ -625,13 +611,13 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         varname = this.filter_keywords(varname);
 
         //Not a class field
-        if(fieldData == null){
-            return new OllirData(varname+ "." + return_type, "");
+        if (fieldData == null) {
+            return new OllirData(varname + "." + return_type, "");
         }
-        if(isSet){
+        if (isSet) {
             //putfield
             jmmNode.put("putfield_required", "true");
-            if(fieldData == null) {
+            if (fieldData == null) {
                 return new OllirData(varname + "." + return_type, "");
             }
         }
@@ -679,8 +665,8 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         }
 
         ollirCode += "    ".repeat(this.identCounter) + ".construct " + className + "().V {\n" +
-                "    ".repeat(this.identCounter + 1) + "invokespecial(this, \"<init>\").V;\n" +
-                "    ".repeat(this.identCounter) + "}\n";
+            "    ".repeat(this.identCounter + 1) + "invokespecial(this, \"<init>\").V;\n" +
+            "    ".repeat(this.identCounter) + "}\n";
 
 
         for (JmmNode child : node.getChildren()) {
@@ -814,7 +800,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                 else if (child.getKind().equals("True") || child.getKind().equals("False")) {
                     types.add(new ValueSymbol(new Type("boolean", false), "", true));
                 }
-                else if(child.getOptional("type").isPresent()){
+                else if (child.getOptional("type").isPresent()) {
                     //ollir_code += childData.getOllirCode();
                     types.add(new ValueSymbol(new Type(child.get("type"), Boolean.parseBoolean(child.get("is_array"))), "", true));
                 }
@@ -933,7 +919,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
     public String getVarAssignmentName(JmmNode jmmNode) {
         JmmNode parent_node = jmmNode.getParent();
         String name = "";
-        if(parent_node.getChildren().get(0).getKind().equals("Index")){
+        if (parent_node.getChildren().get(0).getKind().equals("Index")) {
             name = "aux" + localVariableCounter++;
         }
         else if (parent_node.getKind().equals("Assignment")) {
@@ -1022,15 +1008,15 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         return (type.isArray() ? "array." : "") + ollirType;
     }
 
-    private OllirData getOrPutFieldCode(JmmNode identifierNode, String methodId, String varType){
+    private OllirData getOrPutFieldCode(JmmNode identifierNode, String methodId, String varType) {
         String varName = identifierNode.get("name");
         String getOrPutFieldString = "";
         String return_var = "";
 
         //Is it a class field?
-        if(NodeFindingMethods.isClassField(symbolTable.getMethod(methodId), symbolTable, varName)){
+        if (NodeFindingMethods.isClassField(symbolTable.getMethod(methodId), symbolTable, varName)) {
             String var = filter_keywords(varName);
-            if(isSet(identifierNode)){
+            if (isSet(identifierNode)) {
                 //putfield can't be done here since it requires things to be placed after operations
                 // eg: a = 2 + 2            aux1 = 2 + 2; putfield(a)
                 //return new OllirData("", "");
@@ -1039,7 +1025,7 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
                 return_var = auxVarName;
                 return new OllirData(return_var, getOrPutFieldString);
             }
-            else{
+            else {
                 //getfield
                 String auxVarName = "aux" + localVariableCounter++ + "." + varType;
                 getOrPutFieldString = "    ".repeat(this.identCounter) + auxVarName + " :=." + varType + " getfield(this, " + var + "." + varType + ")." + varType + ";\n";
@@ -1051,14 +1037,14 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         return null;
     }
 
-    public boolean putFieldCodeString(JmmNode identifierNode, String methodId, String varType){
+    public boolean putFieldCodeString(JmmNode identifierNode, String methodId, String varType) {
         String varName = identifierNode.get("name");
         String getOrPutFieldString = "";
         String return_var = "";
 
         //Is it a class field?
-        if(NodeFindingMethods.isClassField(symbolTable.getMethod(methodId), symbolTable, varName)){
-            if(isSet(identifierNode)){
+        if (NodeFindingMethods.isClassField(symbolTable.getMethod(methodId), symbolTable, varName)) {
+            if (isSet(identifierNode)) {
                 //putfield can't be done here since it requires things to be placed after operations
                 // eg: a = 2 + 2            aux1 = 2 + 2; putfield(a)
                 return true;
@@ -1067,23 +1053,23 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         return false;
     }
 
-    private boolean isSet(JmmNode node){
-        if(node.getParent().getKind().equals("Assignment")){
-            if(node == node.getParent().getChildren().get(0)) {
+    private boolean isSet(JmmNode node) {
+        if (node.getParent().getKind().equals("Assignment")) {
+            if (node == node.getParent().getChildren().get(0)) {
                 return true;
             }
         }
-        else if(node.getParent().getKind().equals("Index")){
-            if(node.getParent() == node.getParent().getParent().getChildren().get(0)){
+        else if (node.getParent().getKind().equals("Index")) {
+            if (node.getParent() == node.getParent().getParent().getChildren().get(0)) {
                 return true;
             }
         }
         return false;
     }
 
-    private boolean isLastThingInMain(JmmNode ifNode){
-        if(ifNode.getParent().getKind().equals("MethodBody")){
-            if(ifNode.getParent().getParent().getOptional("name").isPresent()) {
+    private boolean isLastThingInMain(JmmNode ifNode) {
+        if (ifNode.getParent().getKind().equals("MethodBody")) {
+            if (ifNode.getParent().getParent().getOptional("name").isPresent()) {
                 if (ifNode.getParent().getParent().get("name").equals("main")) {
                     if (ifNode.getParent().getChildren().get(ifNode.getParent().getChildren().size() - 1) == ifNode) {
                         return true;
