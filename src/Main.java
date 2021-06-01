@@ -19,6 +19,7 @@ import java.nio.file.Paths;
 public class Main implements JmmParser {
 
     public JmmParserResult parse(String jmmCode) {
+        System.out.println(jmmCode);
         JMM jmm = new JMM(new StringReader(jmmCode));
         try {
             SimpleNode root = jmm.Program(); // returns reference to root node
@@ -36,13 +37,17 @@ public class Main implements JmmParser {
 
         boolean optimise = false;
 
-        if (args[1].equals("-o")) {
-            optimise = true;
-            filePath = args[2];
+        if (args.length < 1){
+            System.out.print("Usage: java -jar <jarfile> [-o] file");
+            return;
         }
 
-        else
+        if (args[0].equals("-o")) {
+            optimise = true;
             filePath = args[1];
+        } else {
+            filePath = args[0];
+        }
 
         // Read code from input file
         String code = SpecsIo.getResource(filePath);
