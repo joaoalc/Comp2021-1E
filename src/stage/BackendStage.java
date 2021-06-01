@@ -86,8 +86,6 @@ public class BackendStage implements JasminBackend {
             // More reports from this stage
             List<Report> reports = new ArrayList<>();
 
-            System.out.println(jasminCode);
-
             return new JasminResult(ollirResult, jasminCode, reports);
         }
 
@@ -488,7 +486,6 @@ public class BackendStage implements JasminBackend {
 
         // Operand
         else {
-            System.out.println(((Operand) operand).getName());
             int regist = variablesRegists.get(((Operand) operand).getName());
             String loadType = elementTypeToString(operandType).toLowerCase();
 

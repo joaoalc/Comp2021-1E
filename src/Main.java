@@ -19,7 +19,6 @@ import java.nio.file.Paths;
 public class Main implements JmmParser {
 
     public JmmParserResult parse(String jmmCode) {
-        System.out.println(jmmCode);
         JMM jmm = new JMM(new StringReader(jmmCode));
         try {
             SimpleNode root = jmm.Program(); // returns reference to root node
@@ -50,9 +49,9 @@ public class Main implements JmmParser {
         }
 
         // Read code from input file
-        String code = SpecsIo.getResource(filePath);
-        String fileName = new File(filePath).getName();
-        
+        String code = SpecsIo.read(filePath);
+        String fileName = new File(filePath).getName().split("\\.")[0];
+
         JmmParserResult parserResult = new Main().parse(code);
         JmmSemanticsResult semanticsResult = new AnalysisStage().semanticAnalysis(parserResult);
 

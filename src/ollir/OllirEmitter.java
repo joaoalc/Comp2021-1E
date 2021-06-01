@@ -677,10 +677,6 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
         ollirCode += "}";
         this.identCounter--;
 
-//        System.out.println("Full code:\n");
-        System.out.println(ollirCode);
-//        System.out.println("End of code.");
-
         return new OllirData(ollirCode);
     }
 
