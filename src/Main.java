@@ -50,8 +50,8 @@ public class Main implements JmmParser {
 
         // Read code from input file
         String code = SpecsIo.read(filePath);
-        String fileName = new File(filePath).getName().split("\\.")[0];
-
+        String fileName = new File(filePath).getName();
+        
         JmmParserResult parserResult = new Main().parse(code);
         JmmSemanticsResult semanticsResult = new AnalysisStage().semanticAnalysis(parserResult);
 
