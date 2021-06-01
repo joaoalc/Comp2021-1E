@@ -934,7 +934,6 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
     }
 
     private String getFunctionTypeIfNonExistant(JmmNode node) {
-        //TODO: Check if this works for array assignment
         JmmNode parent_node = node.getParent();
         String type = "";
         if (parent_node.getKind().equals("Assignment")) {
@@ -948,7 +947,21 @@ public class OllirEmitter extends AJmmVisitor<String, OllirData> {
             type = "bool";
         }
         else {
-            type = "V";
+            Optional<String> opt = node.getOptional("type");
+            if (opt.isPresent()) {
+                String fcallType = opt.get();
+                if (fcallType.isEmpty()) {
+                    type = "V";
+                } else if (fcallType.equals("int")){
+                    type = "i32";
+                } else if (fcallType.equals("boolean")){
+                    type = "bool";
+                } else {
+                    type = fcallType;
+                }
+            } else {
+                type = "V";
+            }
         }
         return type;
     }

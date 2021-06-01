@@ -131,6 +131,22 @@ public class UnusedVariableVisitor extends AJmmVisitor<Boolean, List<Report>> {
         return new ArrayList<>();
     }
 
+    private String deriveFunctionType(JmmNode node) {
+        String type = "";
+        if (node.getKind().equals("FCall")) {
+            JmmNode functionParent = node.getParent();
+            String parentKind = functionParent.getKind();
+            if (parentKind.equals("Assignment")) {
+                type = functionParent.getChildren().get(0).get("type");
+            } else if (parentKind.equals("LessThan")) {
+                type = "int";
+            } else {
+                type = functionParent.get("type");
+            }
+        }
+        return type;
+    }
+
     private void removeUnused(JmmNode nodeToRemove) {
         if (nodeToRemove.getKind().equals("Assignment")) {
             JmmNode expression = nodeToRemove.getChildren().get(1);
@@ -138,7 +154,8 @@ public class UnusedVariableVisitor extends AJmmVisitor<Boolean, List<Report>> {
             int index = nodeToRemove.getParent().getChildren().indexOf(nodeToRemove);
             for (int i = 0; i < calls.size(); i++) {
                 JmmNode call = calls.get(i);
-                nodeToRemove.removeChild(call);
+                String type = deriveFunctionType(call);
+                call.put("type", type);
                 nodeToRemove.getParent().add(call, index + i);
             }
 
