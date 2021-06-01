@@ -41,7 +41,6 @@ sourceSets {
         java {
             srcDir 'src'
             srcDir 'src-lib'
-            // srcDir 'javacc' // Comment this line to run the code
             srcDir 'generated'
         }
     }
@@ -64,8 +63,12 @@ jar {
     manifest {
         attributes 'Main-Class': 'Main'
     }
-}
 
+    // TODO: Needs strategy for duplicates
+    from {
+        configurations.runtimeClasspath.collect() {it.isDirectory() ? it : zipTree(it) }
+    }
+}
 
 // Copy JAR to root folder
 task copyJar() {

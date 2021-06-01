@@ -488,6 +488,7 @@ public class BackendStage implements JasminBackend {
 
         // Operand
         else {
+            System.out.println(((Operand) operand).getName());
             int regist = variablesRegists.get(((Operand) operand).getName());
             String loadType = elementTypeToString(operandType).toLowerCase();
 
