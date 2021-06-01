@@ -73,10 +73,9 @@ public class OptimizationStage implements JmmOptimization {
             c_f_vis.makeChanges();
             c_prop_vis.visit(root, true);
             c_prop_vis.makeChanges();
-
+            unusedVar_vis.visit(root, false);
+            unusedVar_vis.makeChanges();
         } while(c_prop_vis.isChanged || c_f_vis.isChanged || unusedVar_vis.isChanged);
-        unusedVar_vis.visit(root, false);
-        unusedVar_vis.makeChanges();
 
 
         return semanticsResult;
