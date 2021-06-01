@@ -19,19 +19,24 @@ import org.junit.Test;
 
 import pt.up.fe.comp.TestUtils;
 import pt.up.fe.comp.jmm.jasmin.JasminResult;
+import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsStrings;
 
 public class BackendTest {
     private String runTest(String filename) {
-        JasminResult result = TestUtils.backend(SpecsIo.getResource("fixtures/" + filename));
+        OllirResult ollirResult = TestUtils.optimize(SpecsIo.getResource("fixtures/" + filename), true);
+        TestUtils.noErrors(ollirResult.getReports());
+        JasminResult result = TestUtils.backend(ollirResult);
         TestUtils.noErrors(result.getReports());
 
         return SpecsStrings.normalizeFileContents(result.run().trim());
     }
 
     private String runTest(String filename, String input) {
-        JasminResult result = TestUtils.backend(SpecsIo.getResource("fixtures/" + filename));
+        OllirResult ollirResult = TestUtils.optimize(SpecsIo.getResource("fixtures/" + filename), true);
+        TestUtils.noErrors(ollirResult.getReports());
+        JasminResult result = TestUtils.backend(ollirResult);
         TestUtils.noErrors(result.getReports());
 
         return SpecsStrings.normalizeFileContents(result.run(input).trim());

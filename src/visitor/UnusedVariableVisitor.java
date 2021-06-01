@@ -85,14 +85,9 @@ public class UnusedVariableVisitor extends AJmmVisitor<Boolean, List<Report>> {
         JmmNode firstChild = node.getChildren().get(0);
         JmmNode secondChild = node.getChildren().get(1);
         visit(firstChild, false);
-        visit(secondChild, false);
+        visit(secondChild, true);
 
-        String varName = "";
-        if (firstChild.getKind().equals("Identifier")) {
-            varName = firstChild.get("name");
-        } else if(firstChild.getKind().equals("Index")){
-            varName = firstChild.getChildren().get(0).get("name");
-        }
+        String varName = firstChild.get("name");
 
         if (unusedVariables.containsKey(varName)) {
             unusedVariables.get(varName).add(node);
@@ -139,8 +134,6 @@ public class UnusedVariableVisitor extends AJmmVisitor<Boolean, List<Report>> {
     private void removeUnused(JmmNode nodeToRemove) {
         if (nodeToRemove.getKind().equals("Assignment")) {
             JmmNode expression = nodeToRemove.getChildren().get(1);
-
-            // TODO: Expression may not be FCall directly (1 + fcall + fcall)
             List<JmmNode> calls = NodeFindingMethods.getCalls(expression);
             int index = nodeToRemove.getParent().getChildren().indexOf(nodeToRemove);
             for (int i = 0; i < calls.size(); i++) {
