@@ -48,6 +48,7 @@ public class UnusedVariableVisitor extends AJmmVisitor<Boolean, List<Report>> {
         //addVisit("IfStatement", this::verifyIfStatement);
         //addVisit("WhileStatement", this::verifyIfStatement);
         addVisit("Negate", this::verifyExpression);
+        addVisit("MethodReturn", this::verifyExpression);
 
         //addVisit("Statement1", this::verifyStatement1);
         //addVisit("Statement2", this::verifyStatement2);

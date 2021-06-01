@@ -64,8 +64,8 @@ public class AnalysisStage implements JmmAnalysis {
                 c_prop_vis.makeChanges();
 
             } while(c_prop_vis.isChanged || c_f_vis.isChanged || unusedVar_vis.isChanged);
-            //unusedVar_vis.visit(node, false);
-            //unusedVar_vis.makeChanges();
+            unusedVar_vis.visit(node, false);
+            unusedVar_vis.makeChanges();
         }
 
         System.out.println("Reports: ");
