@@ -51,11 +51,6 @@ public class BackendTest {
     }
 
     @Test
-    public void testFunctionIndexing() {
-        runTest("public/FunctionIndexing.jmm");
-    }
-
-    @Test
     public void HelloWorldTest() {
         String output = runTest("public/HelloWorld.jmm");
         String expected = "Hello, World!";
@@ -85,7 +80,7 @@ public class BackendTest {
         // However, it is necessary to stop the infinite loop of the program
         String input = "1\n2\n3\n4\n5\n6\n7\n8\n9\n\n"; // Execute 10 iterations of the program
         String output = runTest("public/Life.jmm", input);
-        
+
         // Filter the exception text 
         output = output.replaceAll("[a-zA-Z].+", "").trim();
 
@@ -159,5 +154,10 @@ public class BackendTest {
         String expected = SpecsStrings.normalizeFileContents(SpecsIo.getResource("fixtures/public/Transpose.txt"));
 
         assertEquals(expected, output);
+    }
+
+    @Test
+    public void FunctionIndexingTest() {
+        runTest("public/FunctionIndexing.jmm");
     }
 }
