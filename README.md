@@ -81,7 +81,6 @@ To generate the Jasmin code, we iterate over the class' methods and corresponden
 
 ## Pros
 
-- Our tool allows for function overloading.
 - Proper synthatic error detection.
 - Proper semantic error detection.
 - We detect some instances of uninitialized (but declared) variables and add a warning report.
