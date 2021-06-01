@@ -158,6 +158,6 @@ public class BackendTest {
 
     @Test
     public void FunctionIndexingTest() {
-        runTest("public/FunctionIndexing.jmm");
+        runTest("public/Optimisation.jmm");
     }
 }

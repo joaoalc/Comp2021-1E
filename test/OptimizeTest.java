@@ -30,8 +30,16 @@ public class OptimizeTest {
     }
 
     @Test
-    public void testFunctionIndexing() {
-        var result = TestUtils.optimize(SpecsIo.getResource("fixtures/public/FunctionIndexing.jmm"));
+    public void testOptimisation() {
+        var result = TestUtils.optimize(SpecsIo.getResource("fixtures/public/Optimisation.jmm"));
+        TestUtils.noErrors(result.getReports());
+
+        System.out.println(result.getReports().toString());
+    }
+
+    @Test
+    public void testOptimisationWithOptimisation() {
+        var result = TestUtils.optimize(SpecsIo.getResource("fixtures/public/Optimisation.jmm"), true);
         TestUtils.noErrors(result.getReports());
 
         System.out.println(result.getReports().toString());

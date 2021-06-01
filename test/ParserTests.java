@@ -30,7 +30,7 @@ public class ParserTests {
 
     @Test
     public void testFunctionIndexing() {
-        sucessfullTest("FunctionIndexing.jmm");
+        sucessfullTest("Optimisation.jmm");
     }
 
     @Test

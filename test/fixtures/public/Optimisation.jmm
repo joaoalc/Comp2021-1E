@@ -1,15 +1,15 @@
 import ioPlus;
-class ConstantFolding {
+class Optimisation {
 
     public static void main(String[] args){
-        ConstantFolding cf;
+        Optimisation cf;
         int a;
         int b;
         int c;
         int d;
         boolean e;
         boolean f;
-        cf = new ConstantFolding();
+        cf = new Optimisation();
         a = 1 + 2 * (3 + 2 + 5);
         b = cf.doStuff(15, a) + cf.doStuff(15, 4);
         b = args.length;
