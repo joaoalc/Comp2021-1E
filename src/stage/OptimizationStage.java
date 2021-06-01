@@ -14,6 +14,9 @@ import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.specs.util.SpecsIo;
 import table.MySymbolTable;
+import visitor.ConstantFoldingVisitor;
+import visitor.ConstantPropagationVisitor;
+import visitor.UnusedVariableVisitor;
 
 /**
  * Copyright 2021 SPeCS.
@@ -52,7 +55,29 @@ public class OptimizationStage implements JmmOptimization {
 
     @Override
     public JmmSemanticsResult optimize(JmmSemanticsResult semanticsResult) {
-        // THIS IS JUST FOR CHECKPOINT 3
+        JmmNode root = semanticsResult.getRootNode();
+
+        MySymbolTable symbolTable = (MySymbolTable)semanticsResult.getSymbolTable();
+        List<Report> report_list = semanticsResult.getReports();
+
+        ConstantFoldingVisitor c_f_vis = new ConstantFoldingVisitor(symbolTable, report_list);
+        ConstantPropagationVisitor c_prop_vis = new ConstantPropagationVisitor(symbolTable, report_list);
+
+        UnusedVariableVisitor unusedVar_vis = new UnusedVariableVisitor(symbolTable, report_list);
+
+        do {
+            c_f_vis.isChanged = false;
+            c_prop_vis.isChanged = false;
+            unusedVar_vis.isChanged = false;
+            c_f_vis.visit(root, true);
+            c_f_vis.makeChanges();
+            c_prop_vis.visit(root, true);
+            c_prop_vis.makeChanges();
+            unusedVar_vis.visit(root, false);
+            unusedVar_vis.makeChanges();
+        } while(c_prop_vis.isChanged || c_f_vis.isChanged || unusedVar_vis.isChanged);
+
+
         return semanticsResult;
     }
 

@@ -74,6 +74,23 @@ public class NodeFindingMethods {
         }
     }
 
+    public static List<JmmNode> getCalls(JmmNode node) {
+        List<JmmNode> nodes = new ArrayList<>();
+        String kind = node.getKind();
+
+        if (kind.equals("FCall") || kind.equals("NewExpression")) {
+            nodes.add(node);
+            return nodes;
+        }
+
+        for (var child : node.getChildren()) {
+            if(child != null) {
+                nodes.addAll(getCalls(child));
+            }
+        }
+        return nodes;
+    }
+
     private static Type parseTypeNode(JmmNode node) {
         String type_name = node.get("name");
         boolean is_array = Boolean.parseBoolean(node.get("is_array"));

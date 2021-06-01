@@ -17,11 +17,29 @@ import org.junit.Test;
 import pt.up.fe.comp.TestUtils;
 import pt.up.fe.specs.util.SpecsIo;
 
+import static org.junit.Assert.assertEquals;
+
 public class OptimizeTest {
 
     @Test
     public void testHelloWorld() {
         var result = TestUtils.optimize(SpecsIo.getResource("fixtures/public/HelloWorld.jmm"));
+        TestUtils.noErrors(result.getReports());
+
+        System.out.println(result.getReports().toString());
+    }
+
+    @Test
+    public void testOptimisation() {
+        var result = TestUtils.optimize(SpecsIo.getResource("fixtures/public/Optimisation.jmm"));
+        TestUtils.noErrors(result.getReports());
+
+        System.out.println(result.getReports().toString());
+    }
+
+    @Test
+    public void testOptimisationWithOptimisation() {
+        var result = TestUtils.optimize(SpecsIo.getResource("fixtures/public/Optimisation.jmm"), true);
         TestUtils.noErrors(result.getReports());
 
         System.out.println(result.getReports().toString());

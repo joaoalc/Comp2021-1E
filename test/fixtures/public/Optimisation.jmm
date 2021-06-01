@@ -1,0 +1,49 @@
+import ioPlus;
+class Optimisation {
+
+    public static void main(String[] args){
+        Optimisation cf;
+        int a;
+        int b;
+        int c;
+        int d;
+        boolean e;
+        boolean f;
+        cf = new Optimisation();
+        a = 1 + 2 * (3 + 2 + 5);
+        b = cf.doStuff(15, a) + cf.doStuff(15, 4);
+        b = args.length;
+        b = 1 - 2;
+        c = 1 * 2;
+        d = 20 / 21;
+        e = 3 < 5;
+        f = true && false;
+
+        d = 5 / 0;
+
+        d = 2 * 20 / 21;
+    }
+
+    public int doStuff(int a, int b){
+
+        boolean c;
+        boolean d;
+        a = 5;
+        b = a + 5;
+        c = true;
+
+        d = c && false;
+
+        a = this.ahaha();
+
+
+        return b;
+    }
+
+    public int ahaha() {
+        ioPlus.printHelloWorld();
+        return 1;
+    }
+
+
+}

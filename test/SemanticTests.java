@@ -9,7 +9,7 @@ import java.util.List;
 
 import static pt.up.fe.comp.TestUtils.mustFail;
 
-public class SemanticTests {
+public class    SemanticTests {
     private void TestTemplate(String filename) {
         String code = SpecsIo.getResource(String.format("fixtures/public/%s", filename));
         JmmSemanticsResult result = TestUtils.analyse(code);

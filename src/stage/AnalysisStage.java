@@ -46,8 +46,6 @@ public class AnalysisStage implements JmmAnalysis {
         ExpressionVisitor a_s_vis = new ExpressionVisitor(symbolTable, report_list);
         expressionReports = a_s_vis.visit(node, true);
 
-        System.out.println(report_list.size());
-
         System.out.println("Reports: ");
         for(int i = 0; i < report_list.size(); i++){
             System.out.println(report_list.get(i));

@@ -1,8 +1,8 @@
 package pt.up.fe.comp.jmm.analysis.table;
 
 public class Symbol {
-    protected final Type type;
-    protected final String name;
+    private final Type type;
+    private final String name;
 
     public Symbol(Type type, String name) {
         this.type = type;
@@ -49,16 +49,21 @@ public class Symbol {
         if (name == null) {
             if (other.name != null)
                 return false;
-        }
-        else if (!name.equals(other.name))
+        } else if (!name.equals(other.name))
             return false;
         if (type == null) {
             if (other.type != null)
                 return false;
-        }
-        else if (!type.equals(other.type))
+        } else if (!type.equals(other.type))
             return false;
         return true;
     }
 
+    public String print() {
+        var builder = new StringBuilder();
+
+        builder.append(getType().print() + " " + getName());
+
+        return builder.toString();
+    }
 }
